@@ -96,7 +96,15 @@ export const animeApi = {
 
   getAnime: (id: string) => apiFetch<AnimeDetail>(`${BASE}/anime/${id}`),
 
-  getEpisodes: (id: string) => apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`),
+  getEpisodes: async (id: string): Promise<EpisodeData> => {
+    const data = await apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`);
+    if (!data.episodes || data.episodes.length === 0) {
+      console.warn(`REIATSU: No episodes found for ${id}, retrying...`);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      return apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`);
+    }
+    return data;
+  },
 
   getEpisode: (id: string, num: number) => 
     apiFetch<EpisodeDetail>(`${BASE}/anime/${id}/ep/${num}`),

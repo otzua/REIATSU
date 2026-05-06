@@ -13,13 +13,14 @@ const Watch = () => {
   const [episodeData, setEpisodeData] = useState<EpisodeData | null>(null);
   const [currentEp, setCurrentEp] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [activeSource, setActiveSource] = useState<'sub' | 'dub'>('sub');
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Load anime info + ALL episodes
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    setError(false);
     setCurrentEp(1);
     setEpisodeData(null);
     setAnime(null);
@@ -27,47 +28,103 @@ const Watch = () => {
     Promise.all([
       animeApi.getAnime(id),
       animeApi.getEpisodes(id),
-    ]).then(([info, eps]) => {
-      setAnime(info);
-      setEpisodeData(eps);
-      setLoading(false);
-      console.log('REIATSU DEBUG: Loaded episodes', eps.episodes.length);
-    }).catch(err => {
-      console.error('REIATSU ERROR:', err);
-      setLoading(false);
-    });
+    ])
+      .then(([info, eps]) => {
+        setAnime(info);
+        setEpisodeData(eps);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('REIATSU ERROR:', err);
+        setLoading(false);
+        setError(true);
+      });
   }, [id, refreshKey]);
 
-  // Derive the current episode object
-  const currentEpisode = useMemo(() => {
-    const ep = episodeData?.episodes.find(e => e.number === currentEp) ?? null;
-    if (ep) console.log(`REIATSU DEBUG: Current Ep ${currentEp} sources:`, ep.sources);
-    return ep;
-  }, [episodeData, currentEp]);
+  const [activeServer, setActiveServer] = useState<'primary' | 'ani'>('primary');
+  const [individualSource, setIndividualSource] = useState<Record<string, string> | null>(null);
+  const [fetchingSource, setFetchingSource] = useState(false);
 
-  // Derive the video URL from the current episode object
+  // Derive the current episode object
+  const currentEpisode = useMemo(
+    () => episodeData?.episodes.find((e) => e.number === currentEp) ?? null,
+    [episodeData, currentEp]
+  );
+
+  // Auto-fetch source if missing in list
+  useEffect(() => {
+    if (!id || !currentEpisode) return;
+    
+    const listSources = currentEpisode.sources as Record<string, string>;
+    if (!listSources || Object.keys(listSources).length === 0) {
+      setFetchingSource(true);
+      setIndividualSource(null);
+      animeApi.getEpisode(id, currentEp)
+        .then(res => {
+          setIndividualSource(res.episode.sources as Record<string, string>);
+          setFetchingSource(false);
+        })
+        .catch(() => setFetchingSource(false));
+    } else {
+      setIndividualSource(null);
+      setFetchingSource(false);
+    }
+  }, [id, currentEp, episodeData]);
+
+  // Server priority: Selected Server -> Primary Fallback
   const videoUrl = useMemo(() => {
     if (!currentEpisode) return null;
-    const sources = currentEpisode.sources as Record<string, string>;
-    return sources?.[activeSource] || sources?.sub || null;
-  }, [currentEpisode, activeSource]);
+    const src = individualSource || (currentEpisode.sources as Record<string, string>);
+    if (!src) return null;
 
+    // Build potential keys based on server selection
+    const targetKey = activeServer === 'primary' ? activeSource : `ani_${activeSource}`;
+    
+    // Try target -> fallback to primary sub -> fallback to mirror
+    const url = src[targetKey] || src[activeSource] || src.sub || src.ani_sub || null;
+    
+    console.log(`REIATSU PLAYER: Ep ${currentEp} [Server: ${activeServer}, Mode: ${activeSource}] -> ${url ? 'VALID' : 'NULL'}`);
+    return url;
+  }, [currentEpisode, individualSource, activeSource, activeServer]);
+
+  // ── Loading state ──────────────────────────────────────────────────────
   if (loading) {
-    return <div className={styles.container}><div className={styles.loading}>LOADING...</div></div>;
-  }
-
-  if (!anime || !episodeData) {
     return (
       <div className={styles.container}>
-        <div className={styles.error}>ERROR: UNABLE TO LOAD ANIME DATA</div>
+        <HalftoneWave />
+        <div className={styles.content}>
+          <div className={styles.loadingWrapper}>
+            <div className={styles.loading}>LOADING ANIME DATA...</div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // ── Error state ────────────────────────────────────────────────────────
+  if (error || !anime || !episodeData) {
+    return (
+      <div className={styles.container}>
+        <HalftoneWave />
+        <div className={styles.content}>
+          <div className={styles.loadingWrapper}>
+            <div className={styles.error}>
+              FAILED TO LOAD ANIME
+              <button className={styles.iconBtn} onClick={() => setRefreshKey((k) => k + 1)}>
+                RETRY
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main view ──────────────────────────────────────────────────────────
   return (
     <div className={styles.container}>
       <HalftoneWave />
-      
+
       <div className={styles.content}>
         <button onClick={() => navigate(-1)} className={styles.backBtn}>
           <ChevronLeft size={20} />
@@ -75,21 +132,33 @@ const Watch = () => {
         </button>
 
         <div className={styles.mainGrid}>
-          {/* Video Player Section */}
+
+          {/* ── Video Player ─────────────────────────────── */}
           <div className={styles.playerSection}>
+            <div className={styles.animeHeader}>
+              <h1 className={styles.animeName}>
+                {anime?.anime.name || id?.replace(/-/g, ' ')}
+              </h1>
+              <div className={styles.animeMeta}>
+                <span>{anime?.anime.type}</span>
+                <span className={styles.dot}>•</span>
+                <span>{anime?.anime.status}</span>
+              </div>
+            </div>
+
             <div className={styles.videoWrapper}>
               {videoUrl ? (
                 <iframe
-                  key={`${id}-${currentEp}-${activeSource}`}
+                  key={`${id}-ep${currentEp}-${activeSource}-${activeServer}`}
                   src={videoUrl}
                   className={styles.iframe}
                   allowFullScreen
                   scrolling="no"
-                  allow="autoplay; encrypted-media"
+                  allow="autoplay; encrypted-media; picture-in-picture; clipboard-write"
                 />
               ) : (
                 <div className={styles.playerPlaceholder}>
-                  {currentEpisode ? 'NO STREAMING SOURCE AVAILABLE' : 'SELECT AN EPISODE'}
+                  {fetchingSource ? 'FETCHING SOURCE...' : (currentEpisode ? 'NO SOURCE AVAILABLE' : 'SELECT AN EPISODE')}
                 </div>
               )}
             </div>
@@ -97,17 +166,26 @@ const Watch = () => {
             <div className={styles.controls}>
               <div className={styles.epInfo}>
                 <span className={styles.epBadge}>EPISODE {currentEp}</span>
-                <h2 className={styles.epTitle}>{currentEpisode?.title || `Episode ${currentEp}`}</h2>
+                <h2 className={styles.epTitle}>
+                  {currentEpisode?.title || `Episode ${currentEp}`}
+                </h2>
               </div>
-              
+
               <div className={styles.actionGroup}>
-                <button 
-                  className={styles.iconBtn} 
-                  onClick={() => setRefreshKey(k => k + 1)}
-                  title="Refresh Data"
-                >
-                  RELOAD
-                </button>
+                <div className={styles.serverGroup}>
+                  <button 
+                    className={`${styles.serverBtn} ${activeServer === 'primary' ? styles.activeServer : ''}`}
+                    onClick={() => setActiveServer('primary')}
+                  >
+                    PRIMARY
+                  </button>
+                  <button 
+                    className={`${styles.serverBtn} ${activeServer === 'ani' ? styles.activeServer : ''}`}
+                    onClick={() => setActiveServer('ani')}
+                  >
+                    MIRROR
+                  </button>
+                </div>
 
                 <div className={styles.modeToggle}>
                   <button
@@ -119,21 +197,28 @@ const Watch = () => {
                   <button
                     className={`${styles.modeBtn} ${activeSource === 'dub' ? styles.activeMode : ''}`}
                     onClick={() => setActiveSource('dub')}
-                    disabled={!currentEpisode?.sources?.dub}
                   >
                     DUB
                   </button>
                 </div>
+                
+                <button
+                  className={styles.reloadBtn}
+                  onClick={() => setRefreshKey((k) => k + 1)}
+                  title="Force Reload Data"
+                >
+                  RELOAD
+                </button>
               </div>
             </div>
 
             <div className={styles.animeInfo}>
-              <h2 className={styles.animeName}>{anime?.anime.name}</h2>
-              <p className={styles.desc}>{anime?.anime.description}</p>
+              <h2 className={styles.animeName}>{anime.anime.name}</h2>
+              <p className={styles.desc}>{anime.anime.description}</p>
             </div>
           </div>
 
-          {/* Episode List Section */}
+          {/* ── Episode Sidebar ──────────────────────────── */}
           <div className={styles.sideSection}>
             <div className={styles.epHeader}>
               <List size={18} />
@@ -153,6 +238,7 @@ const Watch = () => {
               ))}
             </div>
           </div>
+
         </div>
       </div>
     </div>

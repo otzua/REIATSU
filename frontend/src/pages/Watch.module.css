@@ -42,6 +42,36 @@
   gap: 1.5rem;
 }
 
+.animeHeader {
+  margin-bottom: 1.5rem;
+}
+
+.animeName {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.animeMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dot {
+  color: var(--accent-color);
+}
+
 .videoWrapper {
   width: 100%;
   aspect-ratio: 16/9;
@@ -69,13 +99,66 @@
   letter-spacing: 0.2rem;
 }
 
+.serverGroup {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.serverBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.serverBtn:last-child {
+  border-right: none;
+}
+
+.serverBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.activeServer {
+  background: var(--accent-color) !important;
+  color: #000 !important;
+}
+
+.reloadBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.reloadBtn:hover {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  background: rgba(26, 26, 26, 0.4);
-  backdrop-filter: blur(12px);
+  background: rgba(26, 26, 26, 0.9);
   border-radius: 16px;
   border: 1px solid rgba(220, 201, 169, 0.05);
 }
@@ -126,11 +209,25 @@
   background: rgba(184, 58, 45, 0.1);
 }
 
+.iconBtn.epBadge {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: #fff;
+  background: var(--accent);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 900;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+}
+
 .epTitle {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.8rem;
+  font-weight: 800;
   color: var(--color-cream);
-  margin: 0;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.2;
 }
 
 .modeToggle {
