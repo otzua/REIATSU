@@ -1,9 +1,16 @@
 # REIATSU (霊圧)
 
-A high-performance, self-hosted anime streaming platform built with a brutalist digital aesthetic.
+<div align="center">
+  <img src="./reiatsu_banner_1778080050417.png" alt="REIATSU Banner" width="100%">
+  <br />
+  <p><i>A high-performance, self-hosted anime streaming platform built with a brutalist digital aesthetic.</i></p>
+  
+  ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
+  ![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Vite%20%7C%20TS-blue?style=for-the-badge)
+  ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+</div>
 
-![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
-![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Vite%20%7C%20TS-blue?style=for-the-badge)
+---
 
 ## 🌌 The Vision | ビジョン
 
@@ -18,34 +25,26 @@ Reiatsu is designed for speed, stability, and a unique visual identity. Moving a
 
 ## 🛠️ Tech Stack | 技術スタック
 
-- **Frontend**: React 18, Vite, TypeScript
+- **Frontend**: React 18, Vite, TypeScript, Framer Motion
+- **Backend**: Node.js, Express, TypeScript (Integration with High-Performance Anime-API)
 - **Styling**: Vanilla CSS Modules (Brutalist Design System)
-- **Animation**: Framer Motion & Custom Canvas API
-- **Backend**: Node.js / TypeScript (In Development)
+- **Animation**: Custom Canvas API for background interference
 
-## 📈 Performance | パフォーマンス
+## 📁 Project Structure | プロジェクト構造
 
-The project prioritizes low-level optimizations to ensure smooth 60FPS rendering:
-- **DPR Scaling**: Intelligent canvas scaling to maintain sharpness without taxing the GPU.
-- **Interference Math**: Pre-calculated wave factors to reduce per-frame CPU cycles.
-- **Non-Linear Falloff**: Optimized proximity detection for interactive elements.
-
-## 🗺️ Roadmap | ロードマップ
-
-### Phase 1: Foundation (Current)
-- [x] High-performance Halftone Engine
-- [x] Dark Mode Design System
-- [x] Project Structure & Git Integration
-
-### Phase 2: Core UI
-- [ ] Minimalist Brutalist Navbar
-- [ ] Anime Metadata Grid
-- [ ] Dynamic Search Overlay
-
-### Phase 3: Streaming & API
-- [ ] Integration with High-Performance Anime-API
-- [ ] HLS Video Player Customization
-- [ ] Global State Management (Zustand)
+```text
+REIATSU/
+├── frontend/           # React + Vite application
+│   ├── src/
+│   │   ├── components/ # Reusable UI components
+│   │   ├── pages/      # Route pages
+│   │   └── styles/     # Global CSS and Design Tokens
+├── backend/            # Node.js + Express server
+│   ├── src/
+│   │   ├── routes/     # API Endpoints
+│   │   └── services/   # Business logic & Scrapers
+└── docs/               # Project documentation
+```
 
 ## 📦 Getting Started | 開始方法
 
@@ -53,20 +52,34 @@ The project prioritizes low-level optimizations to ensure smooth 60FPS rendering
 - Node.js (v18+)
 - npm or yarn
 
-### Installation
-1. Clone the repository:
+### Installation & Setup
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/otzua/REIATSU.git
+   cd REIATSU
    ```
-2. Install dependencies:
+
+2. **Setup Frontend:**
    ```bash
    cd frontend
    npm install
-   ```
-3. Start the development server:
-   ```bash
    npm run dev
    ```
+
+3. **Setup Backend:**
+   ```bash
+   cd ../backend
+   npm install
+   npm run dev
+   ```
+
+## 📈 Performance | パフォーマンス
+
+The project prioritizes low-level optimizations to ensure smooth 60FPS rendering:
+- **DPR Scaling**: Intelligent canvas scaling to maintain sharpness without taxing the GPU.
+- **Interference Math**: Pre-calculated wave factors to reduce per-frame CPU cycles.
+- **Non-Linear Falloff**: Optimized proximity detection for interactive elements.
 
 ## 🎨 Design System | デザイン
 
@@ -76,6 +89,19 @@ The project prioritizes low-level optimizations to ensure smooth 60FPS rendering
 | Premium Cream | `#DCC9A9` | Text / Accents |
 | Accent Red | `#B83A2D` | Highlights |
 | Forest Green | `#4E6851` | Secondary |
+
+## 🗺️ Roadmap | ロードマップ
+
+- [x] High-performance Halftone Engine
+- [x] Dark Mode Design System
+- [ ] Minimalist Brutalist Navbar
+- [ ] Anime Metadata Grid
+- [ ] Integration with High-Performance Anime-API
+- [ ] HLS Video Player Customization
+
+## 📄 License | ライセンス
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
