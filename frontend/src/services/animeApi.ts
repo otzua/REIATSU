@@ -1,9 +1,8 @@
 // Central API service for the Reiatsu platform
 // VITE_API_URL: set in .env for prod (e.g. https://your-api.vercel.app)
 // Empty string falls back to the Vite dev proxy (/api -> localhost:4000)
-const API_HOST = import.meta.env.VITE_API_URL ?? '';
-const PROVIDER = 'anikoto';
-const BASE = `${API_HOST}/api/v2/${PROVIDER}`;
+const API_HOST = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const BASE = `${API_HOST}/api`;
 
 export interface SpotlightAnime {
   id: string;
