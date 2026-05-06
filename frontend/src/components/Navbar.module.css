@@ -1,62 +1,91 @@
-.navbar {
-  height: 60px;
+.navbarContainer {
+  position: fixed;
+  top: 2rem;
+  left: 0;
+  width: 100%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-lg);
-  background: #000;
-  border-bottom: 2px solid #fff;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.searchContainer {
-  display: flex;
   align-items: center;
-  background: #000;
-  border: 1px solid #333;
-  padding: 0.4rem 1rem;
-  width: 100%;
-  max-width: 350px;
-  transition: var(--transition-smooth);
+  padding: 0 3rem;
+  z-index: 1000;
+  pointer-events: none; /* Let clicks pass through empty space */
 }
 
-.searchContainer:focus-within {
-  border-color: #fff;
-}
-
-.searchIcon {
-  color: #fff;
-  margin-right: 0.5rem;
-}
-
-.searchInput {
-  background: none;
-  border: none;
-  color: #fff;
-  outline: none;
-  width: 100%;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-md);
-}
-
-.iconBtn {
-  color: #fff;
-  transition: var(--transition-smooth);
-  padding: 0.5rem;
+.logoCapsule,
+.navCapsule,
+.accountCapsule {
+  pointer-events: auto; /* Re-enable clicks */
+  background: var(--color-black, #1A1A1A);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 201, 169, 0.05); /* Very subtle cream border */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 20px; /* Slightly squarish capsule shape */
 }
 
-.iconBtn:hover {
-  background: #fff;
-  color: #000;
+.logoCapsule {
+  width: 64px;
+  height: 64px;
+}
+
+.logoKanji {
+  color: var(--color-cream, #DCC9A9);
+  font-family: var(--font-jp, 'Noto Sans JP', sans-serif);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.navCapsule {
+  height: 64px;
+  padding: 0 1rem;
+  gap: 1rem;
+}
+
+.navItem {
+  background: none;
+  border: none;
+  color: rgba(220, 201, 169, 0.4); /* Faded cream */
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth, all 0.3s ease);
+}
+
+.navItem:hover {
+  color: rgba(220, 201, 169, 0.8);
+}
+
+.active {
+  color: var(--color-cream, #DCC9A9);
+  background: rgba(255, 255, 255, 0.08); /* Inner pill background for active state */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.accountCapsule {
+  width: 64px;
+  height: 64px;
+}
+
+.accountBtn {
+  background: none;
+  border: none;
+  color: rgba(220, 201, 169, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  transition: var(--transition-smooth, all 0.3s ease);
+}
+
+.accountBtn:hover {
+  color: var(--color-cream, #DCC9A9);
+  background: rgba(255, 255, 255, 0.05);
 }
