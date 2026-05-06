@@ -34,8 +34,13 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    if (!query.trim()) { setResults([]); return; }
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    
+    if (!query.trim()) {
+      setTimeout(() => setResults([]), 0);
+      return;
+    }
+
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {

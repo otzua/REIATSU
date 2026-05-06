@@ -2,9 +2,10 @@
   "name": "reiatsu-root",
   "private": true,
   "scripts": {
+    "dev:api": "cd anime-api && npm run dev",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev": "npx concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:frontend\""
   },
   "dependencies": {
     "concurrently": "^9.2.1"
