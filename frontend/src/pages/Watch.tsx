@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, List, ChevronLeft, Maximize } from 'lucide-react';
+import { Play, List, ChevronLeft } from 'lucide-react';
 import { animeApi } from '../services/animeApi';
-import type { AnimeDetail, EpisodeData, EpisodeDetail } from '../services/animeApi';
+import type { AnimeDetail, EpisodeData } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
 import styles from './Watch.module.css';
 
@@ -12,58 +12,57 @@ const Watch = () => {
   const [anime, setAnime] = useState<AnimeDetail | null>(null);
   const [episodeData, setEpisodeData] = useState<EpisodeData | null>(null);
   const [currentEp, setCurrentEp] = useState(1);
-  const [epDetail, setEpDetail] = useState<EpisodeDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [epLoading, setEpLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<'sub' | 'dub'>('sub');
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  // Load anime info + ALL episodes
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    
+    setCurrentEp(1);
+    setEpisodeData(null);
+    setAnime(null);
+
     Promise.all([
       animeApi.getAnime(id),
-      animeApi.getEpisodes(id)
+      animeApi.getEpisodes(id),
     ]).then(([info, eps]) => {
       setAnime(info);
       setEpisodeData(eps);
       setLoading(false);
+      console.log('REIATSU DEBUG: Loaded episodes', eps.episodes.length);
     }).catch(err => {
-      console.error(err);
+      console.error('REIATSU ERROR:', err);
       setLoading(false);
     });
-  }, [id]);
+  }, [id, refreshKey]);
 
-  useEffect(() => {
-    if (!id || !currentEp) return;
-    setEpLoading(true);
-    animeApi.getEpisode(id, currentEp)
-      .then(detail => {
-        setEpDetail(detail);
-        setEpLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setEpLoading(false);
-      });
-  }, [id, currentEp]);
+  // Derive the current episode object
+  const currentEpisode = useMemo(() => {
+    const ep = episodeData?.episodes.find(e => e.number === currentEp) ?? null;
+    if (ep) console.log(`REIATSU DEBUG: Current Ep ${currentEp} sources:`, ep.sources);
+    return ep;
+  }, [episodeData, currentEp]);
 
-  const videoUrl = epDetail?.episode?.sources?.[activeSource] || epDetail?.episode?.sources?.sub;
+  // Derive the video URL from the current episode object
+  const videoUrl = useMemo(() => {
+    if (!currentEpisode) return null;
+    const sources = currentEpisode.sources as Record<string, string>;
+    return sources?.[activeSource] || sources?.sub || null;
+  }, [currentEpisode, activeSource]);
 
   if (loading) {
     return <div className={styles.container}><div className={styles.loading}>LOADING...</div></div>;
   }
 
-  if (!anime || !epDetail) {
+  if (!anime || !episodeData) {
     return (
       <div className={styles.container}>
-        <div className={styles.error}>
-          {loading ? 'LOADING...' : 'ERROR: UNABLE TO LOAD ANIME DATA'}
-        </div>
+        <div className={styles.error}>ERROR: UNABLE TO LOAD ANIME DATA</div>
       </div>
     );
   }
-
 
   return (
     <div className={styles.container}>
@@ -79,10 +78,9 @@ const Watch = () => {
           {/* Video Player Section */}
           <div className={styles.playerSection}>
             <div className={styles.videoWrapper}>
-              {epLoading ? (
-                <div className={styles.playerPlaceholder}>LOADING EPISODE...</div>
-              ) : videoUrl ? (
+              {videoUrl ? (
                 <iframe
+                  key={`${id}-${currentEp}-${activeSource}`}
                   src={videoUrl}
                   className={styles.iframe}
                   allowFullScreen
@@ -91,7 +89,7 @@ const Watch = () => {
                 />
               ) : (
                 <div className={styles.playerPlaceholder}>
-                  NO STREAMING SOURCE AVAILABLE
+                  {currentEpisode ? 'NO STREAMING SOURCE AVAILABLE' : 'SELECT AN EPISODE'}
                 </div>
               )}
             </div>
@@ -99,10 +97,17 @@ const Watch = () => {
             <div className={styles.controls}>
               <div className={styles.epInfo}>
                 <span className={styles.epBadge}>EPISODE {currentEp}</span>
-                <h2 className={styles.epTitle}>{epDetail.episode.title || 'Untitled Episode'}</h2>
+                <h2 className={styles.epTitle}>{currentEpisode?.title || `Episode ${currentEp}`}</h2>
               </div>
               
               <div className={styles.actionGroup}>
+                <button 
+                  className={styles.iconBtn} 
+                  onClick={() => setRefreshKey(k => k + 1)}
+                  title="Refresh Data"
+                >
+                  RELOAD
+                </button>
 
                 <div className={styles.modeToggle}>
                   <button
@@ -114,7 +119,7 @@ const Watch = () => {
                   <button
                     className={`${styles.modeBtn} ${activeSource === 'dub' ? styles.activeMode : ''}`}
                     onClick={() => setActiveSource('dub')}
-                    disabled={!epDetail.episode.sources.dub}
+                    disabled={!currentEpisode?.sources?.dub}
                   >
                     DUB
                   </button>
@@ -132,10 +137,10 @@ const Watch = () => {
           <div className={styles.sideSection}>
             <div className={styles.epHeader}>
               <List size={18} />
-              <span>EPISODES</span>
+              <span>EPISODES ({episodeData.totalEpisodes})</span>
             </div>
             <div className={styles.epList}>
-              {episodeData?.episodes.map((ep) => (
+              {episodeData.episodes.map((ep) => (
                 <button
                   key={ep.number}
                   className={`${styles.epItem} ${currentEp === ep.number ? styles.activeEp : ''}`}
