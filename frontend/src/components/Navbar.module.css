@@ -146,3 +146,128 @@
     gap: 0.5rem;
   }
 }
+
+/* ─── Search Overlay ───────────────────────────────────────────────────── */
+.searchOverlay {
+  position: fixed;
+  top: 6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(640px, 90vw);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-black);
+  border: 1px solid rgba(220, 201, 169, 0.15);
+  border-radius: 20px;
+  padding: 0 1.25rem;
+  height: 56px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.searchIcon {
+  color: rgba(220, 201, 169, 0.4);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.searchInput::placeholder {
+  color: rgba(220, 201, 169, 0.3);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: rgba(220, 201, 169, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: var(--transition-smooth);
+}
+
+.closeBtn:hover {
+  color: var(--color-cream);
+  background: rgba(220, 201, 169, 0.1);
+}
+
+.searchResults {
+  background: var(--color-black);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.resultItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border-bottom: 1px solid rgba(220, 201, 169, 0.05);
+}
+
+.resultItem:last-child {
+  border-bottom: none;
+}
+
+.resultItem:hover {
+  background: rgba(220, 201, 169, 0.05);
+}
+
+.resultThumb {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.resultInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.resultName {
+  color: var(--color-cream);
+  font-size: 0.95rem;
+}
+
+.resultMeta {
+  color: rgba(220, 201, 169, 0.4);
+  font-size: 0.8rem;
+}
+
+.searchHint {
+  text-align: center;
+  color: rgba(220, 201, 169, 0.4);
+  font-size: 0.9rem;
+  padding: 1rem;
+  background: var(--color-black);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+}

@@ -124,12 +124,16 @@ const HalftoneWave: React.FC = () => {
       ref={canvasRef}
       style={{
         display: 'block',
+        position: 'fixed',
+        top: 0,
+        left: 0,
         width: '100vw',
         height: '100vh',
         backgroundColor: '#000',
         margin: 0,
         padding: 0,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        zIndex: -1
       }}
     />
   );

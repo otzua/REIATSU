@@ -1,0 +1,168 @@
+.releasesSection {
+  width: 100%;
+  padding: var(--space-xl);
+  margin-top: 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.accentBox {
+  width: 12px;
+  height: 48px;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  color: var(--color-cream);
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.animeCard {
+  background: rgba(26, 26, 26, 0.4);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(220, 201, 169, 0.05);
+  transition: var(--transition-smooth);
+  cursor: pointer;
+}
+
+.posterPlaceholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: rgba(220, 201, 169, 0.05);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.posterImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.animeCard:hover .posterImg {
+  transform: scale(1.05);
+}
+
+.episodeOverlay {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.episodeOverlay span {
+  font-size: 0.75rem;
+  font-family: var(--font-heading);
+  background: rgba(26,26,26,0.85);
+  color: var(--color-cream);
+  padding: 0.15rem 0.5rem;
+  border-radius: 5px;
+  backdrop-filter: blur(4px);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(220,201,169,0.04) 25%, rgba(220,201,169,0.09) 50%, rgba(220,201,169,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonLine {
+  border-radius: 6px;
+  background: rgba(220, 201, 169, 0.08);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonTitle {
+  height: 14px;
+  width: 80%;
+  margin-bottom: 0.4rem;
+}
+
+.skeletonEp {
+  height: 10px;
+  width: 40%;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: var(--accent);
+  color: white;
+  padding: 0.2rem 0.8rem;
+  border-radius: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  box-shadow: 0 4px 10px rgba(184, 58, 45, 0.4);
+}
+
+.info {
+  padding: 1.2rem;
+}
+
+.animeTitle {
+  color: var(--color-cream);
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.episode {
+  color: rgba(220, 201, 169, 0.5);
+  font-size: 0.9rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .releasesSection {
+    padding: var(--space-md);
+    margin-top: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .header {
+    margin-bottom: 2rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .accentBox {
+    height: 32px;
+  }
+}
