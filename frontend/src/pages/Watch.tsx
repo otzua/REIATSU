@@ -126,9 +126,6 @@ const Watch = () => {
       <HalftoneWave />
 
       <div className={styles.content}>
-        <div style={{ color: '#ff4444', fontWeight: 900, marginBottom: '1rem', fontSize: '0.8rem' }}>
-          REIATSU DEPLOYMENT: VERSION 2.0 (STABLE)
-        </div>
         <button onClick={() => navigate(-1)} className={styles.backBtn}>
           <ChevronLeft size={20} />
           <span>BACK TO EXPLORE</span>
