@@ -1,0 +1,58 @@
+.backgroundContainer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #000; /* Pure black background */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The Halftone Layer */
+.halftoneLayer {
+  position: absolute;
+  inset: 0;
+  background: #fff; /* White squares */
+  
+  /* Create the square grid using a mask */
+  mask-image: 
+    /* The interactive mouse spotlight */
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      black 0%,
+      transparent 50%
+    ),
+    /* The repeating square grid pattern */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='12' height='12' x='6' y='6' fill='black'/%3E%3C/svg%3E");
+  
+  /* Use mask-composite to intersect the spotlight with the grid */
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in; /* For Safari/Chrome */
+  
+  /* Add a bit of glow to make it look digital */
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  
+  transition: mask-image 0.05s ease-out;
+}
+
+/* Subtle Scanlines for the CRT/Digital look */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 0, 0, 0.5) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Noise overlay for texture */
+.noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+  mix-blend-mode: overlay;
+}
