@@ -54,6 +54,16 @@ const Watch = () => {
     return <div className={styles.container}><div className={styles.loading}>LOADING...</div></div>;
   }
 
+  if (!anime || !epDetail) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.error}>
+          {loading ? 'LOADING...' : 'ERROR: UNABLE TO LOAD ANIME DATA'}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <HalftoneWave />
