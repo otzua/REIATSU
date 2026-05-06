@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { SpotlightAnime } from '../services/animeApi';
 import styles from './Hero.module.css';
@@ -56,27 +57,29 @@ const Hero = () => {
         >
           {slides.map((slide) => (
             <div key={slide.id} className={styles.slide}>
-              <img
-                src={slide.poster}
-                alt={slide.name}
-                className={styles.poster}
-                draggable={false}
-              />
-              <div className={styles.overlay} />
-              <div className={styles.slideContent}>
-                <div className={styles.tagRow}>
-                  <span className={styles.rankBadge}>#{slide.rank}</span>
-                  {slide.genres?.slice(0, 3).map((g) => (
-                    <span key={g} className={styles.genreTag}>{g}</span>
-                  ))}
+              <Link to={`/watch/${slide.id}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
+                <img
+                  src={slide.poster}
+                  alt={slide.name}
+                  className={styles.poster}
+                  draggable={false}
+                />
+                <div className={styles.overlay} />
+                <div className={styles.slideContent}>
+                  <div className={styles.tagRow}>
+                    <span className={styles.rankBadge}>#{slide.rank}</span>
+                    {slide.genres?.slice(0, 3).map((g) => (
+                      <span key={g} className={styles.genreTag}>{g}</span>
+                    ))}
+                  </div>
+                  <h1 className={styles.title}>{slide.name}</h1>
+                  <p className={styles.description}>{slide.description?.slice(0, 160)}...</p>
+                  <div className={styles.episodePills}>
+                    {slide.episodes.sub != null && <span className={styles.pill}>SUB {slide.episodes.sub}</span>}
+                    {slide.episodes.dub != null && <span className={styles.pill}>DUB {slide.episodes.dub}</span>}
+                  </div>
                 </div>
-                <h1 className={styles.title}>{slide.name}</h1>
-                <p className={styles.description}>{slide.description?.slice(0, 160)}...</p>
-                <div className={styles.episodePills}>
-                  {slide.episodes.sub != null && <span className={styles.pill}>SUB {slide.episodes.sub}</span>}
-                  {slide.episodes.dub != null && <span className={styles.pill}>DUB {slide.episodes.dub}</span>}
-                </div>
-              </div>
+              </Link>
             </div>
           ))}
         </motion.div>

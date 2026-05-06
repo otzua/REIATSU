@@ -41,6 +41,12 @@
   cursor: pointer;
 }
 
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .posterPlaceholder {
   width: 100%;
   aspect-ratio: 2/3;

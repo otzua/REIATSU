@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
 import styles from './NewReleases.module.css';
@@ -50,20 +51,22 @@ const NewReleases = () => {
               transition={{ delay: index * 0.04 }}
               whileHover={{ y: -8 }}
             >
-              <div className={styles.posterPlaceholder}>
-                {anime.poster
-                  ? <img src={anime.poster} alt={anime.name} className={styles.posterImg} draggable={false} />
-                  : null}
-                <div className={styles.badge}>NEW</div>
-                <div className={styles.episodeOverlay}>
-                  {anime.episodes.sub != null && <span>SUB {anime.episodes.sub}</span>}
-                  {anime.episodes.dub != null && <span>DUB {anime.episodes.dub}</span>}
+              <Link to={`/watch/${anime.id}`} className={styles.cardLink}>
+                <div className={styles.posterPlaceholder}>
+                  {anime.poster
+                    ? <img src={anime.poster} alt={anime.name} className={styles.posterImg} draggable={false} />
+                    : null}
+                  <div className={styles.badge}>NEW</div>
+                  <div className={styles.episodeOverlay}>
+                    {anime.episodes.sub != null && <span>SUB {anime.episodes.sub}</span>}
+                    {anime.episodes.dub != null && <span>DUB {anime.episodes.dub}</span>}
+                  </div>
                 </div>
-              </div>
-              <div className={styles.info}>
-                <h3 className={styles.animeTitle}>{anime.name}</h3>
-                <p className={styles.episode}>{anime.type ?? 'Anime'}</p>
-              </div>
+                <div className={styles.info}>
+                  <h3 className={styles.animeTitle}>{anime.name}</h3>
+                  <p className={styles.episode}>{anime.type ?? 'Anime'}</p>
+                </div>
+              </Link>
             </motion.div>
           ))}
       </div>

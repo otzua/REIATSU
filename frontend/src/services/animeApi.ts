@@ -48,13 +48,64 @@ async function apiFetch<T>(path: string): Promise<T> {
   return json.data as T;
 }
 
+export interface AnimeDetail {
+  anime: {
+    id: string;
+    name: string;
+    poster: string;
+    description: string;
+    type: string;
+    status: string;
+    episodes: { sub: number | null; dub: number | null };
+  };
+  seasons: any[];
+  recommended: AnimeCard[];
+}
+
+export interface Episode {
+  number: number;
+  title: string;
+  isFiller: boolean;
+  hasSub: boolean;
+  hasDub: boolean;
+}
+
+export interface EpisodeData {
+  totalEpisodes: number;
+  episodes: Episode[];
+}
+
+export interface EpisodeDetail {
+  episode: {
+    number: number;
+    title: string;
+    sources: {
+      sub?: string;
+      dub?: string;
+      aniSub?: string;
+      aniDub?: string;
+    };
+  };
+}
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Unknown API error');
+  return json.data as T;
+}
+
 export const animeApi = {
   getHome: () => apiFetch<HomeData>(`${BASE}/home`),
 
   search: (query: string, page = 1) =>
     apiFetch<SearchResult>(`${BASE}/search?q=${encodeURIComponent(query)}&page=${page}`),
 
-  getAnime: (id: string) => apiFetch<unknown>(`${BASE}/anime/${id}`),
+  getAnime: (id: string) => apiFetch<AnimeDetail>(`${BASE}/anime/${id}`),
 
-  getEpisodes: (id: string) => apiFetch<unknown>(`${BASE}/anime/${id}/episodes`),
+  getEpisodes: (id: string) => apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`),
+
+  getEpisode: (id: string, num: number) => 
+    apiFetch<EpisodeDetail>(`${BASE}/anime/${id}/ep/${num}`),
 };

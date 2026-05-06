@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Home, Search, Compass, Bookmark, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
 import styles from './Navbar.module.css';
@@ -108,7 +109,12 @@ const Navbar = () => {
               <div className={styles.searchResults}>
                 {searching && <div className={styles.searchHint}>Searching...</div>}
                 {results.map((anime) => (
-                  <div key={anime.id} className={styles.resultItem}>
+                  <Link 
+                    key={anime.id} 
+                    to={`/watch/${anime.id}`} 
+                    className={styles.resultItem}
+                    onClick={closeSearch}
+                  >
                     {anime.poster && (
                       <img src={anime.poster} alt={anime.name} className={styles.resultThumb} />
                     )}
@@ -116,7 +122,7 @@ const Navbar = () => {
                       <span className={styles.resultName}>{anime.name}</span>
                       <span className={styles.resultMeta}>{anime.type ?? 'Anime'}</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
