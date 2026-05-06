@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, List, ChevronLeft } from 'lucide-react';
+import { Play, List, ChevronLeft, Maximize } from 'lucide-react';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, EpisodeData, EpisodeDetail } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
@@ -15,7 +15,7 @@ const Watch = () => {
   const [epDetail, setEpDetail] = useState<EpisodeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [epLoading, setEpLoading] = useState(false);
-  const [mode, setMode] = useState<'sub' | 'dub'>('sub');
+  const [activeSource, setActiveSource] = useState<'sub' | 'dub'>('sub');
 
   useEffect(() => {
     if (!id) return;
@@ -48,7 +48,7 @@ const Watch = () => {
       });
   }, [id, currentEp]);
 
-  const sourceUrl = epDetail?.episode?.sources?.[mode] || epDetail?.episode?.sources?.sub;
+  const videoUrl = epDetail?.episode?.sources?.[activeSource] || epDetail?.episode?.sources?.sub;
 
   if (loading) {
     return <div className={styles.container}><div className={styles.loading}>LOADING...</div></div>;
@@ -64,13 +64,15 @@ const Watch = () => {
     );
   }
 
+
   return (
     <div className={styles.container}>
       <HalftoneWave />
       
       <div className={styles.content}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <ChevronLeft /> BACK
+        <button onClick={() => navigate(-1)} className={styles.backBtn}>
+          <ChevronLeft size={20} />
+          <span>BACK TO EXPLORE</span>
         </button>
 
         <div className={styles.mainGrid}>
@@ -79,31 +81,44 @@ const Watch = () => {
             <div className={styles.videoWrapper}>
               {epLoading ? (
                 <div className={styles.playerPlaceholder}>LOADING EPISODE...</div>
-              ) : sourceUrl ? (
+              ) : videoUrl ? (
                 <iframe
-                  src={sourceUrl}
+                  src={videoUrl}
                   className={styles.iframe}
                   allowFullScreen
                   scrolling="no"
+                  allow="autoplay; encrypted-media"
                 />
               ) : (
-                <div className={styles.playerPlaceholder}>SOURCE NOT AVAILABLE</div>
+                <div className={styles.playerPlaceholder}>
+                  NO STREAMING SOURCE AVAILABLE
+                </div>
               )}
             </div>
 
             <div className={styles.controls}>
-              <h1 className={styles.epTitle}>
-                EPISODE {currentEp}: {epDetail?.episode.title || 'Loading...'}
-              </h1>
-              <div className={styles.modeToggle}>
-                <button 
-                  className={`${styles.modeBtn} ${mode === 'sub' ? styles.activeMode : ''}`}
-                  onClick={() => setMode('sub')}
-                >SUB</button>
-                <button 
-                  className={`${styles.modeBtn} ${mode === 'dub' ? styles.activeMode : ''}`}
-                  onClick={() => setMode('dub')}
-                >DUB</button>
+              <div className={styles.epInfo}>
+                <span className={styles.epBadge}>EPISODE {currentEp}</span>
+                <h2 className={styles.epTitle}>{epDetail.episode.title || 'Untitled Episode'}</h2>
+              </div>
+              
+              <div className={styles.actionGroup}>
+
+                <div className={styles.modeToggle}>
+                  <button
+                    className={`${styles.modeBtn} ${activeSource === 'sub' ? styles.activeMode : ''}`}
+                    onClick={() => setActiveSource('sub')}
+                  >
+                    SUB
+                  </button>
+                  <button
+                    className={`${styles.modeBtn} ${activeSource === 'dub' ? styles.activeMode : ''}`}
+                    onClick={() => setActiveSource('dub')}
+                    disabled={!epDetail.episode.sources.dub}
+                  >
+                    DUB
+                  </button>
+                </div>
               </div>
             </div>
 
