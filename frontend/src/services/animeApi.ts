@@ -67,6 +67,7 @@ export interface Episode {
   isFiller: boolean;
   hasSub: boolean;
   hasDub: boolean;
+  sources?: Record<string, string>;
 }
 
 export interface EpisodeData {
