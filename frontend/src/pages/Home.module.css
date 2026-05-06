@@ -10,3 +10,20 @@
   position: relative;
   padding-top: 100px; /* Space for the floating navbar */
 }
+
+.loading, .error {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--color-cream);
+  letter-spacing: 0.5rem;
+}
+
+.error {
+  color: var(--accent);
+  text-align: center;
+  padding: 2rem;
+}
