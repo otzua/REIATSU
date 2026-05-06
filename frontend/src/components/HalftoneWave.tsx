@@ -40,10 +40,11 @@ const HalftoneWave: React.FC = () => {
     document.addEventListener('mouseleave', handleMouseLeave);
 
     const draw = () => {
-      ctx.fillStyle = '#000000';
+      // Swapped for Dark Theme
+      ctx.fillStyle = '#1A1A1A'; // Black Background
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = '#DCC9A9'; // Cream Squares
       const spacing = 30; // Increased spacing = significantly fewer draw calls
       const rows = Math.ceil(window.innerHeight / spacing);
       const cols = Math.ceil(window.innerWidth / spacing);
