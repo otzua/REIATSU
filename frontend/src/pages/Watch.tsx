@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Play, List, Info, ChevronLeft } from 'lucide-react';
+import { Play, List, ChevronLeft } from 'lucide-react';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, EpisodeData, EpisodeDetail } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
@@ -49,7 +48,7 @@ const Watch = () => {
       });
   }, [id, currentEp]);
 
-  const sourceUrl = epDetail?.episode.sources[mode] || epDetail?.episode.sources.sub;
+  const sourceUrl = epDetail?.episode?.sources?.[mode] || epDetail?.episode?.sources?.sub;
 
   if (loading) {
     return <div className={styles.container}><div className={styles.loading}>LOADING...</div></div>;

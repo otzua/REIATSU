@@ -88,13 +88,6 @@ export interface EpisodeDetail {
   };
 }
 
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(path);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error || 'Unknown API error');
-  return json.data as T;
-}
 
 export const animeApi = {
   getHome: () => apiFetch<HomeData>(`${BASE}/home`),
