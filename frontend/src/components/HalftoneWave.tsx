@@ -24,20 +24,32 @@ const HalftoneWave: React.FC = () => {
     window.addEventListener('resize', resize);
     resize();
 
-    // Handle Mouse Interaction
+    // Handle Mouse & Touch Interaction
     let mouseX = -1000;
     let mouseY = -1000;
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+
+    const updateInteraction = (x: number, y: number) => {
+      mouseX = x;
+      mouseY = y;
     };
-    const handleMouseLeave = () => {
+
+    const handleMouseMove = (e: MouseEvent) => updateInteraction(e.clientX, e.clientY);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateInteraction(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    const clearInteraction = () => {
       mouseX = -1000;
       mouseY = -1000;
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
+    document.addEventListener('mouseleave', clearInteraction);
+    window.addEventListener('touchend', clearInteraction);
 
     const draw = () => {
       // Swapped for Dark Theme
@@ -70,19 +82,19 @@ const HalftoneWave: React.FC = () => {
           const wave3 = Math.sin(iOff2 + j * 0.08 + t3);
           const waveEffect = (wave1 + wave2 + wave3) / 3;
 
-          // 4. Subtle Mouse Interaction
+          // 4. Subtle Mouse/Touch Interaction
           const dx = xBase - mouseX;
           const dy = yBase - mouseY;
-          const distSq = dx * dx + dy * dy; // Use squared distance to avoid Math.sqrt
+          const distSq = dx * dx + dy * dy;
 
-          let mouseEffect = 0;
+          let interactionEffect = 0;
           if (distSq < 90000) { // 300px * 300px
-            const mouseEffectRaw = 1 - Math.sqrt(distSq) / 300;
-            mouseEffect = mouseEffectRaw * mouseEffectRaw;
+            const effectRaw = 1 - Math.sqrt(distSq) / 300;
+            interactionEffect = effectRaw * effectRaw;
           }
 
           // 5. Final Size Calculation
-          let size = 2 + (waveEffect * 4) + (mouseEffect * 3);
+          let size = 2 + (waveEffect * 4) + (interactionEffect * 3);
           size = size < 0.5 ? 0.5 : (size > spacing - 8 ? spacing - 8 : size);
 
           ctx.beginPath();
@@ -99,7 +111,10 @@ const HalftoneWave: React.FC = () => {
     return () => {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchstart', handleTouchMove);
+      document.removeEventListener('mouseleave', clearInteraction);
+      window.removeEventListener('touchend', clearInteraction);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

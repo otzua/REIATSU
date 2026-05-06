@@ -1,4 +1,3 @@
-import React from 'react';
 import { Home, Compass, Clock, Star, Settings } from 'lucide-react';
 import styles from './Sidebar.module.css';
 import { Link } from 'react-router-dom';

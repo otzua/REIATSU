@@ -1,4 +1,3 @@
-import React from 'react';
 import HalftoneWave from '../components/HalftoneWave';
 import styles from './Home.module.css';
 

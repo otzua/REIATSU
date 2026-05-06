@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Home, Search, Compass, Bookmark, User } from 'lucide-react';
 import styles from './Navbar.module.css';
 
