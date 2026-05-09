@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { SpotlightAnime } from '../services/animeApi';
+import SmartImage from './SmartImage';
 import styles from './Hero.module.css';
 
 const Hero = () => {
@@ -42,6 +43,14 @@ const Hero = () => {
 
   return (
     <section className={styles.hero}>
+      {slides.length > 0 && (
+        <SmartImage
+          src={slides[currentSlide]?.poster}
+          aria-hidden="true"
+          className={styles.heroGlow}
+          draggable={false}
+        />
+      )}
       <div className={styles.sliderContainer}>
         <motion.div
           className={styles.slidesRow}
@@ -59,10 +68,18 @@ const Hero = () => {
           {slides.map((slide) => (
             <div key={slide.id} className={styles.slide}>
               <Link to={`/anime/${slide.id}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
-                <img
+                <SmartImage
+                  src={slide.poster}
+                  aria-hidden="true"
+                  className={styles.posterGlow}
+                  draggable={false}
+                />
+                <SmartImage
                   src={slide.poster}
                   alt={slide.name}
                   className={styles.poster}
+                  loading="eager"
+                  fetchPriority="high"
                   draggable={false}
                 />
                 <div className={styles.overlay} />

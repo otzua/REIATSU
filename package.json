@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev:api": "cd anime-api && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
+    "dev:backend": "npm run dev:api",
     "dev:frontend": "cd frontend && npm run dev",
     "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:frontend\""
   },

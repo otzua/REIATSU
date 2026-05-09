@@ -32,7 +32,7 @@
   font-family: var(--font-heading);
   font-size: 0.75rem;
   letter-spacing: 0.1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .backBtn:hover {
@@ -55,7 +55,7 @@
 .animeNameLink {
   color: var(--color-cream);
   opacity: 0.6;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.05s ease;
 }
 
 .sep {
@@ -82,6 +82,25 @@
   gap: 1.5rem;
 }
 
+.videoWrapperContainer {
+  position: relative;
+  width: 100%;
+}
+
+.playerGlow {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  object-fit: cover;
+  filter: blur(80px) saturate(180%);
+  opacity: 0.6;
+  transform: translateZ(0);
+  pointer-events: none;
+  z-index: -1;
+}
+
 .videoWrapper {
   width: 100%;
   aspect-ratio: 16/9;
@@ -89,9 +108,11 @@
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(220, 201, 169, 0.08);
-  box-shadow: 0 40px 80px rgba(0,0,0,0.9);
+  box-shadow: 0 0 120px rgba(0, 0, 0, 0.9);
   display: grid;
   place-items: stretch;
+  position: relative;
+  z-index: 1;
 }
 
 .iframe, .playerPlaceholder {
@@ -120,11 +141,13 @@
 
 /* Player Controls */
 .playerControls {
-  background: rgba(26, 26, 26, 0.4);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   padding: 1.5rem 2rem;
   border-radius: 24px;
-  border: 1px solid rgba(220, 201, 169, 0.03);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,7 +204,7 @@
   font-family: var(--font-heading);
   font-size: 0.75rem;
   letter-spacing: 0.05rem;
-  transition: all 0.2s ease;
+  transition: all 0.05s ease;
 }
 
 .navBtn:hover:not(:disabled) {
@@ -226,7 +249,7 @@
   font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 800;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .toggleBtn.active, .serverBtn.active {
@@ -237,10 +260,13 @@
 
 /* Anime Details */
 .animeDetails {
-  background: rgba(20, 20, 20, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   border-radius: 24px;
   padding: 2.5rem;
-  border: 1px solid rgba(220, 201, 169, 0.03);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
 }
 
 .animeMainInfo {
@@ -248,13 +274,38 @@
   gap: 2.5rem;
 }
 
+.miniPosterWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.miniPosterGlow {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  filter: blur(25px) saturate(150%);
+  opacity: 0.6;
+  transform: translateZ(0);
+  z-index: -1;
+  pointer-events: none;
+}
+
 .miniPoster {
   width: 160px;
   aspect-ratio: 2/3;
   object-fit: cover;
+  object-position: center center;
   border-radius: 16px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: contrast(1.06) saturate(1.06);
   border: 1px solid rgba(220, 201, 169, 0.08);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 0 60px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 1;
 }
 
 .textInfo {
@@ -267,6 +318,7 @@
 .animeTitle {
   font-family: var(--font-heading);
   font-size: 2rem;
+  font-weight: 800;
   color: var(--color-cream);
   margin: 0;
   letter-spacing: -0.01em;
@@ -331,7 +383,7 @@
   letter-spacing: 0.05rem;
   cursor: pointer;
   padding: 0.5rem 0;
-  transition: color 0.2s ease;
+  transition: color 0.05s ease;
 }
 
 .searchPrompt:hover {
@@ -376,7 +428,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
+  transition: color 0.05s ease;
 }
 
 .closeSearch:hover {
@@ -418,7 +470,7 @@
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all 0.05s ease;
 }
 
 .rangeBtn:hover {
@@ -470,7 +522,7 @@
   color: rgba(220, 201, 169, 0.5);
   cursor: pointer;
   text-align: left;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .episodeItem:hover {
@@ -554,7 +606,7 @@
   border-radius: 14px;
   font-family: var(--font-heading);
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.05s ease;
 }
 
 .errorBox button:hover {

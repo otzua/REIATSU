@@ -4,45 +4,35 @@ import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
-import styles from './NewReleases.module.css';
+import styles from './AiringAnime.module.css';
 
-const SkeletonCard = () => (
-  <div className={styles.animeCard}>
-    <div className={`${styles.posterPlaceholder} ${styles.skeleton}`} />
-    <div className={styles.info}>
-      <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonEp}`} />
-    </div>
-  </div>
-);
-
-const NewReleases = () => {
+const AiringAnime = () => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     animeApi.getHome()
       .then((data) => {
-        // Specifically prioritize the "newReleases" array for this section
-        const items = data.newReleases?.length
-          ? data.newReleases
-          : data.latestEpisodeAnimes ?? [];
-        setAnimes(items.slice(0, 10));
+        setAnimes((data.latestEpisodeAnimes || []).slice(0, 10));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
+  if (!loading && animes.length === 0) return null;
+
   return (
-    <section className={styles.releasesSection}>
+    <section className={styles.section}>
       <div className={styles.header}>
         <div className={styles.accentBox}></div>
-        <h2 className={styles.title}>NEWLY RELEASED</h2>
+        <h2 className={styles.title}>CURRENTLY AIRING</h2>
       </div>
 
       <div className={styles.grid}>
         {loading
-          ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '300px' }} />
+            ))
           : animes.map((anime, index) => (
             <motion.div
               key={anime.id}
@@ -55,23 +45,23 @@ const NewReleases = () => {
             >
               <Link to={`/anime/${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
-                  {anime.poster
-                    ? (
-                      <>
-                        <SmartImage src={anime.poster} aria-hidden="true" className={styles.posterGlow} draggable={false} />
-                        <SmartImage src={anime.poster} alt={anime.name} className={styles.posterImg} draggable={false} />
-                      </>
-                    )
-                    : null}
-                  <div className={styles.badge}>NEW</div>
+                  <div className={styles.airingBadge}>
+                    <div className={styles.dot} />
+                    LIVE
+                  </div>
+                  {anime.poster && (
+                    <>
+                      <SmartImage src={anime.poster} aria-hidden="true" className={styles.posterGlow} draggable={false} />
+                      <SmartImage src={anime.poster} alt={anime.name} className={styles.posterImg} draggable={false} />
+                    </>
+                  )}
                   <div className={styles.episodeOverlay}>
-                    {anime.episodes.sub != null && <span>SUB {anime.episodes.sub}</span>}
-                    {anime.episodes.dub != null && <span>DUB {anime.episodes.dub}</span>}
+                    {anime.episodes.sub != null && <span>EPISODE {anime.episodes.sub}</span>}
                   </div>
                 </div>
                 <div className={styles.info}>
                   <h3 className={styles.animeTitle}>{anime.name}</h3>
-                  <p className={styles.episode}>{anime.type ?? 'Anime'}</p>
+                  <p className={styles.airingTime}>AIRING NOW</p>
                 </div>
               </Link>
             </motion.div>
@@ -81,4 +71,4 @@ const NewReleases = () => {
   );
 };
 
-export default NewReleases;
+export default AiringAnime;

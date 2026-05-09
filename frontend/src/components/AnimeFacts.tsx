@@ -44,7 +44,7 @@ const AnimeFacts = () => {
           } else {
             setBatchIndex(index);
           }
-        } catch (e) {
+        } catch {
           // Reset if corrupted
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ startTime: now, index: 0 }));
           setBatchIndex(0);

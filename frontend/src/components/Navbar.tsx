@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
+import SmartImage from './SmartImage';
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
@@ -152,7 +153,7 @@ const Navbar = () => {
                     onClick={closeSearch}
                   >
                     {anime.poster && (
-                      <img src={anime.poster} alt={anime.name} className={styles.resultThumb} />
+                      <SmartImage src={anime.poster} alt={anime.name} className={styles.resultThumb} />
                     )}
                     <div className={styles.resultInfo}>
                       <span className={styles.resultName}>{anime.name}</span>

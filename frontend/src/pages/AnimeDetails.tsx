@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, AnimeCard } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
+import SmartImage from '../components/SmartImage';
 import styles from './AnimeDetails.module.css';
 
 const AnimeDetails = () => {
@@ -16,22 +17,27 @@ const AnimeDetails = () => {
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
-    setError(false);
+    let isCancelled = false;
     
     // Scroll to top when ID changes
     window.scrollTo(0, 0);
 
     animeApi.getAnime(id)
       .then((info) => {
+        if (isCancelled) return;
         setAnimeInfo(info);
         setLoading(false);
       })
       .catch((err) => {
+        if (isCancelled) return;
         console.error('REIATSU ERROR:', err);
         setLoading(false);
         setError(true);
       });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [id]);
 
   if (loading) {
@@ -67,7 +73,7 @@ const AnimeDetails = () => {
     <div className={styles.wrapper}>
       {/* Immersive Blurred Background */}
       <div className={styles.immersiveBg}>
-        <img src={anime.poster} alt="" className={styles.bgImage} />
+        <SmartImage src={anime.poster} alt="" className={styles.bgImage} loading="eager" />
         <div className={styles.bgOverlay} />
       </div>
 
@@ -87,7 +93,7 @@ const AnimeDetails = () => {
           >
             <div className={styles.mainInfo}>
               <div className={styles.posterWrapper}>
-                <img src={anime.poster} alt={anime.name} className={styles.poster} />
+                <SmartImage src={anime.poster} alt={anime.name} className={styles.poster} loading="eager" />
                 <div className={styles.actionsMobile}>
                   <Link to={`/watch/${anime.id}`} className={styles.watchBtn}>
                     <Play fill="currentColor" size={20} />
@@ -148,13 +154,13 @@ const AnimeDetails = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.04 }}
-                    whileHover={{ y: -8 }}
-                  >
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
+                    >
                     <Link to={`/anime/${rel.id}`} className={styles.cardLink}>
                       <div className={styles.posterPlaceholder}>
                         {rel.poster && (
-                          <img src={rel.poster} alt={rel.name} className={styles.recPosterImg} draggable={false} />
+                          <SmartImage src={rel.poster} alt={rel.name} className={styles.recPosterImg} draggable={false} />
                         )}
                         <div className={styles.episodeOverlay}>
                           {rel.episodes.sub != null && <span>SUB {rel.episodes.sub}</span>}
@@ -192,13 +198,16 @@ const AnimeDetails = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.04 }}
-                    whileHover={{ y: -8 }}
-                  >
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
+                    >
                     <Link to={`/anime/${rec.id}`} className={styles.cardLink}>
                       <div className={styles.posterPlaceholder}>
                         {rec.poster && (
-                          <img src={rec.poster} alt={rec.name} className={styles.recPosterImg} draggable={false} />
+                          <>
+                            <SmartImage src={rec.poster} aria-hidden="true" className={styles.recPosterGlow} draggable={false} />
+                            <SmartImage src={rec.poster} alt={rec.name} className={styles.recPosterImg} draggable={false} />
+                          </>
                         )}
                         <div className={styles.episodeOverlay}>
                           {rec.episodes.sub != null && <span>SUB {rec.episodes.sub}</span>}

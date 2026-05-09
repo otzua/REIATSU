@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
-import type { AnimeCard } from '../services/animeApi';
+import type { AnimeDetail } from '../services/animeApi';
 import SmartImage from './SmartImage';
-import styles from './NewReleases.module.css';
+import styles from './TheBigThree.module.css';
+
+const BIG_THREE_IDS = ['one-piece-odmau', 'naruto-eybxz', 'bleach-yaa9n'];
 
 const SkeletonCard = () => (
   <div className={styles.animeCard}>
@@ -16,33 +18,32 @@ const SkeletonCard = () => (
   </div>
 );
 
-const NewReleases = () => {
-  const [animes, setAnimes] = useState<AnimeCard[]>([]);
+const TheBigThree = () => {
+  const [animes, setAnimes] = useState<AnimeDetail['anime'][]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    animeApi.getHome()
-      .then((data) => {
-        // Specifically prioritize the "newReleases" array for this section
-        const items = data.newReleases?.length
-          ? data.newReleases
-          : data.latestEpisodeAnimes ?? [];
-        setAnimes(items.slice(0, 10));
+    Promise.all(BIG_THREE_IDS.map(id => animeApi.getAnime(id)))
+      .then(responses => {
+        setAnimes(responses.map(res => res.anime));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <section className={styles.releasesSection}>
+    <section className={styles.bigThreeSection}>
       <div className={styles.header}>
         <div className={styles.accentBox}></div>
-        <h2 className={styles.title}>NEWLY RELEASED</h2>
+        <div className={styles.titleBlock}>
+          <p className={styles.kicker}>Legacy Shonen Icons</p>
+          <h2 className={styles.title}>THE BIG THREE</h2>
+        </div>
       </div>
 
       <div className={styles.grid}>
         {loading
-          ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
           : animes.map((anime, index) => (
             <motion.div
               key={anime.id}
@@ -50,11 +51,12 @@ const NewReleases = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.04 }}
+              transition={{ delay: index * 0.1 }}
               whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
             >
               <Link to={`/anime/${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
+                  <span className={styles.rankBadge}>#{index + 1}</span>
                   {anime.poster
                     ? (
                       <>
@@ -63,10 +65,9 @@ const NewReleases = () => {
                       </>
                     )
                     : null}
-                  <div className={styles.badge}>NEW</div>
                   <div className={styles.episodeOverlay}>
-                    {anime.episodes.sub != null && <span>SUB {anime.episodes.sub}</span>}
-                    {anime.episodes.dub != null && <span>DUB {anime.episodes.dub}</span>}
+                    {anime.episodes?.sub != null && <span>SUB {anime.episodes.sub}</span>}
+                    {anime.episodes?.dub != null && <span>DUB {anime.episodes.dub}</span>}
                   </div>
                 </div>
                 <div className={styles.info}>
@@ -81,4 +82,4 @@ const NewReleases = () => {
   );
 };
 
-export default NewReleases;
+export default TheBigThree;

@@ -21,6 +21,7 @@
 .title {
   font-family: var(--font-heading);
   font-size: 3rem;
+  font-weight: 800;
   color: var(--color-cream);
   letter-spacing: 0.1rem;
   text-transform: uppercase;
@@ -35,10 +36,17 @@
 .animeCard {
   background: rgba(26, 26, 26, 0.4);
   border-radius: 20px;
-  overflow: hidden;
+  /* Removed overflow: hidden so glow can bleed */
   border: 1px solid rgba(220, 201, 169, 0.05);
-  transition: var(--transition-smooth);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  position: relative;
+}
+
+.animeCard:hover {
+  border-color: rgba(220, 201, 169, 0.2);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.7);
 }
 
 .cardLink {
@@ -55,7 +63,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  /* Removed overflow hidden from here too */
+}
+
+.posterGlow {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  filter: blur(24px) saturate(150%);
+  opacity: 0;
+  transform: translateZ(0);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.animeCard:hover .posterGlow {
+  opacity: 0.6;
+  filter: blur(32px) saturate(200%);
+  transform: translateY(10px) translateZ(0);
 }
 
 .posterImg {
@@ -64,11 +94,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.animeCard:hover .posterImg {
-  transform: scale(1.05);
+  object-position: center center;
+  border-radius: 20px 20px 0 0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: contrast(1.06) saturate(1.06);
+  transition: transform 0.05s ease;
+  z-index: 1;
 }
 
 .episodeOverlay {
@@ -134,11 +166,19 @@
 
 .info {
   padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-top: 1px solid rgba(220, 201, 169, 0.1);
+  border-radius: 0 0 20px 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .animeTitle {
   color: var(--color-cream);
   font-size: 1.1rem;
+  font-weight: 700;
   margin-bottom: 0.4rem;
   white-space: nowrap;
   overflow: hidden;
@@ -174,3 +214,4 @@
     height: 32px;
   }
 }
+

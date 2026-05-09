@@ -30,6 +30,11 @@ export interface HomeData {
   latestEpisodeAnimes: AnimeCard[];
   newReleases: AnimeCard[];
   topUpcomingAnimes: AnimeCard[];
+  top10Animes: {
+    today: AnimeCard[];
+    week: AnimeCard[];
+    month: AnimeCard[];
+  };
   genres: string[];
 }
 

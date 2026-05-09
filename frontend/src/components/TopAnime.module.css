@@ -1,0 +1,163 @@
+.section {
+  width: 100%;
+  padding: var(--space-xl);
+  margin-top: 2rem;
+  background: radial-gradient(circle at 50% -20%, rgba(218, 165, 32, 0.05) 0%, transparent 50%);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+}
+
+.accentBox {
+  width: 12px;
+  height: 52px;
+  background: linear-gradient(to bottom, #FFD700, #B8860B);
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(218, 165, 32, 0.4);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 900;
+  color: #FFD700;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  text-shadow: 0 0 30px rgba(218, 165, 32, 0.2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2.5rem;
+}
+
+.animeCard {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 24px;
+  border: 1px solid rgba(218, 165, 32, 0.1);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  position: relative;
+}
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.posterPlaceholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: rgba(218, 165, 32, 0.03);
+  position: relative;
+  border-radius: 24px 24px 0 0;
+}
+
+.rankBadge {
+  position: absolute;
+  top: -1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+  color: #000;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 900;
+  box-shadow: 0 10px 25px rgba(184, 134, 11, 0.5);
+  border: 4px solid #1a1a1a;
+}
+
+.posterGlow {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  filter: blur(30px) saturate(160%);
+  opacity: 0.5;
+  transform: translateZ(0);
+  z-index: -1;
+}
+
+.posterImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 24px 24px 0 0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: contrast(1.06) saturate(1.06);
+  z-index: 1;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.info {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-top: 1px solid rgba(218, 165, 32, 0.1);
+  border-radius: 0 0 24px 24px;
+  text-align: center;
+}
+
+.animeTitle {
+  color: #FFD700;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-heading);
+  letter-spacing: 0.02rem;
+}
+
+.type {
+  color: rgba(220, 201, 169, 0.4);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(218,165,32,0.02) 25%, rgba(218,165,32,0.05) 50%, rgba(218,165,32,0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-md);
+  }
+  .title {
+    font-size: 2.2rem;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}

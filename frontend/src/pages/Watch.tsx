@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, EpisodeData } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
+import SmartImage from '../components/SmartImage';
 import styles from './Watch.module.css';
 
 const Watch = () => {
@@ -21,6 +22,9 @@ const Watch = () => {
   const [selectedRange, setSelectedRange] = useState<[number, number] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [activeServer, setActiveServer] = useState<'primary' | 'ani'>('primary');
+  const [individualSource, setIndividualSource] = useState<{ ep: number; sources: Record<string, string> } | null>(null);
+  const [sourceFetchFailedEp, setSourceFetchFailedEp] = useState<number | null>(null);
   
 
   // Keyboard Shortcuts
@@ -47,17 +51,19 @@ const Watch = () => {
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
-    setError(false);
+    let isSubscribed = true;
     
     Promise.all([
       animeApi.getAnime(id),
       animeApi.getEpisodes(id),
     ])
       .then(([info, eps]) => {
+        if (!isSubscribed) return;
         setAnime(info);
         setEpisodeData(eps);
         setCurrentEp(1);
+        setIndividualSource(null);
+        setSourceFetchFailedEp(null);
         
         // Initialize range if many episodes (> 28)
         if (eps.totalEpisodes > 28) {
@@ -66,18 +72,20 @@ const Watch = () => {
           setSelectedRange(null);
         }
         
+        setError(false);
         setLoading(false);
       })
       .catch((err) => {
+        if (!isSubscribed) return;
         console.error('REIATSU ERROR:', err);
         setLoading(false);
         setError(true);
       });
-  }, [id, refreshKey]);
 
-  const [activeServer, setActiveServer] = useState<'primary' | 'ani'>('primary');
-  const [individualSource, setIndividualSource] = useState<{ ep: number; sources: Record<string, string> } | null>(null);
-  const [fetchingSource, setFetchingSource] = useState(false);
+    return () => {
+      isSubscribed = false;
+    };
+  }, [id, refreshKey]);
 
   const decodeEntities = (text: string) => {
     if (!text) return '';
@@ -97,44 +105,34 @@ const Watch = () => {
     let isSubscribed = true;
     
     const listSources = currentEpisode.sources as Record<string, string>;
-    if (!listSources || Object.keys(listSources).length === 0) {
-      setFetchingSource(true);
-      // We let the previous source remain briefly until the new one loads or we fail
-      animeApi.getEpisode(id, currentEp)
-        .then(res => {
-          if (isSubscribed) {
-            setIndividualSource({ ep: currentEp, sources: res.episode.sources as Record<string, string> });
-            setFetchingSource(false);
-          }
-        })
-        .catch(() => {
-          if (isSubscribed) setFetchingSource(false);
-        });
-    } else {
-      setIndividualSource(null);
-      setFetchingSource(false);
-    }
+    if (listSources && Object.keys(listSources).length > 0) return;
+    if (individualSource?.ep === currentEp || sourceFetchFailedEp === currentEp) return;
+
+    // We let the previous source remain briefly until the new one loads or we fail
+    animeApi.getEpisode(id, currentEp)
+      .then(res => {
+        if (isSubscribed) {
+          setIndividualSource({ ep: currentEp, sources: res.episode.sources as Record<string, string> });
+          setSourceFetchFailedEp(null);
+        }
+      })
+      .catch(() => {
+        if (isSubscribed) setSourceFetchFailedEp(currentEp);
+      });
     
     return () => {
       isSubscribed = false;
     };
-  }, [id, currentEp, episodeData]);
+  }, [id, currentEp, currentEpisode, individualSource?.ep, sourceFetchFailedEp]);
 
-  // Auto-sync episode range only when currentEp changes
-  useEffect(() => {
-    if (!episodeData || episodeData.totalEpisodes <= 28) return;
-    
-    const rangeSize = 100;
-    const start = Math.floor((currentEp - 1) / rangeSize) * rangeSize + 1;
-    const end = Math.min(start + rangeSize - 1, episodeData.totalEpisodes);
-    
-    setSelectedRange(prev => {
-      if (!prev || currentEp < prev[0] || currentEp > prev[1]) {
-        return [start, end];
-      }
-      return prev;
-    });
-  }, [currentEp, episodeData]);
+  const fetchingSource = useMemo(() => {
+    if (!currentEpisode) return false;
+    const inlineSources = currentEpisode.sources as Record<string, string> | undefined;
+    const hasInlineSources = !!inlineSources && Object.keys(inlineSources).length > 0;
+    if (hasInlineSources) return false;
+    if (individualSource?.ep === currentEp) return false;
+    return sourceFetchFailedEp !== currentEp;
+  }, [currentEpisode, individualSource?.ep, currentEp, sourceFetchFailedEp]);
 
   const videoUrl = useMemo(() => {
     if (!currentEpisode) return null;
@@ -160,15 +158,29 @@ const Watch = () => {
     }
   }, [currentEpisode, individualSource, activeSource, activeServer, currentEp]);
 
+  const syncRangeForEpisode = (nextEp: number) => {
+    if (!episodeData || episodeData.totalEpisodes <= 28) return;
+    if (selectedRange && nextEp >= selectedRange[0] && nextEp <= selectedRange[1]) return;
+
+    const rangeSize = 100;
+    const start = Math.floor((nextEp - 1) / rangeSize) * rangeSize + 1;
+    const end = Math.min(start + rangeSize - 1, episodeData.totalEpisodes);
+    setSelectedRange([start, end]);
+  };
+
   const handleNextEp = () => {
     if (episodeData && currentEp < episodeData.totalEpisodes) {
-      setCurrentEp(prev => prev + 1);
+      const nextEp = currentEp + 1;
+      setCurrentEp(nextEp);
+      syncRangeForEpisode(nextEp);
     }
   };
 
   const handlePrevEp = () => {
     if (currentEp > 1) {
-      setCurrentEp(prev => prev - 1);
+      const nextEp = currentEp - 1;
+      setCurrentEp(nextEp);
+      syncRangeForEpisode(nextEp);
     }
   };
 
@@ -222,7 +234,7 @@ const Watch = () => {
         <div className={styles.content}>
           <div className={styles.errorBox}>
             <h2>FAILED TO LOAD DATA</h2>
-            <button onClick={() => setRefreshKey(k => k + 1)}>RETRY</button>
+            <button onClick={() => { setLoading(true); setError(false); setRefreshKey(k => k + 1); }}>RETRY</button>
           </div>
         </div>
       </div>
@@ -248,21 +260,24 @@ const Watch = () => {
 
         <div className={styles.mainGrid}>
           <div className={styles.playerSection}>
-            <div ref={playerWrapperRef} className={styles.videoWrapper}>
-              {videoUrl ? (
-                <iframe
-                  key={`${id}-${activeSource}-${activeServer}`}
-                  src={videoUrl}
-                  className={styles.iframe}
-                  allowFullScreen
-                  scrolling="no"
-                  allow="autoplay; encrypted-media"
-                />
-              ) : (
-                <div className={styles.playerPlaceholder}>
-                  {fetchingSource ? 'LOCATING STREAMS...' : 'NO SOURCE FOUND'}
-                </div>
-              )}
+            <div className={styles.videoWrapperContainer}>
+              <SmartImage src={anime.anime.poster} aria-hidden="true" className={styles.playerGlow} />
+              <div ref={playerWrapperRef} className={styles.videoWrapper}>
+                {videoUrl ? (
+                  <iframe
+                    key={`${id}-${activeSource}-${activeServer}`}
+                    src={videoUrl}
+                    className={styles.iframe}
+                    allowFullScreen
+                    scrolling="no"
+                    allow="autoplay; encrypted-media"
+                  />
+                ) : (
+                  <div className={styles.playerPlaceholder}>
+                    {fetchingSource ? 'LOCATING STREAMS...' : 'NO SOURCE FOUND'}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className={styles.playerControls}>
@@ -330,7 +345,10 @@ const Watch = () => {
 
             <div className={styles.animeDetails}>
               <div className={styles.animeMainInfo}>
-                <img src={anime.anime.poster} alt="" className={styles.miniPoster} />
+                <div className={styles.miniPosterWrapper}>
+                  <SmartImage src={anime.anime.poster} aria-hidden="true" className={styles.miniPosterGlow} />
+                  <SmartImage src={anime.anime.poster} alt="" className={styles.miniPoster} loading="eager" />
+                </div>
                 <div className={styles.textInfo}>
                   <h2 className={styles.animeTitle}>{anime.anime.name}</h2>
                   <div className={styles.badges}>
@@ -402,7 +420,7 @@ const Watch = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                     className={`${styles.episodeItem} ${currentEp === ep.number ? styles.active : ''}`}
-                    onClick={() => setCurrentEp(ep.number)}
+                    onClick={() => { setCurrentEp(ep.number); syncRangeForEpisode(ep.number); }}
                   >
                     <span className={styles.num}>{ep.number}</span>
                     <span className={styles.name}>{decodeEntities(ep.title) || `Episode ${ep.number}`}</span>
