@@ -6,7 +6,10 @@ const Sidebar = () => {
   return (
     <aside className={`${styles.sidebar} glass`}>
       <div className={styles.logo}>
-        <h2>REI<span className={styles.accent}>ATSU</span></h2>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontFamily: 'var(--font-jp)', color: 'var(--color-cream)', fontSize: '2.5rem' }}>霊</span>
+          <span>REI<span className={styles.accent}>ATSU</span></span>
+        </h2>
       </div>
       <nav className={styles.nav}>
         <ul>

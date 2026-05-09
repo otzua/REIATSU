@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Home, Search, Compass, Bookmark, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
-  const [activeTab, setActiveTab] = useState('home');
+  const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<AnimeCard[]>([]);
@@ -16,16 +16,23 @@ const Navbar = () => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navItems = [
-    { id: 'home', icon: Home },
-    { id: 'browse', icon: Compass },
-    { id: 'search', icon: Search },
-    { id: 'list', icon: Bookmark },
+    { id: 'home', path: '/', icon: Home },
+    { id: 'browse', path: '/explore', icon: Compass },
+    { id: 'search', path: '#search', icon: Search },
+    { id: 'list', path: '/watchlist', icon: Bookmark },
   ];
 
+  const activeTab = searchOpen 
+    ? 'search' 
+    : navItems.find(item => location.pathname === item.path)?.id || 'home';
+
   const handleSearchClick = () => {
-    setSearchOpen(true);
-    setActiveTab('search');
-    setTimeout(() => inputRef.current?.focus(), 100);
+    if (searchOpen) {
+      closeSearch();
+    } else {
+      setSearchOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
   };
 
   const closeSearch = () => {
@@ -58,18 +65,33 @@ const Navbar = () => {
   return (
     <>
       <div className={styles.navbarContainer}>
-        <div className={styles.logoCapsule}>
+        <Link to="/" className={styles.logoCapsule} onClick={closeSearch}>
           <span className={styles.logoKanji}>霊</span>
-        </div>
+        </Link>
 
         <nav className={styles.navCapsule}>
-          {navItems.map((item) => (
+          {navItems.map((item) => item.id !== 'search' ? (
+            <Link
+              key={item.id}
+              to={item.path}
+              className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
+              onClick={closeSearch}
+            >
+              {activeTab === item.id && (
+                <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+              )}
+              <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
+            </Link>
+          ) : (
             <button
               key={item.id}
-              className={`${styles.navItem} ${activeTab === item.id ? styles.active : ''}`}
-              onClick={() => item.id === 'search' ? handleSearchClick() : setActiveTab(item.id)}
+              className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
+              onClick={handleSearchClick}
             >
-              <item.icon size={22} strokeWidth={2} />
+              {activeTab === item.id && (
+                <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+              )}
+              <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
             </button>
           ))}
         </nav>
@@ -85,6 +107,20 @@ const Navbar = () => {
       <AnimatePresence>
         {searchOpen && (
           <motion.div
+            key="backdrop"
+            className={styles.searchBackdrop}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeSearch}
+          />
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            key="overlay"
             className={styles.searchOverlay}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -111,7 +147,7 @@ const Navbar = () => {
                 {results.map((anime) => (
                   <Link 
                     key={anime.id} 
-                    to={`/watch/${anime.id}`} 
+                    to={`/anime/${anime.id}`} 
                     className={styles.resultItem}
                     onClick={closeSearch}
                   >

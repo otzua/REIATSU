@@ -51,7 +51,7 @@ const NewReleases = () => {
               transition={{ delay: index * 0.04 }}
               whileHover={{ y: -8 }}
             >
-              <Link to={`/watch/${anime.id}`} className={styles.cardLink}>
+              <Link to={`/anime/${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
                   {anime.poster
                     ? <img src={anime.poster} alt={anime.name} className={styles.posterImg} draggable={false} />

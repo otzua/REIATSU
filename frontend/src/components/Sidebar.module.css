@@ -2,8 +2,11 @@
   width: 260px;
   height: 100vh;
   padding: var(--space-lg);
-  background: #000;
-  border-right: 2px solid #fff;
+  background: rgba(15, 15, 15, 0.5);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid rgba(220, 201, 169, 0.08);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -74,5 +77,8 @@
   }
   .nav a {
     justify-content: center;
+  }
+}
+ent: center;
   }
 }

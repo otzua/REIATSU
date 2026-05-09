@@ -82,11 +82,13 @@
 .episodeOverlay span {
   font-size: 0.75rem;
   font-family: var(--font-heading);
-  background: rgba(26,26,26,0.85);
+  background: rgba(15, 15, 15, 0.5);
   color: var(--color-cream);
   padding: 0.15rem 0.5rem;
   border-radius: 5px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(220, 201, 169, 0.1);
 }
 
 .skeleton {

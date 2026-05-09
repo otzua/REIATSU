@@ -27,6 +27,11 @@
   text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
+.gridWrapper {
+  position: relative;
+  min-height: 200px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -34,16 +39,25 @@
 }
 
 .factCard {
-  background: rgba(26, 26, 26, 0.5);
-  border: 1px solid rgba(220, 201, 169, 0.1);
+  background: rgba(20, 20, 20, 0.4);
+  border: 1px solid rgba(220, 201, 169, 0.08);
   border-radius: 24px;
   padding: 2rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   position: relative;
   transition: var(--transition-smooth);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.factCard:hover {
+  transform: translateY(-5px);
+  background: rgba(25, 25, 25, 0.5);
+  border-color: rgba(220, 201, 169, 0.15);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .animeTag {

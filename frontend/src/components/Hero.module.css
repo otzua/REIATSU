@@ -1,20 +1,21 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 640px;
   overflow: hidden;
-  margin-top: 2rem;
-  padding: 0 var(--space-xl);
+  margin-top: 1.5rem;
+  padding: 0 4rem;
 }
 
 .sliderContainer {
   width: 100%;
   height: 100%;
   position: relative;
-  background: rgba(26, 26, 26, 0.5);
-  border-radius: 32px;
+  background: rgba(10, 10, 10, 0.8);
+  border-radius: 40px;
   overflow: hidden;
-  border: 1px solid rgba(220, 201, 169, 0.1);
+  border: 1px solid rgba(220, 201, 169, 0.08);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
 }
 
 .slidesRow {
@@ -30,7 +31,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: var(--space-xl);
+  padding: 4rem;
   position: relative;
   touch-action: pan-y;
   cursor: grab;
@@ -58,83 +59,96 @@
   object-fit: cover;
   object-position: top;
   z-index: 0;
+  filter: brightness(0.8);
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(26,26,26,0.95) 30%, transparent 80%),
-              linear-gradient(to top, rgba(26,26,26,0.7) 0%, transparent 50%);
+  background: 
+    linear-gradient(90deg, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.8) 40%, transparent 80%),
+    linear-gradient(to top, rgba(15,15,15,0.9) 0%, transparent 40%);
   z-index: 1;
 }
 
 .slideContent {
   position: relative;
   z-index: 2;
-  max-width: 600px;
+  max-width: 720px;
 }
 
 .tagRow {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 
 .rankBadge {
   font-family: var(--font-heading);
-  font-size: 1rem;
-  color: var(--color-cream);
+  font-size: 1.1rem;
+  color: #fff;
   background: var(--accent);
-  padding: 0.15rem 0.7rem;
-  border-radius: 8px;
+  padding: 0.25rem 0.8rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(184, 58, 45, 0.4);
 }
 
 .genreTag {
-  font-size: 0.8rem;
-  color: rgba(220, 201, 169, 0.7);
-  border: 1px solid rgba(220, 201, 169, 0.25);
-  padding: 0.15rem 0.6rem;
-  border-radius: 6px;
-  background: rgba(26,26,26,0.5);
-  backdrop-filter: blur(4px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(220, 201, 169, 0.6);
+  border: 1px solid rgba(220, 201, 169, 0.15);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
 }
 
 .title {
   font-family: var(--font-heading);
-  font-size: 3.5rem;
+  font-size: 4.5rem;
   color: var(--color-cream);
-  margin-bottom: 0.75rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-  line-height: 1.1;
+  margin-bottom: 1rem;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .description {
-  font-size: 1rem;
-  color: rgba(220, 201, 169, 0.75);
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
-  max-width: 480px;
+  font-size: 1.1rem;
+  color: rgba(220, 201, 169, 0.5);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  max-width: 540px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .episodePills {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
 .pill {
-  font-size: 0.85rem;
-  font-family: var(--font-heading);
-  padding: 0.2rem 0.8rem;
-  border-radius: 8px;
-  background: rgba(220, 201, 169, 0.1);
-  border: 1px solid rgba(220, 201, 169, 0.3);
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.4rem 1rem;
+  border-radius: 10px;
+  background: rgba(220, 201, 169, 0.05);
+  border: 1px solid rgba(220, 201, 169, 0.12);
   color: var(--color-cream);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .skeleton {
-  background: linear-gradient(90deg, rgba(220,201,169,0.05) 25%, rgba(220,201,169,0.1) 50%, rgba(220,201,169,0.05) 75%);
+  background: linear-gradient(90deg, rgba(220,201,169,0.02) 25%, rgba(220,201,169,0.05) 50%, rgba(220,201,169,0.02) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -150,16 +164,16 @@
   transform: translateY(-50%);
   width: 72px;
   height: 72px;
-  background: rgba(26, 26, 26, 0.6);
-  border: 1px solid rgba(220, 201, 169, 0.3);
-  border-radius: 20px;
-  color: rgba(220, 201, 169, 0.6);
+  background: rgba(15, 15, 15, 0.4);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  border-radius: 24px;
+  color: rgba(220, 201, 169, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: var(--transition-smooth);
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
   z-index: 20;
   opacity: 0;
   pointer-events: none;
@@ -171,13 +185,15 @@
 }
 
 .arrowBtn:hover {
-  background: rgba(26, 26, 26, 0.8);
-  border-color: rgba(220, 201, 169, 0.8);
-  color: var(--color-cream);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 10px 30px rgba(184, 58, 45, 0.3);
 }
 
 .arrowBtn:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(0.9);
 }
 
 .left {
@@ -190,59 +206,59 @@
 
 .indicators {
   position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 2.5rem;
+  right: 4rem;
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
+  z-index: 10;
+  align-items: center;
 }
 
 .indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(220, 201, 169, 0.3);
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(220, 201, 169, 0.15);
   cursor: pointer;
-  transition: var(--transition-smooth);
+  transition: all 0.3s ease;
 }
 
 .activeIndicator {
-  background: var(--color-cream);
-  transform: scale(1.2);
+  background: var(--accent);
+  width: 32px;
+  height: 8px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(184, 58, 45, 0.5);
 }
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .hero {
-    height: 500px;
-    padding: 0 var(--space-md);
-    margin-top: 6rem; /* Make room for the navbar */
+    height: 540px;
+    padding: 0 1.5rem;
+    margin-top: 6rem;
+  }
+
+  .slide {
+    padding: 2.5rem;
   }
 
   .title {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
   }
 
   .description {
     font-size: 1rem;
+    -webkit-line-clamp: 2;
   }
 
   .arrowBtn {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    border-width: 1px;
-  }
-
-  .left {
-    left: 0.5rem;
-  }
-
-  .right {
-    right: 0.5rem;
+    display: none;
   }
 
   .indicators {
-    bottom: 1rem;
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 1.5rem;
   }
 }

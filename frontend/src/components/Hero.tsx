@@ -15,6 +15,7 @@ const Hero = () => {
   useEffect(() => {
     animeApi.getHome()
       .then((data) => {
+        console.log("REIATSU: Home data:", data);
         if (data.spotlightAnimes?.length) setSlides(data.spotlightAnimes.slice(0, 6));
       })
       .catch(console.error)
@@ -45,7 +46,7 @@ const Hero = () => {
         <motion.div
           className={styles.slidesRow}
           animate={{ x: `-${currentSlide * 100}%` }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ type: 'tween', ease: [0.25, 1, 0.5, 1], duration: 0.8 }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           onDragStart={() => setIsDragging(true)}
@@ -57,7 +58,7 @@ const Hero = () => {
         >
           {slides.map((slide) => (
             <div key={slide.id} className={styles.slide}>
-              <Link to={`/watch/${slide.id}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
+              <Link to={`/anime/${slide.id}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
                 <img
                   src={slide.poster}
                   alt={slide.name}
@@ -91,16 +92,6 @@ const Hero = () => {
       <button className={`${styles.arrowBtn} ${styles.right}`} onClick={nextSlide}>
         <ChevronRight size={28} />
       </button>
-
-      <div className={styles.indicators}>
-        {slides.map((_, i) => (
-          <div
-            key={i}
-            className={`${styles.indicator} ${i === currentSlide ? styles.activeIndicator : ''}`}
-            onClick={() => setCurrentSlide(i)}
-          />
-        ))}
-      </div>
     </section>
   );
 };
