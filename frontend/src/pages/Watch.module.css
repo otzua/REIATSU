@@ -149,10 +149,23 @@
   border: 1px solid rgba(220, 201, 169, 0.1);
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
   display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.playerControlsInner {
+  display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  min-width: 0;
+  width: 100%;
+}
+
+.timerWrapper {
+  width: 100%;
+  border-top: 1px solid rgba(220, 201, 169, 0.08);
+  padding-top: 1.5rem;
 }
 
 .epMeta {

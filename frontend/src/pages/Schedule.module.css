@@ -1,0 +1,350 @@
+.container {
+  min-height: 100vh;
+  width: 100%;
+  padding-top: 100px;
+  position: relative;
+}
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 4rem 6rem;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.accentBox {
+  width: 12px;
+  height: 48px;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-cream);
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 4rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scrollbar-width: none;
+}
+
+.timeline::-webkit-scrollbar {
+  display: none;
+}
+
+.dayBtn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  position: relative;
+  color: var(--color-cream);
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.dayBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.activeDay {
+  color: #fff;
+  border-color: transparent;
+}
+
+.activeIndicator {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: 16px;
+  z-index: -1;
+  box-shadow: 0 10px 30px rgba(184, 58, 45, 0.4);
+}
+
+.dayName {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  opacity: 0.8;
+}
+
+.dayNum {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.todayDot {
+  width: 6px;
+  height: 6px;
+  background: #00ff00;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  box-shadow: 0 0 8px #00ff00;
+}
+
+.scheduleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.animeCard {
+  background: rgba(26, 26, 26, 0.4);
+  border-radius: 20px;
+  border: 1px solid rgba(220, 201, 169, 0.05);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.animeCard:hover {
+  border-color: rgba(220, 201, 169, 0.2);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.7);
+}
+
+.navigating {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  backdrop-filter: blur(4px);
+  border-radius: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(220, 201, 169, 0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton {
+  height: 400px;
+  background: linear-gradient(90deg, rgba(220,201,169,0.02) 25%, rgba(220,201,169,0.06) 50%, rgba(220,201,169,0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 20px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.timeCapsule {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(220, 201, 169, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(10px);
+}
+
+.localTime {
+  font-family: var(--font-heading);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.jstTime {
+  font-size: 0.65rem;
+  color: rgba(220, 201, 169, 0.6);
+  letter-spacing: 0.05rem;
+}
+
+.posterPlaceholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: rgba(220, 201, 169, 0.05);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.posterGlow {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  filter: blur(24px) saturate(150%);
+  opacity: 0;
+  transform: translateZ(0);
+  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.animeCard:hover .posterGlow {
+  opacity: 0.6;
+  filter: blur(32px) saturate(200%);
+  transform: translateY(10px) translateZ(0);
+}
+
+.posterImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 20px 20px 0 0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: contrast(1.06) saturate(1.06);
+  transition: transform 0.05s ease;
+  z-index: 1;
+}
+
+.info {
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-top: 1px solid rgba(220, 201, 169, 0.1);
+  border-radius: 0 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.animeTitle {
+  color: var(--color-cream);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.genres {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: 0.05rem;
+}
+
+.genreTag {
+  background: rgba(220, 201, 169, 0.1);
+  color: var(--color-cream);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  border: 1px solid rgba(220, 201, 169, 0.15);
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.noResults {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem;
+  font-family: var(--font-heading);
+  color: rgba(220, 201, 169, 0.5);
+  font-size: 1.5rem;
+  letter-spacing: 0.1rem;
+}
+
+@media (max-width: 1024px) {
+  .scheduleGrid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 2rem 1.5rem 6rem;
+  }
+  .title {
+    font-size: 2rem;
+  }
+  .timeline {
+    justify-content: flex-start;
+  }
+  .scheduleGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  .scheduleGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+  .info {
+    padding: 0.8rem;
+  }
+  .animeTitle {
+    font-size: 0.95rem;
+  }
+}

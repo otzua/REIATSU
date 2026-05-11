@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ImgHTMLAttributes } from 'react';
 
 type SmartImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {

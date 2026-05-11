@@ -1,0 +1,98 @@
+.timerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.timerHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.2rem;
+  text-shadow: 0 0 20px rgba(184, 58, 45, 0.4);
+}
+
+.icon {
+  opacity: 1;
+}
+
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.timeBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(220, 201, 169, 0.05);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  min-width: 75px;
+  box-shadow: inset 0 0 20px rgba(220, 201, 169, 0.01);
+}
+
+.value {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-cream);
+  line-height: 1;
+  margin-bottom: 0.4rem;
+  text-shadow: 0 0 15px rgba(220, 201, 169, 0.3);
+}
+
+.label {
+  font-size: 0.7rem;
+  color: rgba(220, 201, 169, 0.6);
+  font-weight: 700;
+  letter-spacing: 0.15rem;
+}
+
+.colon {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: rgba(220, 201, 169, 0.2);
+  margin-top: -15px; /* Alignment adjustment */
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .timerContainer {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown {
+    gap: 0.5rem;
+  }
+  
+  .timeBlock {
+    min-width: 55px;
+    padding: 0.6rem 0.5rem;
+  }
+  
+  .value {
+    font-size: 1.4rem;
+  }
+  
+  .label {
+    font-size: 0.55rem;
+  }
+}

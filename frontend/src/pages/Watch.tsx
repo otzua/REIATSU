@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Play, ChevronLeft, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, EpisodeData } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
+import NextEpisodeTimer from '../components/NextEpisodeTimer';
 import styles from './Watch.module.css';
 
 const Watch = () => {
@@ -284,66 +285,73 @@ const Watch = () => {
             </div>
 
             <div className={styles.playerControls}>
-              <div className={styles.epMeta}>
-                <span className={styles.epCount}>EPISODE {currentEp}</span>
-                <h1 className={styles.epTitle}>
-                  {decodeEntities(currentEpisode?.title || `Episode ${currentEp}`)}
-                </h1>
-              </div>
-
-              <div className={styles.playerActions}>
-                <div className={styles.navButtons}>
-                  <button 
-                    onClick={handlePrevEp} 
-                    disabled={currentEp <= 1}
-                    className={styles.navBtn}
-                  >
-                    PREV
-                  </button>
-                  <button 
-                    onClick={handleNextEp} 
-                    disabled={currentEp >= episodeData.totalEpisodes}
-                    className={styles.navBtn}
-                  >
-                    NEXT
-                  </button>
+              <div className={styles.playerControlsInner}>
+                <div className={styles.epMeta}>
+                  <span className={styles.epCount}>EPISODE {currentEp}</span>
+                  <h1 className={styles.epTitle}>
+                    {decodeEntities(currentEpisode?.title || `Episode ${currentEp}`)}
+                  </h1>
                 </div>
 
-                <div className={styles.divider} />
-
-                <div className={styles.controlsGroup}>
-                  <div className={styles.toggleGroup}>
+                <div className={styles.playerActions}>
+                  <div className={styles.navButtons}>
                     <button 
-                      className={`${styles.toggleBtn} ${activeSource === 'sub' ? styles.active : ''}`}
-                      onClick={() => setActiveSource('sub')}
+                      onClick={handlePrevEp} 
+                      disabled={currentEp <= 1}
+                      className={styles.navBtn}
                     >
-                      SUB
+                      PREV
                     </button>
                     <button 
-                      className={`${styles.toggleBtn} ${activeSource === 'dub' ? styles.active : ''}`}
-                      onClick={() => setActiveSource('dub')}
+                      onClick={handleNextEp} 
+                      disabled={currentEp >= episodeData.totalEpisodes}
+                      className={styles.navBtn}
                     >
-                      DUB
+                      NEXT
                     </button>
                   </div>
 
-                  <div className={styles.serverToggle}>
-                    <button 
-                      className={`${styles.serverBtn} ${activeServer === 'primary' ? styles.active : ''}`}
-                      onClick={() => setActiveServer('primary')}
-                    >
-                      PRIMARY
-                    </button>
-                    <button 
-                      className={`${styles.serverBtn} ${activeServer === 'ani' ? styles.active : ''}`}
-                      onClick={() => setActiveServer('ani')}
-                    >
-                      MIRROR
-                    </button>
+                  <div className={styles.divider} />
+
+                  <div className={styles.controlsGroup}>
+                    <div className={styles.toggleGroup}>
+                      <button 
+                        className={`${styles.toggleBtn} ${activeSource === 'sub' ? styles.active : ''}`}
+                        onClick={() => setActiveSource('sub')}
+                      >
+                        SUB
+                      </button>
+                      <button 
+                        className={`${styles.toggleBtn} ${activeSource === 'dub' ? styles.active : ''}`}
+                        onClick={() => setActiveSource('dub')}
+                      >
+                        DUB
+                      </button>
+                    </div>
+
+                    <div className={styles.serverToggle}>
+                      <button 
+                        className={`${styles.serverBtn} ${activeServer === 'primary' ? styles.active : ''}`}
+                        onClick={() => setActiveServer('primary')}
+                      >
+                        PRIMARY
+                      </button>
+                      <button 
+                        className={`${styles.serverBtn} ${activeServer === 'ani' ? styles.active : ''}`}
+                        onClick={() => setActiveServer('ani')}
+                      >
+                        MIRROR
+                      </button>
+                    </div>
                   </div>
                 </div>
-
               </div>
+
+              {anime.anime.status.toLowerCase().includes('airing') && currentEp === episodeData.totalEpisodes && (
+                <div className={styles.timerWrapper}>
+                  <NextEpisodeTimer animeName={anime.anime.name} />
+                </div>
+              )}
             </div>
 
             <div className={styles.animeDetails}>

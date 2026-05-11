@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Home, Search, Compass, Bookmark, User, X } from 'lucide-react';
+import { Home, Search, Calendar, Bookmark, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -18,7 +18,7 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'home', path: '/', icon: Home },
-    { id: 'browse', path: '/explore', icon: Compass },
+    { id: 'schedule', path: '/schedule', icon: Calendar },
     { id: 'search', path: '#search', icon: Search },
     { id: 'list', path: '/watchlist', icon: Bookmark },
   ];

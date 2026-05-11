@@ -62,6 +62,8 @@ export interface AnimeDetail {
     status: string;
     rating?: string;
     episodes: { sub: number | null; dub: number | null };
+    malId?: string;
+    alId?: string;
   };
   seasons: any[];
   related: AnimeCard[];
@@ -119,4 +121,7 @@ export const animeApi = {
 
   getType: (name: string, page = 1) =>
     apiFetch<{ type: string; animes: AnimeCard[] }>(`${BASE}/type/${name}?page=${page}`),
+
+  getSchedule: (day: string) =>
+    apiFetch<any[]>(`${BASE}/schedule?day=${day}`),
 };
