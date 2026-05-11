@@ -102,7 +102,6 @@ const TopAnime = () => {
                   <h3 className={styles.animeTitle}>{anime.name}</h3>
                   <div className={styles.episodesMeta}>
                     {anime.episodes?.sub != null && <span className={styles.sub}>SUB {anime.episodes.sub}</span>}
-                    {anime.episodes?.sub != null && anime.episodes?.dub != null && <span className={styles.divider}>|</span>}
                     {anime.episodes?.dub != null && <span className={styles.dub}>DUB {anime.episodes.dub}</span>}
                     {(anime.episodes == null || (anime.episodes.sub == null && anime.episodes.dub == null)) && <span className={styles.type}>{anime.type ?? 'TV SERIES'}</span>}
                   </div>
