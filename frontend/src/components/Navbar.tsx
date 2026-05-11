@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Home, Search, Calendar, Bookmark, User, X } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -10,6 +10,7 @@ import styles from './Navbar.module.css';
 const Navbar = () => {
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<AnimeCard[]>([]);
   const [searching, setSearching] = useState(false);
@@ -20,20 +21,28 @@ const Navbar = () => {
     { id: 'home', path: '/', icon: Home },
     { id: 'schedule', path: '/schedule', icon: Calendar },
     { id: 'search', path: '#search', icon: Search },
-    { id: 'list', path: '/watchlist', icon: Bookmark },
+    { id: 'switch', path: '#switch', icon: ArrowRightLeft },
   ];
 
   const activeTab = searchOpen 
     ? 'search' 
+    : switchOpen
+    ? 'switch'
     : navItems.find(item => location.pathname === item.path)?.id || 'home';
 
   const handleSearchClick = () => {
+    if (switchOpen) setSwitchOpen(false);
     if (searchOpen) {
       closeSearch();
     } else {
       setSearchOpen(true);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
+  };
+
+  const handleSwitchClick = () => {
+    if (searchOpen) closeSearch();
+    setSwitchOpen(!switchOpen);
   };
 
   const closeSearch = () => {
@@ -66,35 +75,54 @@ const Navbar = () => {
   return (
     <>
       <div className={styles.navbarContainer}>
-        <Link to="/" className={styles.logoCapsule} onClick={closeSearch}>
+        <Link to="/" className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); }}>
           <span className={styles.logoKanji}>霊</span>
         </Link>
 
         <nav className={styles.navCapsule}>
-          {navItems.map((item) => item.id !== 'search' ? (
-            <Link
-              key={item.id}
-              to={item.path}
-              className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
-              onClick={closeSearch}
-            >
-              {activeTab === item.id && (
-                <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
-              )}
-              <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
-            </Link>
-          ) : (
-            <button
-              key={item.id}
-              className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
-              onClick={handleSearchClick}
-            >
-              {activeTab === item.id && (
-                <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
-              )}
-              <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
-            </button>
-          ))}
+          {navItems.map((item) => {
+            if (item.id === 'search') {
+              return (
+                <button
+                  key={item.id}
+                  className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
+                  onClick={handleSearchClick}
+                >
+                  {activeTab === item.id && (
+                    <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
+                </button>
+              );
+            }
+            if (item.id === 'switch') {
+              return (
+                <button
+                  key={item.id}
+                  className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
+                  onClick={handleSwitchClick}
+                >
+                  {activeTab === item.id && (
+                    <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
+                </button>
+              );
+            }
+            return (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
+                onClick={() => { closeSearch(); setSwitchOpen(false); }}
+              >
+                {activeTab === item.id && (
+                  <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+                )}
+                <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.accountCapsule}>
@@ -104,20 +132,58 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Search Overlay */}
+      {/* Overlays Backdrop */}
       <AnimatePresence>
-        {searchOpen && (
+        {(searchOpen || switchOpen) && (
           <motion.div
             key="backdrop"
             className={styles.searchBackdrop}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeSearch}
+            onClick={() => { closeSearch(); setSwitchOpen(false); }}
           />
         )}
       </AnimatePresence>
       
+      {/* Switch Overlay */}
+      <AnimatePresence>
+        {switchOpen && (
+          <motion.div
+            key="switch-overlay"
+            className={styles.switchOverlay}
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, x: '-50%' }}
+            transition={{ duration: 0.25 }}
+          >
+            <div className={styles.switchHeader}>
+              <h3>SELECT INTERFACE</h3>
+              <button className={styles.closeBtn} onClick={() => setSwitchOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className={styles.switchOptions}>
+              <button className={`${styles.switchBtn} ${styles.activeInterface}`} onClick={() => setSwitchOpen(false)}>
+                <div className={styles.interfaceIcon}>霊</div>
+                <div className={styles.interfaceInfo}>
+                  <h4>ANIME REIATSU</h4>
+                  <p>Current Interface</p>
+                </div>
+              </button>
+              <button className={styles.switchBtn} onClick={() => alert('New Cinema API pending. Provide the API details to proceed!')}>
+                <div className={styles.interfaceIcon}>🎬</div>
+                <div className={styles.interfaceInfo}>
+                  <h4>CINEMA</h4>
+                  <p>Movies & Web Series</p>
+                </div>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Search Overlay */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div

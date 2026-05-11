@@ -358,3 +358,100 @@
     top: 4.5rem;
   }
 }
+
+.switchOverlay {
+  position: fixed;
+  bottom: 6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(400px, 92vw);
+  background: rgba(15, 15, 15, 0.8);
+  border: 1px solid rgba(220, 201, 169, 0.12);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  z-index: 1100;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+}
+
+.switchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(220, 201, 169, 0.05);
+}
+
+.switchHeader h3 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--color-cream);
+  font-weight: 800;
+  letter-spacing: 0.1rem;
+  margin: 0;
+}
+
+.switchOptions {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.switchBtn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(220, 201, 169, 0.05);
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.switchBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(220, 201, 169, 0.2);
+}
+
+.switchBtn.activeInterface {
+  background: rgba(184, 58, 45, 0.1);
+  border-color: var(--accent);
+}
+
+.interfaceIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  color: var(--color-cream);
+}
+
+.activeInterface .interfaceIcon {
+  background: var(--accent);
+  color: white;
+}
+
+.interfaceInfo h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-cream);
+  margin: 0 0 0.2rem 0;
+}
+
+.interfaceInfo p {
+  font-size: 0.8rem;
+  color: rgba(220, 201, 169, 0.5);
+  margin: 0;
+}
