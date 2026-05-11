@@ -13,7 +13,7 @@ const AiringAnime = () => {
   useEffect(() => {
     animeApi.getHome()
       .then((data) => {
-        setAnimes((data.latestEpisodeAnimes || []).slice(0, 10));
+        setAnimes((data.latestEpisodeAnimes || []).slice(0, 24));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -25,7 +25,7 @@ const AiringAnime = () => {
     <section className={styles.section}>
       <div className={styles.header}>
         <div className={styles.accentBox}></div>
-        <h2 className={styles.title}>CURRENTLY AIRING</h2>
+        <h2 className={styles.title}>TOP AIRING</h2>
       </div>
 
       <div className={styles.grid}>
@@ -35,7 +35,7 @@ const AiringAnime = () => {
             ))
           : animes.map((anime, index) => (
             <motion.div
-              key={anime.id}
+              key={`${anime.id || 'anime'}-${index}`}
               className={styles.animeCard}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -55,13 +55,15 @@ const AiringAnime = () => {
                       <SmartImage src={anime.poster} alt={anime.name} className={styles.posterImg} draggable={false} />
                     </>
                   )}
-                  <div className={styles.episodeOverlay}>
-                    {anime.episodes.sub != null && <span>EPISODE {anime.episodes.sub}</span>}
-                  </div>
                 </div>
                 <div className={styles.info}>
                   <h3 className={styles.animeTitle}>{anime.name}</h3>
-                  <p className={styles.airingTime}>AIRING NOW</p>
+                  <div className={styles.episodesMeta}>
+                    {anime.episodes?.sub != null && <span className={styles.sub}>SUB {anime.episodes.sub}</span>}
+                    {anime.episodes?.sub != null && anime.episodes?.dub != null && <span className={styles.divider}>|</span>}
+                    {anime.episodes?.dub != null && <span className={styles.dub}>DUB {anime.episodes.dub}</span>}
+                    {(anime.episodes == null || (anime.episodes.sub == null && anime.episodes.dub == null)) && <span className={styles.type}>{anime.type || 'TV'}</span>}
+                  </div>
                 </div>
               </Link>
             </motion.div>

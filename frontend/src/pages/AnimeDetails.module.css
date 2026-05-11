@@ -566,3 +566,41 @@
     gap: 1.5rem 1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .container {
+    padding: 5rem 0.5rem 2rem;
+  }
+  
+  .detailsBox {
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .badges {
+    gap: 0.5rem;
+  }
+  
+  .badge {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.65rem;
+  }
+  
+  .posterWrapper {
+    max-width: 260px;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 0.75rem;
+  }
+  
+  .sectionHeaderLine h2 {
+    font-size: 1.4rem;
+  }
+}

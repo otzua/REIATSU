@@ -26,9 +26,23 @@
   --space-xl: 4rem;
 }
 
+@media (max-width: 1024px) {
+  :root {
+    --space-xl: 3rem;
+  }
+}
+
 @media (max-width: 768px) {
   :root {
     --space-lg: 1.5rem;
     --space-xl: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --space-md: 0.8rem;
+    --space-lg: 1.2rem;
+    --space-xl: 1.5rem;
   }
 }

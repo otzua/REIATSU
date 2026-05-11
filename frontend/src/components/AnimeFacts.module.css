@@ -80,6 +80,12 @@
 }
 
 /* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .factsSection {
+    padding: var(--space-lg);
+  }
+}
+
 @media (max-width: 768px) {
   .factsSection {
     padding: var(--space-md);
@@ -97,5 +103,20 @@
 
   .grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+    letter-spacing: 0.1rem;
+  }
+
+  .factCard {
+    padding: 1.5rem;
+  }
+
+  .factText {
+    font-size: 0.95rem;
   }
 }

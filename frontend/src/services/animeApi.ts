@@ -116,4 +116,7 @@ export const animeApi = {
 
   getEpisode: (id: string, num: number) => 
     apiFetch<EpisodeDetail>(`${BASE}/anime/${id}/ep/${num}`),
+
+  getType: (name: string, page = 1) =>
+    apiFetch<{ type: string; animes: AnimeCard[] }>(`${BASE}/type/${name}?page=${page}`),
 };

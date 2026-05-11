@@ -33,10 +33,12 @@ function buildImageCandidates(rawSrc: string): string[] {
 const SmartImage = ({ src, loading = 'lazy', decoding = 'async', onError, ...props }: SmartImageProps) => {
   const candidates = useMemo(() => buildImageCandidates(src), [src]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [prevSrc, setPrevSrc] = useState(src);
 
-  useEffect(() => {
+  if (src !== prevSrc) {
     setCurrentIndex(0);
-  }, [src]);
+    setPrevSrc(src);
+  }
 
   const currentSrc = candidates[currentIndex] ?? src;
 

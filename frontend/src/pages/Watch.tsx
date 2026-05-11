@@ -11,10 +11,13 @@ import styles from './Watch.module.css';
 const Watch = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const epParam = searchParams.get('ep');
+  
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [anime, setAnime] = useState<AnimeDetail | null>(null);
   const [episodeData, setEpisodeData] = useState<EpisodeData | null>(null);
-  const [currentEp, setCurrentEp] = useState(1);
+  const [currentEp, setCurrentEp] = useState(epParam ? parseInt(epParam, 10) : 1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeSource, setActiveSource] = useState<'sub' | 'dub'>('sub');

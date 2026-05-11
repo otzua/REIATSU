@@ -52,9 +52,8 @@ const HalftoneWave: React.FC = () => {
     window.addEventListener('touchend', clearInteraction);
 
     const draw = () => {
-      // Swapped for Dark Theme
-      ctx.fillStyle = '#1A1A1A'; // Black Background
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Clear instead of fill to prevent subpixel bleeding
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.fillStyle = '#DCC9A9'; // Cream Squares
       const spacing = 30; // Increased spacing = significantly fewer draw calls
@@ -125,15 +124,15 @@ const HalftoneWave: React.FC = () => {
       style={{
         display: 'block',
         position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: '#000',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'transparent',
         margin: 0,
         padding: 0,
         overflow: 'hidden',
-        zIndex: -1
+        zIndex: -1,
+        pointerEvents: 'none'
       }}
     />
   );

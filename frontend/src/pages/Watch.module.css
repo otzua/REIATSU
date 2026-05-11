@@ -681,3 +681,48 @@
     font-size: 1.5rem;
   }
 }
+
+@media (max-width: 480px) {
+  .container {
+    padding: 6rem 0.5rem 2rem;
+  }
+  
+  .playerControls {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .epTitle {
+    font-size: 1.1rem;
+  }
+  
+  .animeDetails {
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .animeTitle {
+    font-size: 1.2rem;
+  }
+  
+  .controlsGroup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .toggleGroup, .serverToggle {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .toggleBtn, .serverBtn {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .sidebar {
+    height: 500px;
+    border-radius: 20px;
+  }
+}

@@ -270,6 +270,12 @@
 }
 
 /* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .navbarContainer {
+    padding: 0 2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .navbarContainer {
     top: 1rem;
@@ -317,5 +323,38 @@
 
   .searchOverlay {
     top: 5.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbarContainer {
+    padding: 0 1rem;
+  }
+
+  .logoCapsule,
+  .accountCapsule {
+    height: 44px;
+    width: 44px;
+    border-radius: 14px;
+  }
+
+  .logoKanji {
+    font-size: 1.5rem;
+  }
+
+  .navCapsule {
+    bottom: 1.5rem;
+    min-width: 240px;
+    height: 54px;
+  }
+
+  .navItem {
+    width: 40px;
+    height: 40px;
+  }
+
+  .searchOverlay {
+    width: calc(100% - 2rem);
+    top: 4.5rem;
   }
 }

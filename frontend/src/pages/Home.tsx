@@ -1,10 +1,10 @@
 import HalftoneWave from '../components/HalftoneWave';
 import Hero from '../components/Hero';
-import AnimeFacts from '../components/AnimeFacts';
-import NewReleases from '../components/NewReleases';
-import TheBigThree from '../components/TheBigThree';
+import ContinueWatching from '../components/ContinueWatching';
 import AiringAnime from '../components/AiringAnime';
+import TopMovies from '../components/TopMovies';
 import TopAnime from '../components/TopAnime';
+import AnimeFacts from '../components/AnimeFacts';
 import styles from './Home.module.css';
 
 const Home = () => {
@@ -13,9 +13,9 @@ const Home = () => {
       <HalftoneWave />
       <div className={styles.content}>
         <Hero />
+        <ContinueWatching />
         <AiringAnime />
-        <NewReleases />
-        <TheBigThree />
+        <TopMovies />
         <TopAnime />
         <AnimeFacts />
       </div>

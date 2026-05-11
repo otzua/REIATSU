@@ -141,25 +141,42 @@
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-  border-top: 1px solid rgba(78, 104, 81, 0.1);
+  border-top: 1px solid rgba(220, 201, 169, 0.1);
   border-radius: 0 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .animeTitle {
   color: var(--color-cream);
   font-size: 1.05rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.airingTime {
-  color: #4E6851;
-  font-size: 0.8rem;
+.episodesMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--font-heading);
   font-weight: 800;
   letter-spacing: 0.05rem;
+}
+
+.sub, .dub, .type {
+  color: var(--color-cream);
+  opacity: 0.8;
+}
+
+.divider {
+  color: rgba(220, 201, 169, 0.3);
 }
 
 .skeleton {
@@ -173,6 +190,12 @@
   100% { opacity: 0.5; }
 }
 
+@media (max-width: 1024px) {
+  .grid {
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .section {
     padding: var(--space-md);
@@ -181,7 +204,29 @@
     font-size: 2.2rem;
   }
   .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  .header {
+    margin-bottom: 2rem;
+  }
+  .grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 0.8rem;
+  }
+  .accentBox {
+    height: 32px;
+  }
+  .info {
+    padding: 0.8rem;
+  }
+  .animeTitle {
+    font-size: 0.95rem;
   }
 }

@@ -1,4 +1,4 @@
-.releasesSection {
+.section {
   width: 100%;
   padding: var(--space-xl);
   margin-top: 2rem;
@@ -36,7 +36,6 @@
 .animeCard {
   background: rgba(26, 26, 26, 0.4);
   border-radius: 20px;
-  /* Removed overflow: hidden so glow can bleed */
   border: 1px solid rgba(220, 201, 169, 0.05);
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
   transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
@@ -64,7 +63,6 @@
   align-items: center;
   justify-content: center;
   border-radius: 20px 20px 0 0;
-  /* Removed overflow hidden from here too */
 }
 
 .posterGlow {
@@ -103,47 +101,10 @@
   z-index: 1;
 }
 
-.episodeOverlay {
-  position: absolute;
-  bottom: 0.5rem;
-  left: 0.5rem;
-  display: flex;
-  gap: 0.3rem;
-}
-
-.episodeOverlay span {
-  font-size: 0.75rem;
-  font-family: var(--font-heading);
-  background: rgba(15, 15, 15, 0.5);
-  color: var(--color-cream);
-  padding: 0.15rem 0.5rem;
-  border-radius: 5px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(220, 201, 169, 0.1);
-}
-
 .skeleton {
   background: linear-gradient(90deg, rgba(220,201,169,0.04) 25%, rgba(220,201,169,0.09) 50%, rgba(220,201,169,0.04) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-}
-
-.skeletonLine {
-  border-radius: 6px;
-  background: rgba(220, 201, 169, 0.08);
-  animation: shimmer 1.5s infinite;
-}
-
-.skeletonTitle {
-  height: 14px;
-  width: 80%;
-  margin-bottom: 0.4rem;
-}
-
-.skeletonEp {
-  height: 10px;
-  width: 40%;
 }
 
 @keyframes shimmer {
@@ -162,43 +123,67 @@
   font-family: var(--font-heading);
   font-size: 0.8rem;
   box-shadow: 0 4px 10px rgba(184, 58, 45, 0.4);
+  z-index: 2;
 }
 
 .info {
-  padding: 1.2rem;
+  padding: 1.25rem;
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   border-top: 1px solid rgba(220, 201, 169, 0.1);
   border-radius: 0 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   position: relative;
   z-index: 2;
 }
 
 .animeTitle {
   color: var(--color-cream);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.episode {
-  color: rgba(220, 201, 169, 0.5);
-  font-size: 0.9rem;
+.episodesMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: 0.05rem;
+}
+
+.sub, .dub, .type {
+  color: var(--color-cream);
+  opacity: 0.8;
+}
+
+.divider {
+  color: rgba(220, 201, 169, 0.3);
 }
 
 /* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .grid {
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .releasesSection {
+  .section {
     padding: var(--space-md);
     margin-top: 1rem;
   }
 
   .title {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .header {
@@ -206,8 +191,8 @@
   }
 
   .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.2rem;
   }
 
   .accentBox {
@@ -215,3 +200,18 @@
   }
 }
 
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+  .info {
+    padding: 0.8rem;
+  }
+  .animeTitle {
+    font-size: 0.95rem;
+  }
+}

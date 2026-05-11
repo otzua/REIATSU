@@ -4,62 +4,19 @@ import { Link } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
-import styles from './TopAnime.module.css';
+import styles from './TopMovies.module.css';
 
-const TopAnime = () => {
+const TopMovies = () => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const LEGENDARY_IDS = [
-    'one-piece-odmau',
-    'naruto-shippuden-c8gov',
-    'fullmetal-alchemist-brotherhood-9s0fl',
-    'hunter-x-hunter-tjlki',
-    'death-note-fc8mq',
-    'attack-on-titan-final-season-part-2-bures',
-    'code-geass-lelouch-of-the-rebellion-mtskz',
-    'cowboy-bebop-kb7hu',
-    'demon-slayer-kimetsu-no-yaiba-rzepv',
-    'neon-genesis-evangelion-d0uqe',
-    'dragon-ball-z-3gzan',
-    'chainsaw-man-efeig'
-  ];
-
   useEffect(() => {
-    let mounted = true;
-    const fetchLegends = async () => {
-      try {
-        const promises = LEGENDARY_IDS.map(id => animeApi.getAnime(id).catch(() => null));
-        const details = await Promise.all(promises);
-        
-        const valid = details
-          .filter(d => d && d.anime)
-          .map(d => ({
-            id: d!.anime.id,
-            name: d!.anime.name,
-            jname: null,
-            poster: d!.anime.poster,
-            type: d!.anime.type,
-            episodes: d!.anime.episodes
-          }));
-          
-        if (mounted) {
-           if (valid.length > 0) {
-             setAnimes(valid);
-           } else {
-             const data = await animeApi.getHome();
-             setAnimes((data.top10Animes?.month || data.topUpcomingAnimes || []).slice(0, 12));
-           }
-        }
-      } catch (error) {
-        console.error('Failed to fetch legends', error);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    fetchLegends();
-    return () => { mounted = false; };
+    animeApi.getType('movie')
+      .then((data) => {
+        setAnimes((data.animes || []).slice(0, 12));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   if (!loading && animes.length === 0) return null;
@@ -68,13 +25,13 @@ const TopAnime = () => {
     <section className={styles.section}>
       <div className={styles.header}>
         <div className={styles.accentBox}></div>
-        <h2 className={styles.title}>ALL-TIME LEGENDS</h2>
+        <h2 className={styles.title}>TOP MOVIES</h2>
       </div>
 
       <div className={styles.grid}>
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '350px' }} />
+              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '300px' }} />
             ))
           : animes.map((anime, index) => (
             <motion.div
@@ -83,14 +40,12 @@ const TopAnime = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ y: -10, scale: 1.05, transition: { duration: 0.15, ease: "easeOut" } }}
+              transition={{ delay: index * 0.04 }}
+              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
             >
               <Link to={`/anime/${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
-                  <div className={styles.rankBadge}>
-                    {index + 1}
-                  </div>
+                  <div className={styles.badge}>MOVIE</div>
                   {anime.poster && (
                     <>
                       <SmartImage src={anime.poster} aria-hidden="true" className={styles.posterGlow} draggable={false} />
@@ -104,7 +59,7 @@ const TopAnime = () => {
                     {anime.episodes?.sub != null && <span className={styles.sub}>SUB {anime.episodes.sub}</span>}
                     {anime.episodes?.sub != null && anime.episodes?.dub != null && <span className={styles.divider}>|</span>}
                     {anime.episodes?.dub != null && <span className={styles.dub}>DUB {anime.episodes.dub}</span>}
-                    {(anime.episodes == null || (anime.episodes.sub == null && anime.episodes.dub == null)) && <span className={styles.type}>{anime.type ?? 'TV SERIES'}</span>}
+                    {(anime.episodes == null || (anime.episodes.sub == null && anime.episodes.dub == null)) && <span className={styles.type}>MOVIE</span>}
                   </div>
                 </div>
               </Link>
@@ -115,4 +70,4 @@ const TopAnime = () => {
   );
 };
 
-export default TopAnime;
+export default TopMovies;

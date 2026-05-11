@@ -1,5 +1,5 @@
 .homeContainer {
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
   margin: 0;
@@ -9,6 +9,18 @@
 .content {
   position: relative;
   padding-top: 100px; /* Space for the floating navbar */
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding-top: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding-top: 40px;
+  }
 }
 
 .loading, .error {

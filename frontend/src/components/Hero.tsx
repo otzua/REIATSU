@@ -17,7 +17,7 @@ const Hero = () => {
     animeApi.getHome()
       .then((data) => {
         console.log("REIATSU: Home data:", data);
-        if (data.spotlightAnimes?.length) setSlides(data.spotlightAnimes.slice(0, 6));
+        if (data.spotlightAnimes?.length) setSlides(data.spotlightAnimes.slice(0, 15));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -65,8 +65,8 @@ const Hero = () => {
             else if (info.offset.x > 50) prevSlide();
           }}
         >
-          {slides.map((slide) => (
-            <div key={slide.id} className={styles.slide}>
+          {slides.map((slide, index) => (
+            <div key={`${slide.id || 'slide'}-${index}`} className={styles.slide}>
               <Link to={`/anime/${slide.id}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
                 <SmartImage
                   src={slide.poster}
