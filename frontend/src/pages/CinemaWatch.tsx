@@ -49,6 +49,29 @@ const CinemaWatch = () => {
           setActiveEpisode(1);
         }
         
+        // Save to Continue Watching
+        const cwItem = {
+          id: data.id,
+          title: data.title,
+          poster: data.imageUrl,
+          mediaType: data.mediaType,
+          season: data.mediaType === 'tv' ? 1 : undefined,
+          episode: data.mediaType === 'tv' ? 1 : undefined,
+          timestamp: Date.now()
+        };
+        
+        const existingRaw = localStorage.getItem('reiatsu_cinema_continue_watching');
+        let history = [];
+        try {
+          history = existingRaw ? JSON.parse(existingRaw) : [];
+          if (!Array.isArray(history)) history = [];
+        } catch { history = []; }
+
+        // Remove if exists and add to front
+        history = history.filter((item: any) => item.id !== data.id);
+        history.unshift(cwItem);
+        localStorage.setItem('reiatsu_cinema_continue_watching', JSON.stringify(history.slice(0, 15)));
+        
         setLoading(false);
       })
       .catch((err) => {
@@ -57,6 +80,31 @@ const CinemaWatch = () => {
         setLoading(false);
       });
   }, [id, mediaTypeParam]);
+
+  useEffect(() => {
+    if (movie && movie.mediaType === 'tv') {
+      const existingRaw = localStorage.getItem('reiatsu_cinema_continue_watching');
+      try {
+        let history = existingRaw ? JSON.parse(existingRaw) : [];
+        if (!Array.isArray(history)) history = [];
+        
+        const index = history.findIndex((item: any) => item.id === movie.id);
+        if (index !== -1) {
+          history[index].season = activeSeason;
+          history[index].episode = activeEpisode;
+          history[index].timestamp = Date.now();
+          
+          // Move to front
+          const [updatedItem] = history.splice(index, 1);
+          history.unshift(updatedItem);
+          
+          localStorage.setItem('reiatsu_cinema_continue_watching', JSON.stringify(history));
+        }
+      } catch (e) {
+        console.error('History update error:', e);
+      }
+    }
+  }, [activeSeason, activeEpisode, movie]);
 
   if (loading) {
     return (

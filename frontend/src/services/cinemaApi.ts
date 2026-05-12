@@ -126,4 +126,34 @@ export const cinemaApi = {
       overview: m.overview || '',
     }));
   },
+
+  // Get top rated movies
+  getTopRated: async (): Promise<CinemaMovie[]> => {
+    const data = await tmdbFetch<any>('/movie/top_rated');
+    return (data.results || []).map((m: any) => ({
+      id: m.id.toString(),
+      title: m.title || m.original_title || 'Untitled Movie',
+      imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+      backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
+      mediaType: 'movie',
+      releaseDate: m.release_date || '',
+      rating: m.vote_average || 0,
+      overview: m.overview || '',
+    }));
+  },
+
+  // Get upcoming movies
+  getUpcoming: async (): Promise<CinemaMovie[]> => {
+    const data = await tmdbFetch<any>('/movie/upcoming');
+    return (data.results || []).map((m: any) => ({
+      id: m.id.toString(),
+      title: m.title || m.original_title || 'Untitled Movie',
+      imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+      backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
+      mediaType: 'movie',
+      releaseDate: m.release_date || '',
+      rating: m.vote_average || 0,
+      overview: m.overview || '',
+    }));
+  },
 };

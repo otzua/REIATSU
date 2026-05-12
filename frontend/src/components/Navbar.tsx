@@ -16,7 +16,8 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<any[]>([]);
+  const [animeResults, setAnimeResults] = useState<any[]>([]);
+  const [cinemaResults, setCinemaResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,6 +51,12 @@ const Navbar = () => {
         e.preventDefault();
         setSearchOpen(true);
         setTimeout(() => inputRef.current?.focus(), 100);
+      } else if (e.key === '/' && searchOpen) {
+        e.preventDefault();
+        closeSearch();
+      } else if ((e.key === 's' || e.key === 'S') && !searchOpen && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        setSwitchOpen(!switchOpen);
       } else if (e.key === 'Escape') {
         closeSearch();
         setSwitchOpen(false);
@@ -68,35 +75,36 @@ const Navbar = () => {
   const closeSearch = () => {
     setSearchOpen(false);
     setQuery('');
-    setResults([]);
+    setAnimeResults([]);
+    setCinemaResults([]);
   };
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     
     if (!query.trim()) {
-      setTimeout(() => setResults([]), 0);
+      setAnimeResults([]);
+      setCinemaResults([]);
       return;
     }
 
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        if (isCinema) {
-          const data = await cinemaApi.search(query);
-          setResults(data.slice(0, 8));
-        } else {
-          const data = await animeApi.search(query);
-          setResults((data as { animes: AnimeCard[] }).animes?.slice(0, 6) ?? []);
-        }
+        const [animeData, cinemaData] = await Promise.all([
+          animeApi.search(query).catch(() => ({ animes: [] })),
+          cinemaApi.search(query).catch(() => [])
+        ]);
+
+        setAnimeResults((animeData as { animes: AnimeCard[] }).animes?.slice(0, 4) ?? []);
+        setCinemaResults(cinemaData.slice(0, 4));
       } catch (err) {
         console.error('Search error:', err);
-        setResults([]);
       } finally {
         setSearching(false);
       }
     }, 400);
-  }, [query, isCinema]);
+  }, [query]);
 
   return (
     <>
@@ -178,13 +186,16 @@ const Navbar = () => {
           <motion.div
             key="switch-overlay"
             className={styles.switchOverlay}
-            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            initial={{ opacity: 0, y: 20, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: -20, x: '-50%' }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             <div className={styles.switchHeader}>
-              <h3>SELECT INTERFACE</h3>
+              <div>
+                <h3>SELECT INTERFACE</h3>
+                <div style={{ fontSize: '0.6rem', color: 'rgba(220, 201, 169, 0.3)', marginTop: '0.2rem', fontWeight: 700 }}>PRESS 'S' TO TOGGLE</div>
+              </div>
               <button className={styles.closeBtn} onClick={() => setSwitchOpen(false)}>
                 <X size={20} />
               </button>
@@ -215,71 +226,167 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* Search Overlay */}
+      {/* Search Overlay (Command Palette) */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
-            key="overlay"
+            key="search-overlay"
             className={styles.searchOverlay}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.25 }}
+            initial={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             <div className={styles.searchBar}>
-              <Search size={20} className={styles.searchIcon} />
+              <Search size={24} className={styles.searchIcon} />
               <input
                 ref={inputRef}
                 className={styles.searchInput}
-                placeholder={isCinema ? "Search movies & series..." : "Search anime..."}
+                placeholder="Search everything..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
+              <div className={styles.keyBadge} style={{ opacity: query ? 0 : 0.5, fontSize: '0.6rem', padding: '0.2rem 0.5rem' }}>ESC TO CLOSE</div>
               <button className={styles.closeBtn} onClick={closeSearch}>
                 <X size={20} />
               </button>
             </div>
 
-            {(results.length > 0 || searching) && (
+            {(animeResults.length > 0 || cinemaResults.length > 0 || searching) ? (
               <div className={styles.searchResults}>
-                {searching && <div className={styles.searchHint}>Searching...</div>}
-                {results.map((item) => {
-                  const isCinemaItem = 'title' in item;
-                  const id = item.id;
-                  const name = isCinemaItem ? item.title : item.name;
-                  const poster = isCinemaItem ? item.imageUrl : item.poster;
-                  const type = isCinemaItem ? item.mediaType : (item.type ?? 'Anime');
-                  const releaseYear = isCinemaItem && item.releaseDate ? item.releaseDate.split('-')[0] : '';
-                  const link = isCinemaItem 
-                    ? `/cinema/details/${id}?type=${item.mediaType}`
-                    : `/anime/${id}`;
-
-                  return (
-                    <Link 
-                      key={id + (isCinemaItem ? 'cinema' : 'anime')} 
-                      to={link} 
-                      className={styles.resultItem}
-                      onClick={closeSearch}
-                    >
-                      {poster && (
-                        <SmartImage src={poster} alt={name} className={styles.resultThumb} />
-                      )}
-                      <div className={styles.resultInfo}>
-                        <span className={styles.resultName}>{name}</span>
-                        <div className={styles.resultMetaWrapper} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span className={styles.resultMeta} style={{ textTransform: 'uppercase' }}>{type}</span>
-                          {releaseYear && <span className={styles.resultYear} style={{ opacity: 0.5, fontSize: '0.85em' }}>{releaseYear}</span>}
-                        </div>
+                {searching && (
+                  <div className={styles.searchHint}>Searching for "{query}"...</div>
+                )}
+                
+                {/* Primary Section Results */}
+                {isCinema ? (
+                  <>
+                    {cinemaResults.length > 0 && (
+                      <div className={styles.searchSection}>
+                        <div className={styles.sectionLabel}>Cinema Results</div>
+                        {cinemaResults.map((item) => {
+                          const releaseYear = item.releaseDate ? item.releaseDate.split('-')[0] : '';
+                          return (
+                            <Link 
+                              key={item.id + 'cinema'} 
+                              to={`/cinema/details/${item.id}?type=${item.mediaType}`} 
+                              className={styles.resultItem}
+                              onClick={closeSearch}
+                            >
+                              {item.imageUrl && (
+                                <SmartImage src={item.imageUrl} alt={item.title} className={styles.resultThumb} />
+                              )}
+                              <div className={styles.resultInfo}>
+                                <span className={styles.resultName}>{item.title}</span>
+                                <div className={styles.resultMetaWrapper}>
+                                  <span className={styles.resultMeta}>{item.mediaType}</span>
+                                  {releaseYear && <span className={styles.resultYear}>{releaseYear}</span>}
+                                </div>
+                              </div>
+                              <div className={styles.keyboardHint}>
+                                <span>Open</span>
+                                <span className={styles.keyBadge}>↵</span>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                    )}
+                    
+                    {animeResults.length > 0 && (
+                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
+                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From the Anime Section</div>
+                        {animeResults.map((item) => (
+                          <Link 
+                            key={item.id + 'anime'} 
+                            to={`/anime/${item.id}`} 
+                            className={styles.resultItem}
+                            onClick={closeSearch}
+                            style={{ opacity: 0.7 }}
+                          >
+                            {item.poster && (
+                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
+                            )}
+                            <div className={styles.resultInfo}>
+                              <span className={styles.resultName}>{item.name}</span>
+                              <div className={styles.resultMetaWrapper}>
+                                <span className={styles.resultMeta}>{item.type ?? 'Anime'}</span>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {animeResults.length > 0 && (
+                      <div className={styles.searchSection}>
+                        <div className={styles.sectionLabel}>Anime Results</div>
+                        {animeResults.map((item) => (
+                          <Link 
+                            key={item.id + 'anime'} 
+                            to={`/anime/${item.id}`} 
+                            className={styles.resultItem}
+                            onClick={closeSearch}
+                          >
+                            {item.poster && (
+                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
+                            )}
+                            <div className={styles.resultInfo}>
+                              <span className={styles.resultName}>{item.name}</span>
+                              <div className={styles.resultMetaWrapper}>
+                                <span className={styles.resultMeta}>{item.type ?? 'Anime'}</span>
+                              </div>
+                            </div>
+                            <div className={styles.keyboardHint}>
+                              <span>Open</span>
+                              <span className={styles.keyBadge}>↵</span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
 
-            {!searching && query && results.length === 0 && (
-              <div className={styles.searchHint}>No results for "{query}"</div>
-            )}
+                    {cinemaResults.length > 0 && (
+                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
+                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From the Cinema Section</div>
+                        {cinemaResults.map((item) => {
+                          const releaseYear = item.releaseDate ? item.releaseDate.split('-')[0] : '';
+                          return (
+                            <Link 
+                              key={item.id + 'cinema'} 
+                              to={`/cinema/details/${item.id}?type=${item.mediaType}`} 
+                              className={styles.resultItem}
+                              onClick={closeSearch}
+                              style={{ opacity: 0.7 }}
+                            >
+                              {item.imageUrl && (
+                                <SmartImage src={item.imageUrl} alt={item.title} className={styles.resultThumb} />
+                              )}
+                              <div className={styles.resultInfo}>
+                                <span className={styles.resultName}>{item.title}</span>
+                                <div className={styles.resultMetaWrapper}>
+                                  <span className={styles.resultMeta}>{item.mediaType}</span>
+                                  {releaseYear && <span className={styles.resultYear}>{releaseYear}</span>}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : query && !searching ? (
+              <div className={styles.searchResults}>
+                <div className={styles.emptyState}>
+                  <Search size={48} className={styles.emptyIcon} />
+                  <span className={styles.emptyText}>No results found for "{query}"</span>
+                </div>
+              </div>
+            ) : null}
           </motion.div>
         )}
       </AnimatePresence>
