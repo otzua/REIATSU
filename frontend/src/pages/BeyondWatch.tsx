@@ -67,7 +67,7 @@ const BeyondWatch = () => {
           backBufferLength: 90
         });
         
-        hls.on(Hls.Events.ERROR, (event, data) => {
+        hls.on(Hls.Events.ERROR, (_, data) => {
           console.error('HLS Error:', data);
           if (data.fatal) {
             switch (data.type) {
@@ -237,15 +237,14 @@ const BeyondWatch = () => {
               <SmartImage src={video.thumbnail} aria-hidden="true" className={styles.playerGlow} />
               <div ref={playerWrapperRef} className={styles.videoWrapper}>
                 {activeStream ? (
-                  <video
-                    ref={videoRef}
-                    className={styles.iframe}
-                    controls
-                    autoPlay
-                    poster={video.thumbnail}
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                  />
+                    <video
+                      ref={videoRef}
+                      className={styles.iframe}
+                      controls
+                      autoPlay
+                      poster={video.thumbnail}
+                      crossOrigin="anonymous"
+                    />
                 ) : (
                   <iframe
                     src={`https://hanime.tv/embed/${video.id}`}
