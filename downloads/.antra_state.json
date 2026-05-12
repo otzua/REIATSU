@@ -1,0 +1,10 @@
+{
+  "FAILED:isrc:usl4q1960964": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:title_artist:the christmas comet:jim sharkey": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:title_artist_album:the christmas comet:jim sharkey:a lovely day": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:title_artists:the christmas comet:jim sharkey": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:isrc:usug11904206": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:title_artist:blinding lights:the weeknd": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:title_artist_album:blinding lights:the weeknd:blinding lights  single": "[Amazon] All mirrors failed. Last error: API error 401",
+  "FAILED:title_artists:blinding lights:the weeknd": "[Amazon] All mirrors failed. Last error: API error 401"
+}

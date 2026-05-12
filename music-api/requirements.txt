@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+spotipy
+spotdl
+yt-dlp
+python-dotenv
+aiohttp

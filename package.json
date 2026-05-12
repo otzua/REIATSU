@@ -3,9 +3,10 @@
   "private": true,
   "scripts": {
     "dev:api": "cd anime-api && npm run dev",
-    "dev:backend": "npm run dev:api",
+    "dev:music": "cd music-api && python3 main.py",
+    "dev:backend": "npm run dev:api && npm run dev:music",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:frontend\""
+    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:music\" \"npm run dev:frontend\""
   },
   "dependencies": {
     "concurrently": "^9.2.1"
