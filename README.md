@@ -1,12 +1,13 @@
-# REIATSU (霊圧)
+# REIATSU (霊圧) - Open Source Multimedia Platform
 
 <div align="center">
   <img src="./reiatsu_banner_1778080050417.png" alt="REIATSU Banner" width="100%">
   <br />
-  <p><i>A high-performance, self-hosted multimedia streaming platform built with a brutalist digital aesthetic.</i></p>
+  <p><i>The ultimate open-source, self-hosted streaming service for Anime, Movies, and Music.</i></p>
   
   ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
   ![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Vite%20%7C%20TS-blue?style=for-the-badge)
+  ![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red?style=for-the-badge)
   ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 </div>
 
@@ -14,74 +15,75 @@
 
 ## 🌌 The Vision | ビジョン
 
-Reiatsu is designed for speed, stability, and a unique visual identity. It moves away from generic streaming layouts, utilizing a high-contrast "Vintage Digital" aesthetic inspired by classic poster design and halftone printing.
+**Reiatsu** is an open-source multimedia engine designed for speed, privacy, and aesthetic dominance. It provides a unified, self-hosted platform for streaming **Anime**, **Movies**, and **Music** without the bloat of corporate trackers or restrictive interfaces.
 
-## 🚀 Features | 特徴
+Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the act of consumption into an interactive experience.
 
-- **Tri-Interface System**: Seamlessly switch between **Anime**, **Cinema**, and **Music** interfaces.
-- **Interactive Halftone Engine**: A custom-built Canvas background with mouse-reactive wave interference patterns.
-- **Neo-Vintage UI**: A premium dark theme using a Pantone-inspired color palette (`#1A1A1A` and `#DCC9A9`).
-- **High-Performance Streaming**: Optimized frontend logic designed for zero-lag interactions.
-- **Unified Command Palette**: Global search (press `/`) that scans across anime and cinema databases.
+## 🚀 Key Features | 特徴
+
+- **Open Source & Transparent**: 100% open source. Audit the code, self-host the data, and contribute to the evolution.
+- **Tri-Interface Ecosystem**: A single application for three distinct worlds:
+  - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
+  - **映 CINEMA**: A cinematic gateway for movies and TV series.
+  - **音 MUSIC**: A high-fidelity, aesthetic music experience (currently being rebuilt).
+- **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
+- **Unified Command Palette**: Press `/` to search across all media types instantly.
+- **Self-Hosted Privacy**: No telemetry, no trackers. You own your watch history and your data.
 
 ## 🛠️ Tech Stack | 技術スタック
 
 - **Frontend**: React 19, Vite, TypeScript, Framer Motion
-- **Anime Backend**: Node.js, Hono, Scrapers (Anime-API)
-- **Cinema Backend**: Next.js, Drizzle ORM, Neon DB, Postgres
-- **Styling**: Vanilla CSS Modules (Brutalist Design System)
+- **Anime API (Hono)**: A lightweight, high-performance Node.js service for anime scraping and metadata.
+- **Cinema API (Next.js)**: A robust backend utilizing Drizzle ORM and Neon DB for movie management.
+- **Design**: Vanilla CSS Modules with a focus on typography and motion.
 
 ## 📁 Project Structure | プロジェクト構造
 
 ```text
 REIATSU/
-├── frontend/           # React + Vite application (Main UI)
-├── anime-api/          # Hono-based API for anime metadata & streams
-├── cinema-api/         # Next.js-based backend for movies & TV series
-└── config/             # Shared configurations
+├── frontend/           # The core React + Vite application
+├── anime-api/          # Open-source API for anime scraping & streams
+├── cinema-api/         # Scalable backend for movies & series
+└── config/             # Global configuration tokens
 ```
 
-## 📦 Getting Started | 開始方法
+## 📦 Deployment | デプロイ
 
-### Installation & Setup
+### Local Development
 
-1. **Clone the repository:**
+1. **Clone the Source:**
    ```bash
    git clone https://github.com/otzua/REIATSU.git
    cd REIATSU
    ```
 
-2. **Frontend:**
-   ```bash
-   cd frontend && npm install && npm run dev
-   ```
+2. **Run All-in-One (Recommended):**
+   *Each directory contains its own `package.json`. Follow the installation steps in each folder or use a workspace runner.*
 
-3. **Anime API:**
-   ```bash
-   cd anime-api && npm install && npm run dev
-   ```
+   - **Frontend**: `cd frontend && npm install && npm run dev`
+   - **Anime API**: `cd anime-api && npm install && npm run dev`
+   - **Cinema API**: `cd cinema-api && npm install && npm run dev`
 
-4. **Cinema API:**
-   ```bash
-   cd cinema-api && npm install && npm run dev
-   ```
+## 🤝 Contributing | 貢献する
 
-## 📈 Interfaces | インターフェース
+Reiatsu is a community-driven project. We welcome all contributions—from code and documentation to UI/UX suggestions and bug reports.
 
-- **霊 ANIME**: The primary interface for streaming anime with schedule and tracking.
-- **映 CINEMA**: A dedicated space for movies and TV series powered by the Cinema API.
-- **音 MUSIC**: (Under Reconstruction) A high-fidelity music streaming experience.
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 🗺️ Roadmap | ロードマップ
 
 - [x] High-performance Halftone Engine
 - [x] Neo-Vintage Design System
-- [x] Minimalist Brutalist Navbar
-- [x] Unified Search (Command Palette)
+- [x] Unified Global Search
 - [x] Cinema API Integration
 - [x] Anime Schedule & Tracking
-- [ ] Music Section Reconstruction (Wiped for fresh start)
-- [ ] HLS Video Player Customization
+- [ ] Music Section Reconstruction (Currently in progress)
+- [ ] Self-Hosting Docker Suite
+- [ ] PWA Support for Mobile Streaming
 
 ## 📄 License | ライセンス
 
@@ -89,4 +91,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-*Built with passion by [otzua](https://github.com/otzua).*
+*Built with passion and the spirit of open source by [otzua](https://github.com/otzua).*
