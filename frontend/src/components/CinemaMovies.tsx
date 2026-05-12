@@ -118,8 +118,7 @@ const CinemaMovies = () => {
                   transition={{ delay: index * 0.03 }}
                   whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
                 >
-                  <Link to={`/cinema/watch/${movie.id}?type=${movie.mediaType}`} className={styles.cardLink}>
-                    <div className={styles.posterPlaceholder}>
+                  <Link to={`/cinema/details/${movie.id}?type=${movie.mediaType}`} className={styles.cardLink}>                    <div className={styles.posterPlaceholder}>
                       <div className={styles.badge} style={{ textTransform: 'uppercase' }}>
                         {movie.mediaType}
                       </div>

@@ -251,7 +251,7 @@ const Navbar = () => {
                   const type = isCinemaItem ? item.mediaType : (item.type ?? 'Anime');
                   const releaseYear = isCinemaItem && item.releaseDate ? item.releaseDate.split('-')[0] : '';
                   const link = isCinemaItem 
-                    ? `/cinema/watch/${id}?type=${item.mediaType}`
+                    ? `/cinema/details/${id}?type=${item.mediaType}`
                     : `/anime/${id}`;
 
                   return (

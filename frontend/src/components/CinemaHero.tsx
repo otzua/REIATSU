@@ -100,7 +100,7 @@ const CinemaHero = () => {
         >
           {slides.map((slide, index) => (
             <div key={`${slide.id}-${index}`} className={styles.slide}>
-              <Link to={`/cinema/watch/${slide.id}?type=${slide.mediaType}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
+              <Link to={`/cinema/details/${slide.id}?type=${slide.mediaType}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
                 <div className={styles.backdropWrapper}>
                   <SmartImage
                     src={slide.backdropUrl || slide.imageUrl}

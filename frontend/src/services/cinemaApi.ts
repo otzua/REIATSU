@@ -111,4 +111,19 @@ export const cinemaApi = {
       })) : undefined,
     };
   },
+
+  // Get recommended titles for a movie or TV show
+  getRecommendations: async (id: string, mediaType: 'movie' | 'tv'): Promise<CinemaMovie[]> => {
+    const data = await tmdbFetch<any>(`/${mediaType}/${id}/recommendations`);
+    return (data.results || []).map((m: any) => ({
+      id: m.id.toString(),
+      title: m.title || m.name || 'Untitled',
+      imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+      backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
+      mediaType: mediaType,
+      releaseDate: m.release_date || m.first_air_date || '',
+      rating: m.vote_average || 0,
+      overview: m.overview || '',
+    }));
+  },
 };
