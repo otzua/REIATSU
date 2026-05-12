@@ -19,7 +19,7 @@ const CinemaWatch = () => {
   const [error, setError] = useState(false);
   
   // Embed state
-  const [activeServer, setActiveServer] = useState<'videasy' | 'autoembed'>('videasy');
+  const [activeServer, setActiveServer] = useState<'videasy' | 'vidsrcicu' | 'vidlink' | 'vidfast'>('videasy');
   
   // TV Show State
   const [seasons, setSeasons] = useState<any[]>([]);
@@ -92,10 +92,18 @@ const CinemaWatch = () => {
     finalPlayerUrl = movie.mediaType === 'tv'
       ? `https://player.videasy.net/tv/${movie.id}/${activeSeason}/${activeEpisode}`
       : `https://player.videasy.net/movie/${movie.id}`;
-  } else if (activeServer === 'autoembed') {
+  } else if (activeServer === 'vidsrcicu') {
     finalPlayerUrl = movie.mediaType === 'tv'
-      ? `https://autoembed.co/tv/tmdb/${movie.id}-${activeSeason}-${activeEpisode}`
-      : `https://autoembed.co/movie/tmdb/${movie.id}`;
+      ? `https://vidsrc.icu/embed/tv/${movie.id}/${activeSeason}/${activeEpisode}`
+      : `https://vidsrc.icu/embed/movie/${movie.id}`;
+  } else if (activeServer === 'vidlink') {
+    finalPlayerUrl = movie.mediaType === 'tv'
+      ? `https://vidlink.pro/tv/${movie.id}/${activeSeason}/${activeEpisode}`
+      : `https://vidlink.pro/movie/${movie.id}`;
+  } else if (activeServer === 'vidfast') {
+    finalPlayerUrl = movie.mediaType === 'tv'
+      ? `https://vidfast.pro/tv/${movie.id}/${activeSeason}/${activeEpisode}`
+      : `https://vidfast.pro/movie/${movie.id}`;
   }
 
   const releaseYear = movie.releaseDate ? movie.releaseDate.split('-')[0] : '';
@@ -162,10 +170,22 @@ const CinemaWatch = () => {
                         Videasy
                       </button>
                       <button 
-                        className={`${styles.serverBtn} ${activeServer === 'autoembed' ? styles.active : ''}`}
-                        onClick={() => setActiveServer('autoembed')}
+                        className={`${styles.serverBtn} ${activeServer === 'vidsrcicu' ? styles.active : ''}`}
+                        onClick={() => setActiveServer('vidsrcicu')}
                       >
-                        AutoEmbed
+                        VidSrc
+                      </button>
+                      <button 
+                        className={`${styles.serverBtn} ${activeServer === 'vidlink' ? styles.active : ''}`}
+                        onClick={() => setActiveServer('vidlink')}
+                      >
+                        VidLink
+                      </button>
+                      <button 
+                        className={`${styles.serverBtn} ${activeServer === 'vidfast' ? styles.active : ''}`}
+                        onClick={() => setActiveServer('vidfast')}
+                      >
+                        VidFast
                       </button>
                     </div>
                   </div>

@@ -29,7 +29,7 @@ export async function validateApiKey(
   request: NextRequest
 ): Promise<ValidationResult> {
   // API bypass flag for unlimited individual access
-  const apiUnlimitedBypass = true; // Set to true to enable normal API validation
+  const apiUnlimitedBypass = process.env.API_UNLIMITED_BYPASS === "true";
   
   if (apiUnlimitedBypass) {
     return {

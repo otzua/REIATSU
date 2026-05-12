@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserProviders } from "@/lib/providers";
 import { validateApiKey } from "@/lib/api-auth";
+import { Redis } from "@upstash/redis";
+
+// Initialize Upstash Redis with absolute safety if credentials exist in the environment
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
 
 interface SearchResult {
   title: string;
@@ -110,8 +119,21 @@ export async function GET(request: NextRequest) {
 
     const cacheKey = `global-search:${query.toLowerCase()}`;
 
-    if (useCache) {
-      // Redis caching disabled for now
+    // Read from Upstash Redis cache if configured
+    if (useCache && redis) {
+      try {
+        const cachedResults = await redis.get<any>(cacheKey);
+        if (cachedResults) {
+          return NextResponse.json({
+            success: true,
+            cached: true,
+            query,
+            ...cachedResults,
+          });
+        }
+      } catch (err) {
+        console.error("Cache read error:", err);
+      }
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
@@ -151,9 +173,13 @@ export async function GET(request: NextRequest) {
       }, {} as Record<string, SearchResult[]>),
     };
 
-    // Cache results for 1 hour (3600 seconds)
-    if (useCache) {
-      // Redis caching disabled
+    // Store in Upstash Redis cache for 1 hour (3600 seconds) if configured
+    if (useCache && redis) {
+      try {
+        await redis.set(cacheKey, response, { ex: 3600 });
+      } catch (err) {
+        console.error("Cache write error:", err);
+      }
     }
 
     return NextResponse.json({

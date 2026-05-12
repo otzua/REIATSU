@@ -1,5 +1,8 @@
 // Clean and optimized TMDB-based Cinema API service for the Reiatsu platform
-const API_KEY = 'd131017ccc6e5462a81c9304d21476de';
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+if (!API_KEY) {
+  throw new Error("VITE_TMDB_API_KEY is required but was not found in the environment.");
+}
 
 export interface CinemaMovie {
   id: string;
