@@ -218,3 +218,122 @@
     font-size: 0.95rem;
   }
 }
+
+/* Search Bar Styles */
+.searchContainer {
+  margin: -1rem auto 2.5rem;
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 var(--space-md);
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(220, 201, 169, 0.08);
+  border-radius: 16px;
+  padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  transition: all 0.2s ease;
+}
+
+.searchForm:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 10px 40px rgba(184, 58, 45, 0.15);
+}
+
+.searchIcon {
+  color: var(--color-cream);
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  background: none;
+  border: none;
+  color: var(--color-cream);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none;
+  padding: 0.5rem 0;
+}
+
+.searchInput::placeholder {
+  color: rgba(220, 201, 169, 0.25);
+}
+
+.searchButton {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 12px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(184, 58, 45, 0.3);
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(184, 58, 45, 0.4);
+}
+
+.searchButton:active {
+  transform: translateY(0);
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  color: rgba(220, 201, 169, 0.4);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+  border-radius: 50%;
+}
+
+.clearButton:hover {
+  color: var(--accent);
+  background: rgba(220, 201, 169, 0.05);
+}
+
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 var(--space-md);
+}
+
+.resultsTitle {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-cream);
+  letter-spacing: 0.05em;
+}
+
+.noResultsMessage {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: rgba(220, 201, 169, 0.3);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+

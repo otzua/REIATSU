@@ -1,24 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { Home, Search, Calendar, ArrowRightLeft, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
+import { cinemaApi } from '../services/cinemaApi';
 import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const isCinema = location.pathname.startsWith('/cinema');
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<AnimeCard[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navItems = [
-    { id: 'home', path: '/', icon: Home },
+    { id: 'home', path: isCinema ? '/cinema' : '/', icon: Home },
     { id: 'schedule', path: '/schedule', icon: Calendar },
     { id: 'search', path: '#search', icon: Search },
     { id: 'switch', path: '#switch', icon: ArrowRightLeft },
@@ -62,21 +66,27 @@ const Navbar = () => {
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const data = await animeApi.search(query);
-        setResults((data as { animes: AnimeCard[] }).animes?.slice(0, 6) ?? []);
-      } catch {
+        if (isCinema) {
+          const data = await cinemaApi.search(query);
+          setResults(data.slice(0, 8));
+        } else {
+          const data = await animeApi.search(query);
+          setResults((data as { animes: AnimeCard[] }).animes?.slice(0, 6) ?? []);
+        }
+      } catch (err) {
+        console.error('Search error:', err);
         setResults([]);
       } finally {
         setSearching(false);
       }
     }, 400);
-  }, [query]);
+  }, [query, isCinema]);
 
   return (
     <>
       <div className={styles.navbarContainer}>
-        <Link to="/" className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); }}>
-          <span className={styles.logoKanji}>霊</span>
+        <Link to={isCinema ? "/cinema" : "/"} className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); }}>
+          <span className={styles.logoKanji}>{isCinema ? '映' : '霊'}</span>
         </Link>
 
         <nav className={styles.navCapsule}>
@@ -164,18 +174,24 @@ const Navbar = () => {
               </button>
             </div>
             <div className={styles.switchOptions}>
-              <button className={`${styles.switchBtn} ${styles.activeInterface}`} onClick={() => setSwitchOpen(false)}>
+              <button 
+                className={`${styles.switchBtn} ${location.pathname !== '/cinema' ? styles.activeInterface : ''}`} 
+                onClick={() => { navigate('/'); setSwitchOpen(false); }}
+              >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
-                  <p>Current Interface</p>
+                  <p>{location.pathname !== '/cinema' ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
               </button>
-              <button className={styles.switchBtn} onClick={() => alert('New Cinema API pending. Provide the API details to proceed!')}>
-                <div className={styles.interfaceIcon}>🎬</div>
+              <button 
+                className={`${styles.switchBtn} ${location.pathname === '/cinema' ? styles.activeInterface : ''}`} 
+                onClick={() => { navigate('/cinema'); setSwitchOpen(false); }}
+              >
+                <div className={styles.interfaceIcon}>映</div>
                 <div className={styles.interfaceInfo}>
                   <h4>CINEMA</h4>
-                  <p>Movies & Web Series</p>
+                  <p>{location.pathname === '/cinema' ? 'Current Interface' : 'Switch to Movies'}</p>
                 </div>
               </button>
             </div>
@@ -199,7 +215,7 @@ const Navbar = () => {
               <input
                 ref={inputRef}
                 className={styles.searchInput}
-                placeholder="Search anime..."
+                placeholder={isCinema ? "Search movies & series..." : "Search anime..."}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -211,22 +227,37 @@ const Navbar = () => {
             {(results.length > 0 || searching) && (
               <div className={styles.searchResults}>
                 {searching && <div className={styles.searchHint}>Searching...</div>}
-                {results.map((anime) => (
-                  <Link 
-                    key={anime.id} 
-                    to={`/anime/${anime.id}`} 
-                    className={styles.resultItem}
-                    onClick={closeSearch}
-                  >
-                    {anime.poster && (
-                      <SmartImage src={anime.poster} alt={anime.name} className={styles.resultThumb} />
-                    )}
-                    <div className={styles.resultInfo}>
-                      <span className={styles.resultName}>{anime.name}</span>
-                      <span className={styles.resultMeta}>{anime.type ?? 'Anime'}</span>
-                    </div>
-                  </Link>
-                ))}
+                {results.map((item) => {
+                  const isCinemaItem = 'title' in item;
+                  const id = item.id;
+                  const name = isCinemaItem ? item.title : item.name;
+                  const poster = isCinemaItem ? item.imageUrl : item.poster;
+                  const type = isCinemaItem ? item.mediaType : (item.type ?? 'Anime');
+                  const releaseYear = isCinemaItem && item.releaseDate ? item.releaseDate.split('-')[0] : '';
+                  const link = isCinemaItem 
+                    ? `/cinema/watch/${id}?type=${item.mediaType}`
+                    : `/anime/${id}`;
+
+                  return (
+                    <Link 
+                      key={id + (isCinemaItem ? 'cinema' : 'anime')} 
+                      to={link} 
+                      className={styles.resultItem}
+                      onClick={closeSearch}
+                    >
+                      {poster && (
+                        <SmartImage src={poster} alt={name} className={styles.resultThumb} />
+                      )}
+                      <div className={styles.resultInfo}>
+                        <span className={styles.resultName}>{name}</span>
+                        <div className={styles.resultMetaWrapper} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span className={styles.resultMeta} style={{ textTransform: 'uppercase' }}>{type}</span>
+                          {releaseYear && <span className={styles.resultYear} style={{ opacity: 0.5, fontSize: '0.85em' }}>{releaseYear}</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
 

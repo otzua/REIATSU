@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/tmdb-api/(.*)", "destination": "https://twilight-cake-defb.hunternisha55.workers.dev/3/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
