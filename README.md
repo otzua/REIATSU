@@ -26,14 +26,16 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
   - **映 CINEMA**: A cinematic gateway for movies and TV series.
   - **音 MUSIC**: A high-fidelity, aesthetic music experience (currently being rebuilt).
+  - **超越 BEYOND**: A premium portal for niche high-quality titles with advanced stream extraction.
 - **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
+- **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
 - **Unified Command Palette**: Press `/` to search across all media types instantly.
 - **Self-Hosted Privacy**: No telemetry, no trackers. You own your watch history and your data.
 
 ## 🛠️ Tech Stack | 技術スタック
 
-- **Frontend**: React 19, Vite, TypeScript, Framer Motion
-- **Anime API (Hono)**: A lightweight, high-performance Node.js service for anime scraping and metadata.
+- **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js
+- **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, AlphaAPIs stream extraction, and HLS proxying.
 - **Cinema API (Next.js)**: A robust backend utilizing Drizzle ORM and Neon DB for movie management.
 - **Design**: Vanilla CSS Modules with a focus on typography and motion.
 
@@ -42,8 +44,9 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
 ```text
 REIATSU/
 ├── frontend/           # The core React + Vite application
-├── anime-api/          # Open-source API for anime scraping & streams
+├── anime-api/          # API for Anime & Beyond extraction + HLS Proxy
 ├── cinema-api/         # Scalable backend for movies & series
+├── ocean-api/          # Legacy/Backup extraction logic
 └── config/             # Global configuration tokens
 ```
 
@@ -61,7 +64,7 @@ REIATSU/
    *Each directory contains its own `package.json`. Follow the installation steps in each folder or use a workspace runner.*
 
    - **Frontend**: `cd frontend && npm install && npm run dev`
-   - **Anime API**: `cd anime-api && npm install && npm run dev`
+   - **Anime API**: `cd anime-api && npm install && npm run dev` (Runs on 4001)
    - **Cinema API**: `cd cinema-api && npm install && npm run dev`
 
 ## 🤝 Contributing | 貢献する
@@ -81,6 +84,7 @@ Reiatsu is a community-driven project. We welcome all contributions—from code 
 - [x] Unified Global Search
 - [x] Cinema API Integration
 - [x] Anime Schedule & Tracking
+- [x] Beyond Portal & HLS Proxy Integration
 - [ ] Music Section Reconstruction (Currently in progress)
 - [ ] Self-Hosting Docker Suite
 - [ ] PWA Support for Mobile Streaming
