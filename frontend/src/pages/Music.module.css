@@ -155,24 +155,32 @@
 }
 
 .vinylWrapper {
-  width: 240px;
-  height: 240px;
+  width: 280px;
+  height: 280px;
   position: relative;
   border-radius: 50%;
-  padding: 4px;
-  background: radial-gradient(circle, #2d2d30 20%, #151517 50%, #050505 100%);
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  background: #050505;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.8),
+    inset 0 0 2px rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.vinylWrapper::after {
-  content: '';
+.vinylGrooves {
   position: absolute;
-  inset: 12px;
+  inset: 0;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 3px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
   pointer-events: none;
 }
 
@@ -181,21 +189,33 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  z-index: 1;
+  border: 2px solid #000;
 }
 
 .vinylCenter {
-  width: 48px;
-  height: 48px;
-  background: #000;
-  border: 3px solid #111;
+  width: 60px;
+  height: 60px;
+  background: #111;
+  border: 4px solid #000;
   border-radius: 50%;
   position: absolute;
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+  z-index: 2;
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.centerDot {
+  width: 6px;
+  height: 6px;
+  background: #333;
+  border-radius: 50%;
 }
 
 .spinning {
-  animation: rotateVinyl 12s linear infinite;
+  animation: rotateVinyl 15s linear infinite;
 }
 
 @keyframes rotateVinyl {
@@ -782,4 +802,29 @@
   0% { transform: translateY(-10px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
+
+.loadingSpinnerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  animation: fadeIn 0.25s ease;
+}
+
+.spinnerIcon {
+  color: var(--accent, #b83a2d);
+  animation: spinLoader 1s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(184, 58, 45, 0.6));
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 

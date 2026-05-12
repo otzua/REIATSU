@@ -73,6 +73,7 @@ const Music = () => {
   const [playlist, setPlaylist] = useState<Track[]>(OFFLINE_SONGS);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -123,32 +124,8 @@ const Music = () => {
     }
   }, [audioSourceCreated]);
 
-  // Media Session API Integration
-  useEffect(() => {
-    if ('mediaSession' in navigator && activeTrack) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: activeTrack.title,
-        artist: activeTrack.artist,
-        album: activeTrack.album,
-        artwork: [
-          { src: activeTrack.cover, sizes: '96x96', type: 'image/jpeg' },
-          { src: activeTrack.cover, sizes: '128x128', type: 'image/jpeg' },
-          { src: activeTrack.cover, sizes: '192x192', type: 'image/jpeg' },
-          { src: activeTrack.cover, sizes: '256x256', type: 'image/jpeg' },
-          { src: activeTrack.cover, sizes: '384x384', type: 'image/jpeg' },
-          { src: activeTrack.cover, sizes: '512x512', type: 'image/jpeg' },
-        ]
-      });
-
-      navigator.mediaSession.setActionHandler('play', handlePlayPause);
-      navigator.mediaSession.setActionHandler('pause', handlePlayPause);
-      navigator.mediaSession.setActionHandler('previoustrack', () => handleSkip('prev'));
-      navigator.mediaSession.setActionHandler('nexttrack', () => handleSkip('next'));
-    }
-  }, [activeTrack]);
-
   // Play / Pause handler
-  const handlePlayPause = async () => {
+  const handlePlayPause = useCallback(async () => {
     if (!audioRef.current) return;
 
     initAudioEngine();
@@ -167,7 +144,7 @@ const Music = () => {
         console.error('Playback failed:', err);
       });
     }
-  };
+  }, [isPlaying, initAudioEngine]);
 
   // Track skipped
   const handleSkip = useCallback((direction: 'next' | 'prev') => {
@@ -194,6 +171,7 @@ const Music = () => {
 
     setCurrentTrackIndex(nextIndex);
     setIsPlaying(false);
+    setIsAudioLoading(true);
     setCurrentTime(0);
 
     setTimeout(() => {
@@ -206,6 +184,59 @@ const Music = () => {
       }
     }, 150);
   }, [currentTrackIndex, playlist, isShuffle, repeatMode, initAudioEngine]);
+
+  // Media Session API Integration (Metadata)
+  useEffect(() => {
+    if ('mediaSession' in navigator && activeTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: activeTrack.title,
+        artist: activeTrack.artist,
+        album: activeTrack.album,
+        artwork: [
+          { src: activeTrack.cover, sizes: '96x96', type: 'image/jpeg' },
+          { src: activeTrack.cover, sizes: '128x128', type: 'image/jpeg' },
+          { src: activeTrack.cover, sizes: '192x192', type: 'image/jpeg' },
+          { src: activeTrack.cover, sizes: '256x256', type: 'image/jpeg' },
+          { src: activeTrack.cover, sizes: '384x384', type: 'image/jpeg' },
+          { src: activeTrack.cover, sizes: '512x512', type: 'image/jpeg' },
+        ]
+      });
+    }
+  }, [activeTrack]);
+
+  // Media Session Control Handlers
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', handlePlayPause);
+      navigator.mediaSession.setActionHandler('pause', handlePlayPause);
+    }
+    return () => {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', null);
+        navigator.mediaSession.setActionHandler('pause', null);
+      }
+    };
+  }, [handlePlayPause]);
+
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('previoustrack', () => handleSkip('prev'));
+      navigator.mediaSession.setActionHandler('nexttrack', () => handleSkip('next'));
+    }
+    return () => {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('previoustrack', null);
+        navigator.mediaSession.setActionHandler('nexttrack', null);
+      }
+    };
+  }, [handleSkip]);
+
+  // Update System playbackState
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  }, [isPlaying]);
 
   // Keyboard Shortcuts
   useEffect(() => {
@@ -240,7 +271,7 @@ const Music = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, currentTrackIndex, playlist, volume]);
+  }, [isPlaying, currentTrackIndex, playlist, volume, handlePlayPause, handleSkip]);
 
   // Seek handler
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,20 +314,51 @@ const Music = () => {
     const onEnded = () => {
       if (repeatMode === 'one') {
         audio.currentTime = 0;
-        audio.play();
+        audio.play().catch(e => console.log('Repeat playback failed:', e));
       } else {
         handleSkip('next');
       }
     };
 
+    // Buffer and Load States
+    const onLoadStart = () => setIsAudioLoading(true);
+    const onWaiting = () => setIsAudioLoading(true);
+    const onCanPlay = () => setIsAudioLoading(false);
+    const onPlaying = () => {
+      setIsAudioLoading(false);
+      setIsPlaying(true);
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+    };
+    const onError = () => {
+      setIsAudioLoading(false);
+      setApiErrorMessage('Stream error encountered. Buffering next track...');
+      setTimeout(() => {
+        handleSkip('next');
+      }, 1500);
+    };
+
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('durationchange', onDurationChange);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('loadstart', onLoadStart);
+    audio.addEventListener('waiting', onWaiting);
+    audio.addEventListener('canplay', onCanPlay);
+    audio.addEventListener('playing', onPlaying);
+    audio.addEventListener('pause', onPause);
+    audio.addEventListener('error', onError);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('durationchange', onDurationChange);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('loadstart', onLoadStart);
+      audio.removeEventListener('waiting', onWaiting);
+      audio.removeEventListener('canplay', onCanPlay);
+      audio.removeEventListener('playing', onPlaying);
+      audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('error', onError);
     };
   }, [currentTrackIndex, playlist, repeatMode, handleSkip]);
 
@@ -385,7 +447,7 @@ const Music = () => {
     }
   };
 
-  // Real-time Canvas Equalizer Renderer
+  // Real-time Canvas Equalizer Renderer with High-DPI support and centered waveforms
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -394,19 +456,28 @@ const Music = () => {
     if (!ctx) return;
 
     const resizeCanvas = () => {
-      canvas.width = canvas.parentElement?.clientWidth || 600;
-      canvas.height = 120;
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.parentElement?.clientWidth || 600;
+      const height = 120;
+      
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      
+      ctx.scale(dpr, dpr);
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
     const render = () => {
-      const width = canvas.width;
-      const height = canvas.height;
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.width / dpr;
+      const height = canvas.height / dpr;
       ctx.clearRect(0, 0, width, height);
 
       const grad = ctx.createLinearGradient(0, height, 0, 0);
-      grad.addColorStop(0, 'rgba(184, 58, 45, 0.1)');
+      grad.addColorStop(0, 'rgba(184, 58, 45, 0.15)');
       grad.addColorStop(0.5, 'var(--accent, #b83a2d)');
       grad.addColorStop(1, '#ff8080');
 
@@ -415,31 +486,37 @@ const Music = () => {
         const dataArray = new Uint8Array(bufferLength);
         analyserRef.current.getByteFrequencyData(dataArray);
 
-        const barWidth = (width / bufferLength) * 2.5;
-        let barHeight;
+        // We only render the active spectrum (first 72 bins) for a tighter, cleaner look
+        const activeBins = 72;
+        const barGap = 4;
+        const barWidth = (width - (activeBins - 1) * barGap) / activeBins;
+        
         let x = 0;
 
-        for (let i = 0; i < bufferLength; i++) {
-          barHeight = (dataArray[i] / 255) * height * 0.95;
+        for (let i = 0; i < activeBins; i++) {
+          // Normalize bar height
+          const barHeight = (dataArray[i] / 255) * height * 0.85;
 
           ctx.fillStyle = grad;
           ctx.beginPath();
-          ctx.roundRect(x, height - barHeight, barWidth - 3, barHeight, [6, 6, 0, 0]);
+          // Draw beautiful rounded bar
+          ctx.roundRect(x, height - Math.max(barHeight, 4), barWidth, Math.max(barHeight, 4), [4, 4, 0, 0]);
           ctx.fill();
 
-          x += barWidth;
+          x += barWidth + barGap;
         }
       } else {
         const time = Date.now() * 0.003;
-        const barWidth = 8;
+        const barWidth = 6;
         const barGap = 4;
         const totalBars = Math.floor(width / (barWidth + barGap));
+        const startX = (width - (totalBars * (barWidth + barGap) - barGap)) / 2; // perfectly center the idle animation
 
         for (let i = 0; i < totalBars; i++) {
-          const waveHeight = 12 + Math.sin(time + i * 0.2) * 18 * (isPlaying ? 1 : 0.3);
-          ctx.fillStyle = 'rgba(220, 201, 169, 0.2)';
+          const waveHeight = 8 + Math.sin(time + i * 0.15) * 12;
+          ctx.fillStyle = 'rgba(220, 201, 169, 0.15)';
           ctx.beginPath();
-          ctx.roundRect(i * (barWidth + barGap), height - waveHeight, barWidth, waveHeight, [4, 4, 0, 0]);
+          ctx.roundRect(startX + i * (barWidth + barGap), height - waveHeight, barWidth, waveHeight, [3, 3, 0, 0]);
           ctx.fill();
         }
       }
@@ -516,9 +593,14 @@ const Music = () => {
             <div className={styles.glassDeck}>
               {/* Vinyl Wrapper */}
               <div className={styles.artSection}>
-                <div className={`${styles.vinylWrapper} ${isPlaying ? styles.spinning : ''}`}>
+                <div className={`${styles.vinylWrapper} ${isPlaying && !isAudioLoading ? styles.spinning : ''}`}>
                   <div className={styles.vinylGrooves} />
                   <img src={activeTrack.cover} alt={activeTrack.title} className={styles.coverImage} />
+                  {isAudioLoading && (
+                    <div className={styles.loadingSpinnerOverlay}>
+                      <Loader2 size={48} className={styles.spinnerIcon} />
+                    </div>
+                  )}
                   <div className={styles.vinylCenter}>
                     <div className={styles.centerDot} />
                   </div>
