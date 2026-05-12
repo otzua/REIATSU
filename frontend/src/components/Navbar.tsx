@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X, Music } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -25,6 +25,7 @@ const Navbar = () => {
   const navItems = [
     { id: 'home', path: isCinema ? '/cinema' : '/', icon: Home },
     { id: 'schedule', path: '/schedule', icon: Calendar },
+    { id: 'music', path: '/music', icon: Music },
     { id: 'search', path: '#search', icon: Search },
     { id: 'switch', path: '#switch', icon: ArrowRightLeft },
   ];
@@ -202,23 +203,33 @@ const Navbar = () => {
             </div>
             <div className={styles.switchOptions}>
               <button 
-                className={`${styles.switchBtn} ${location.pathname !== '/cinema' ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music')) ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
-                  <p>{location.pathname !== '/cinema' ? 'Current Interface' : 'Switch to Anime'}</p>
+                  <p>{(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music')) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
               </button>
               <button 
-                className={`${styles.switchBtn} ${location.pathname === '/cinema' ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${location.pathname.startsWith('/cinema') ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/cinema'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>映</div>
                 <div className={styles.interfaceInfo}>
                   <h4>CINEMA</h4>
-                  <p>{location.pathname === '/cinema' ? 'Current Interface' : 'Switch to Movies'}</p>
+                  <p>{location.pathname.startsWith('/cinema') ? 'Current Interface' : 'Switch to Movies'}</p>
+                </div>
+              </button>
+              <button 
+                className={`${styles.switchBtn} ${location.pathname.startsWith('/music') ? styles.activeInterface : ''}`} 
+                onClick={() => { navigate('/music'); setSwitchOpen(false); }}
+              >
+                <div className={styles.interfaceIcon}>音</div>
+                <div className={styles.interfaceInfo}>
+                  <h4>HIFI MUSIC</h4>
+                  <p>{location.pathname.startsWith('/music') ? 'Current Interface' : 'Switch to Music'}</p>
                 </div>
               </button>
             </div>

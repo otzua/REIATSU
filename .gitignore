@@ -29,3 +29,13 @@ build/
 *.njsproj
 *.sln
 *.sw?
+
+# Local Env Configuration (Secret Keys)
+.env
+.env.*
+
+# Local test & dump files
+op.json
+test_*.js
+test_*.html
+

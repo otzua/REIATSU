@@ -26,7 +26,7 @@ export async function fetchWithScraperApi(url: string): Promise<string> {
   // Try each key until one works
   for (let i = 0; i < shuffledKeys.length; i++) {
     const apiKey = shuffledKeys[i];
-    const scraperApiUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(url)}`;
+    const scraperApiUrl = `https://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(url)}`;
     
     try {
       const response = await axios.get(scraperApiUrl, {

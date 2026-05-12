@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, Calendar, Flame } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { cinemaApi } from '../services/cinemaApi';
 import type { CinemaMovie } from '../services/cinemaApi';
 import SmartImage from './SmartImage';

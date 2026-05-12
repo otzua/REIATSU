@@ -28,8 +28,8 @@ interface ValidationResult {
 export async function validateApiKey(
   request: NextRequest
 ): Promise<ValidationResult> {
-  // API bypass flag for unlimited individual access
-  const apiUnlimitedBypass = process.env.API_UNLIMITED_BYPASS === "true";
+  // API bypass flag for unlimited individual access (strictly non-production only)
+  const apiUnlimitedBypass = process.env.NODE_ENV !== "production" && process.env.API_UNLIMITED_BYPASS === "true";
   
   if (apiUnlimitedBypass) {
     return {
@@ -47,7 +47,7 @@ export async function validateApiKey(
     };
   }
 
-  // Try to get API key from different sources
+  // Try to get API key from different sources (strictly secure headers)
   let key: string | null = null;
 
   // 1. Check Authorization header
@@ -61,18 +61,7 @@ export async function validateApiKey(
     key = request.headers.get("x-api-key");
   }
 
-  // 3. Check query parameter
-  if (!key) {
-    const { searchParams } = new URL(request.url);
-    key = searchParams.get("api_key") || searchParams.get("apiKey");
-  }
-
-  // 4. Check cookie
-  if (!key) {
-    key = request.cookies.get("api_key")?.value || null;
-  }
-
-  // 5. If no API key provided, try session-based authentication
+  // 3. If no API key provided in headers, try session-based authentication
   if (!key) {
     try {
       const session = await auth.api.getSession({
@@ -99,7 +88,7 @@ export async function validateApiKey(
   if (!key) {
     return {
       valid: false,
-      error: "API key is required. Provide it via Authorization header, x-api-key header, api_key query parameter, api_key cookie, or login to use your account key.",
+      error: "API key is required. Provide it via Authorization header (Bearer token), x-api-key header, or log in to your account.",
     };
   }
 

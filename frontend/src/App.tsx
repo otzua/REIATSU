@@ -6,6 +6,7 @@ import CinemaWatch from './pages/CinemaWatch';
 import Watch from './pages/Watch';
 import AnimeDetails from './pages/AnimeDetails';
 import Schedule from './pages/Schedule';
+import Music from './pages/Music';
 import Layout from './components/Layout';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/anime/:id" element={<AnimeDetails />} />
           <Route path="/watch/:id" element={<Watch />} />
           <Route path="/schedule" element={<Schedule />} />
+          <Route path="/music" element={<Music />} />
         </Routes>
       </Layout>
     </div>

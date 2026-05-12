@@ -129,6 +129,40 @@ const Watch = () => {
     };
   }, [id, currentEp, currentEpisode, individualSource?.ep, sourceFetchFailedEp]);
 
+  // Save to Continue Watching History
+  useEffect(() => {
+    if (!anime || !episodeData) return;
+
+    const cwItem = {
+      animeId: anime.anime.id,
+      animeName: anime.anime.name,
+      animePoster: anime.anime.poster,
+      episodeNumber: currentEp,
+      episodeTitle: currentEpisode?.title || `Episode ${currentEp}`,
+      timestamp: Date.now()
+    };
+
+    try {
+      const existingRaw = localStorage.getItem('reiatsu_continue_watching');
+      let history = [];
+      if (existingRaw) {
+        const parsed = JSON.parse(existingRaw);
+        history = Array.isArray(parsed) ? parsed : [];
+      }
+
+      // Filter out previous record of the same anime
+      history = history.filter((item: any) => item.animeId !== anime.anime.id);
+      
+      // Put new item at the beginning
+      history.unshift(cwItem);
+      
+      // Store top 15 items
+      localStorage.setItem('reiatsu_continue_watching', JSON.stringify(history.slice(0, 15)));
+    } catch (e) {
+      console.error('Failed to save to Continue Watching history:', e);
+    }
+  }, [anime, episodeData, currentEp, currentEpisode]);
+
   const fetchingSource = useMemo(() => {
     if (!currentEpisode) return false;
     const inlineSources = currentEpisode.sources as Record<string, string> | undefined;
