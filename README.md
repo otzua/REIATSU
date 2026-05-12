@@ -3,7 +3,7 @@
 <div align="center">
   <img src="./reiatsu_banner_1778080050417.png" alt="REIATSU Banner" width="100%">
   <br />
-  <p><i>A high-performance, self-hosted anime streaming platform built with a brutalist digital aesthetic.</i></p>
+  <p><i>A high-performance, self-hosted multimedia streaming platform built with a brutalist digital aesthetic.</i></p>
   
   ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
   ![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Vite%20%7C%20TS-blue?style=for-the-badge)
@@ -14,43 +14,34 @@
 
 ## 🌌 The Vision | ビジョン
 
-Reiatsu is designed for speed, stability, and a unique visual identity. Moving away from generic streaming layouts, it utilizes a high-contrast "Vintage Digital" aesthetic inspired by classic poster design and halftone printing.
+Reiatsu is designed for speed, stability, and a unique visual identity. It moves away from generic streaming layouts, utilizing a high-contrast "Vintage Digital" aesthetic inspired by classic poster design and halftone printing.
 
 ## 🚀 Features | 特徴
 
+- **Tri-Interface System**: Seamlessly switch between **Anime**, **Cinema**, and **Music** interfaces.
 - **Interactive Halftone Engine**: A custom-built Canvas background with mouse-reactive wave interference patterns.
-- **Neo-Vintage UI**: A premium dark theme using the Pantone-inspired color palette (`#1A1A1A` and `#DCC9A9`).
-- **High-Performance Streaming**: Optimized frontend logic designed for zero-lag interactions even on low-end devices.
-- **Multilingual Support**: Built-in support for Japanese typography (`Noto Sans JP`).
+- **Neo-Vintage UI**: A premium dark theme using a Pantone-inspired color palette (`#1A1A1A` and `#DCC9A9`).
+- **High-Performance Streaming**: Optimized frontend logic designed for zero-lag interactions.
+- **Unified Command Palette**: Global search (press `/`) that scans across anime and cinema databases.
 
 ## 🛠️ Tech Stack | 技術スタック
 
-- **Frontend**: React 18, Vite, TypeScript, Framer Motion
-- **Backend**: Node.js, Express, TypeScript (Integration with High-Performance Anime-API)
+- **Frontend**: React 19, Vite, TypeScript, Framer Motion
+- **Anime Backend**: Node.js, Hono, Scrapers (Anime-API)
+- **Cinema Backend**: Next.js, Drizzle ORM, Neon DB, Postgres
 - **Styling**: Vanilla CSS Modules (Brutalist Design System)
-- **Animation**: Custom Canvas API for background interference
 
 ## 📁 Project Structure | プロジェクト構造
 
 ```text
 REIATSU/
-├── frontend/           # React + Vite application
-│   ├── src/
-│   │   ├── components/ # Reusable UI components
-│   │   ├── pages/      # Route pages
-│   │   └── styles/     # Global CSS and Design Tokens
-├── backend/            # Node.js + Express server
-│   ├── src/
-│   │   ├── routes/     # API Endpoints
-│   │   └── services/   # Business logic & Scrapers
-└── docs/               # Project documentation
+├── frontend/           # React + Vite application (Main UI)
+├── anime-api/          # Hono-based API for anime metadata & streams
+├── cinema-api/         # Next.js-based backend for movies & TV series
+└── config/             # Shared configurations
 ```
 
 ## 📦 Getting Started | 開始方法
-
-### Prerequisites
-- Node.js (v18+)
-- npm or yarn
 
 ### Installation & Setup
 
@@ -60,43 +51,36 @@ REIATSU/
    cd REIATSU
    ```
 
-2. **Setup Frontend:**
+2. **Frontend:**
    ```bash
-   cd frontend
-   npm install
-   npm run dev
+   cd frontend && npm install && npm run dev
    ```
 
-3. **Setup Backend:**
+3. **Anime API:**
    ```bash
-   cd ../backend
-   npm install
-   npm run dev
+   cd anime-api && npm install && npm run dev
    ```
 
-## 📈 Performance | パフォーマンス
+4. **Cinema API:**
+   ```bash
+   cd cinema-api && npm install && npm run dev
+   ```
 
-The project prioritizes low-level optimizations to ensure smooth 60FPS rendering:
-- **DPR Scaling**: Intelligent canvas scaling to maintain sharpness without taxing the GPU.
-- **Interference Math**: Pre-calculated wave factors to reduce per-frame CPU cycles.
-- **Non-Linear Falloff**: Optimized proximity detection for interactive elements.
+## 📈 Interfaces | インターフェース
 
-## 🎨 Design System | デザイン
-
-| Color | Hex | Purpose |
-| --- | --- | --- |
-| Deep Black | `#1A1A1A` | Background / Void |
-| Premium Cream | `#DCC9A9` | Text / Accents |
-| Accent Red | `#B83A2D` | Highlights |
-| Forest Green | `#4E6851` | Secondary |
+- **霊 ANIME**: The primary interface for streaming anime with schedule and tracking.
+- **映 CINEMA**: A dedicated space for movies and TV series powered by the Cinema API.
+- **音 MUSIC**: (Under Reconstruction) A high-fidelity music streaming experience.
 
 ## 🗺️ Roadmap | ロードマップ
 
 - [x] High-performance Halftone Engine
-- [x] Dark Mode Design System
-- [ ] Minimalist Brutalist Navbar
-- [ ] Anime Metadata Grid
-- [ ] Integration with High-Performance Anime-API
+- [x] Neo-Vintage Design System
+- [x] Minimalist Brutalist Navbar
+- [x] Unified Search (Command Palette)
+- [x] Cinema API Integration
+- [x] Anime Schedule & Tracking
+- [ ] Music Section Reconstruction (Wiped for fresh start)
 - [ ] HLS Video Player Customization
 
 ## 📄 License | ライセンス
