@@ -12,11 +12,6 @@ const CinemaMovies = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'movie' | 'tv'>('movie');
   
-  // Fetch trending movies or TV on mount or tab change
-  useEffect(() => {
-    loadTrending();
-  }, [activeTab]);
-
   const loadTrending = () => {
     setLoading(true);
     const fetchPromise = activeTab === 'movie' 
@@ -28,6 +23,11 @@ const CinemaMovies = () => {
       .catch(console.error)
       .finally(() => setLoading(false));
   };
+
+  // Fetch trending movies or TV on mount or tab change
+  useEffect(() => {
+    loadTrending();
+  }, [activeTab]);
 
   return (
     <section className={styles.section} style={{ marginTop: '1rem' }}>

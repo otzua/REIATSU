@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const MUSIC_API_BASE = import.meta.env.VITE_MUSIC_API_URL || 'http://localhost:8000';
+const MUSIC_API_BASE = import.meta.env.VITE_MUSIC_API_URL || 'http://127.0.0.1:8000';
 
 export interface Track {
   id: string;

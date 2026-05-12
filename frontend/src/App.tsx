@@ -7,7 +7,7 @@ import Watch from './pages/Watch';
 import AnimeDetails from './pages/AnimeDetails';
 import Schedule from './pages/Schedule';
 import Music from './pages/Music';
-import Ocean from './pages/Ocean';
+import Beyond from './pages/Beyond';
 import Layout from './components/Layout';
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
           <Route path="/watch/:id" element={<Watch />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/music" element={<Music />} />
-          <Route path="/ocean" element={<Ocean />} />
+          <Route path="/beyond" element={<Beyond />} />
         </Routes>
       </Layout>
     </div>

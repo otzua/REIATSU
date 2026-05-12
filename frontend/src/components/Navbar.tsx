@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Home, Search, Calendar, ArrowRightLeft, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import { cinemaApi } from '../services/cinemaApi';
+import { beyondApi } from '../services/beyondApi';
 import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './Navbar.module.css';
@@ -13,20 +14,20 @@ const Navbar = () => {
   const navigate = useNavigate();
   const isCinema = location.pathname.startsWith('/cinema');
   const isMusic = location.pathname.startsWith('/music');
-  const isOcean = location.pathname.startsWith('/ocean');
+  const isBeyond = location.pathname.startsWith('/beyond');
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [animeResults, setAnimeResults] = useState<any[]>([]);
   const [cinemaResults, setCinemaResults] = useState<any[]>([]);
+  const [beyondResults, setBeyondResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Secret ocean unlocking states
-  const [oceanUnlocked, setOceanUnlocked] = useState(() => localStorage.getItem('ocean_unlocked') === 'true');
-  const [, setTypedKeys] = useState('');
+  // Secret portal unlocking states
+  const [beyondUnlocked, setBeyondUnlocked] = useState(() => localStorage.getItem('beyond_unlocked') === 'true');
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const logoClicksRef = useRef({ count: 0, timer: 0 });
@@ -34,21 +35,14 @@ const Navbar = () => {
   const getHomePath = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
-    if (isOcean) return '/ocean';
-    return '/';
-  };
-
-  const getLogoPath = () => {
-    if (isCinema) return '/cinema';
-    if (isMusic) return '/music';
-    if (isOcean) return '/ocean';
+    if (isBeyond) return '/beyond';
     return '/';
   };
 
   const getLogoKanji = () => {
     if (isCinema) return '映';
     if (isMusic) return '音';
-    if (isOcean) return '海';
+    if (isBeyond) return '過';
     return '霊';
   };
 
@@ -64,6 +58,14 @@ const Navbar = () => {
     : switchOpen
     ? 'switch'
     : navItems.find(item => location.pathname === item.path)?.id || 'home';
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setQuery('');
+    setAnimeResults([]);
+    setCinemaResults([]);
+    setBeyondResults([]);
+  };
 
   const handleSearchClick = () => {
     if (switchOpen) setSwitchOpen(false);
@@ -87,22 +89,22 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Secret cheat code: typing 'ocean' anywhere
+      // Direct shortcut 'h' / 'H' to instantly activate and open/close Portal
       if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
-        const char = e.key.toLowerCase();
-        if (char >= 'a' && char <= 'z') {
-          setTypedKeys(prev => {
-            const next = (prev + char).slice(-15);
-            if (next.endsWith('ocean')) {
-              const newState = !oceanUnlocked;
-              localStorage.setItem('ocean_unlocked', String(newState));
-              setOceanUnlocked(newState);
-              setToastMsg(newState ? '🌊 Secret Ocean Interface Unlocked!' : '🔒 Secret Ocean Interface Hidden!');
-              setShowToast(true);
-              return '';
-            }
-            return next;
-          });
+        if (e.key === 'h' || e.key === 'H') {
+          e.preventDefault();
+          if (location.pathname.startsWith('/beyond')) {
+            navigate('/');
+            setToastMsg('🔒 Closed Portal');
+            setShowToast(true);
+          } else {
+            localStorage.setItem('beyond_unlocked', 'true');
+            setBeyondUnlocked(true);
+            setToastMsg('✨ Entering Portal...');
+            setShowToast(true);
+            navigate('/beyond');
+          }
+          return;
         }
       }
 
@@ -124,7 +126,7 @@ const Navbar = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [searchOpen, switchOpen, oceanUnlocked]);
+  }, [searchOpen, switchOpen, beyondUnlocked, location.pathname, navigate]);
 
   const handleLogoClick = () => {
     const now = Date.now();
@@ -137,10 +139,10 @@ const Navbar = () => {
     clicks.timer = now;
 
     if (clicks.count >= 5) {
-      const newState = !oceanUnlocked;
-      localStorage.setItem('ocean_unlocked', String(newState));
-      setOceanUnlocked(newState);
-      setToastMsg(newState ? '🌊 Secret Ocean Interface Unlocked!' : '🔒 Secret Ocean Interface Hidden!');
+      const newState = !beyondUnlocked;
+      localStorage.setItem('beyond_unlocked', String(newState));
+      setBeyondUnlocked(newState);
+      setToastMsg(newState ? '✨ Secret Interface Unlocked!' : '🔒 Secret Interface Hidden!');
       setShowToast(true);
       clicks.count = 0;
     }
@@ -151,46 +153,42 @@ const Navbar = () => {
     setSwitchOpen(!switchOpen);
   };
 
-  const closeSearch = () => {
-    setSearchOpen(false);
-    setQuery('');
-    setAnimeResults([]);
-    setCinemaResults([]);
-  };
-
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     
     if (!query.trim()) {
       setAnimeResults([]);
       setCinemaResults([]);
+      setBeyondResults([]);
       return;
     }
 
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const [animeData, cinemaData] = await Promise.all([
+        const [animeData, cinemaData, beyondData] = await Promise.all([
           animeApi.search(query).catch(() => ({ animes: [] })),
-          cinemaApi.search(query).catch(() => [])
+          cinemaApi.search(query).catch(() => []),
+          beyondUnlocked ? beyondApi.search(query).catch(() => []) : Promise.resolve([])
         ]);
 
         setAnimeResults((animeData as { animes: AnimeCard[] }).animes?.slice(0, 4) ?? []);
         setCinemaResults(cinemaData.slice(0, 4));
+        setBeyondResults(beyondData.slice(0, 4));
       } catch (err) {
         console.error('Search error:', err);
       } finally {
         setSearching(false);
       }
     }, 400);
-  }, [query]);
+  }, [query, beyondUnlocked]);
 
   return (
     <>
       <div className={styles.navbarContainer}>
-        <Link to={getLogoPath()} className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }}>
+        <div className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} style={{ cursor: 'pointer' }}>
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
-        </Link>
+        </div>
 
         <nav className={styles.navCapsule}>
           {navItems.map((item) => {
@@ -245,7 +243,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Overlays Backdrop */}
       <AnimatePresence>
         {(searchOpen || switchOpen) && (
           <motion.div
@@ -259,7 +256,6 @@ const Navbar = () => {
         )}
       </AnimatePresence>
       
-      {/* Switch Overlay */}
       <AnimatePresence>
         {switchOpen && (
           <motion.div
@@ -281,13 +277,13 @@ const Navbar = () => {
             </div>
             <div className={styles.switchOptions}>
               <button 
-                className={`${styles.switchBtn} ${(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/ocean')) ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/beyond')) ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
-                  <p>{(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/ocean')) ? 'Current Interface' : 'Switch to Anime'}</p>
+                  <p>{(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/beyond')) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
               </button>
               <button 
@@ -310,18 +306,18 @@ const Navbar = () => {
                   <p>{location.pathname.startsWith('/music') ? 'Current Interface' : 'Switch to Music'}</p>
                 </div>
               </button>
-              {oceanUnlocked && (
+              {beyondUnlocked && (
                 <button 
-                  className={`${styles.switchBtn} ${location.pathname.startsWith('/ocean') ? styles.activeInterface : ''}`} 
-                  onClick={() => { navigate('/ocean'); setSwitchOpen(false); }}
+                  className={`${styles.switchBtn} ${location.pathname.startsWith('/beyond') ? styles.activeInterface : ''}`} 
+                  onClick={() => { navigate('/beyond'); setSwitchOpen(false); }}
                   style={{
-                    border: location.pathname.startsWith('/ocean') ? '1px solid rgba(0, 245, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+                    border: location.pathname.startsWith('/beyond') ? '1px solid rgba(0, 245, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
                   }}
                 >
-                  <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #0077b6, #00b4d8)', color: '#fff' }}>海</div>
+                  <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #2c3e50, #000000)', color: '#fff' }}>過</div>
                   <div className={styles.interfaceInfo}>
-                    <h4>DEEP OCEAN</h4>
-                    <p>{location.pathname.startsWith('/ocean') ? 'Current Interface' : 'Switch to Ocean'}</p>
+                    <h4>THE BEYOND</h4>
+                    <p>{location.pathname.startsWith('/beyond') ? 'Current Interface' : 'Switch to Beyond'}</p>
                   </div>
                 </button>
               )}
@@ -330,7 +326,6 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* Search Overlay (Command Palette) */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -356,20 +351,51 @@ const Navbar = () => {
               </button>
             </div>
 
-            {(animeResults.length > 0 || cinemaResults.length > 0 || searching) ? (
+            {(animeResults.length > 0 || cinemaResults.length > 0 || beyondResults.length > 0 || searching) ? (
               <div className={styles.searchResults}>
                 {searching && (
                   <div className={styles.searchHint}>Searching for "{query}"...</div>
                 )}
                 
-                {/* Primary Section Results */}
-                {isCinema ? (
+                {isBeyond ? (
+                  <>
+                    {beyondResults.length > 0 && (
+                      <div className={styles.searchSection}>
+                        <div className={styles.sectionLabel}>Beyond Results</div>
+                        {beyondResults.map((item) => (
+                          <div 
+                            key={item.id + 'beyond'} 
+                            className={styles.resultItem}
+                            onClick={() => {
+                              closeSearch();
+                              navigate('/beyond', { state: { selectedVideo: item } });
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {item.thumbnail && (
+                              <SmartImage src={item.thumbnail} alt={item.title} className={styles.resultThumb} />
+                            )}
+                            <div className={styles.resultInfo}>
+                              <span className={styles.resultName}>{item.title}</span>
+                              <div className={styles.resultMetaWrapper}>
+                                <span className={styles.resultMeta}>BEYOND</span>
+                              </div>
+                            </div>
+                            <div className={styles.keyboardHint}>
+                              <span>Open</span>
+                              <span className={styles.keyBadge}>↵</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : isCinema ? (
                   <>
                     {cinemaResults.length > 0 && (
                       <div className={styles.searchSection}>
                         <div className={styles.sectionLabel}>Cinema Results</div>
                         {cinemaResults.map((item) => {
-                          const releaseYear = item.releaseDate ? item.releaseDate.split('-')[0] : '';
                           return (
                             <Link 
                               key={item.id + 'cinema'} 
@@ -384,41 +410,11 @@ const Navbar = () => {
                                 <span className={styles.resultName}>{item.title}</span>
                                 <div className={styles.resultMetaWrapper}>
                                   <span className={styles.resultMeta}>{item.mediaType}</span>
-                                  {releaseYear && <span className={styles.resultYear}>{releaseYear}</span>}
                                 </div>
-                              </div>
-                              <div className={styles.keyboardHint}>
-                                <span>Open</span>
-                                <span className={styles.keyBadge}>↵</span>
                               </div>
                             </Link>
                           );
                         })}
-                      </div>
-                    )}
-                    
-                    {animeResults.length > 0 && (
-                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
-                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From the Anime Section</div>
-                        {animeResults.map((item) => (
-                          <Link 
-                            key={item.id + 'anime'} 
-                            to={`/anime/${item.id}`} 
-                            className={styles.resultItem}
-                            onClick={closeSearch}
-                            style={{ opacity: 0.7 }}
-                          >
-                            {item.poster && (
-                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
-                            )}
-                            <div className={styles.resultInfo}>
-                              <span className={styles.resultName}>{item.name}</span>
-                              <div className={styles.resultMetaWrapper}>
-                                <span className={styles.resultMeta}>{item.type ?? 'Anime'}</span>
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
                       </div>
                     )}
                   </>
@@ -443,10 +439,6 @@ const Navbar = () => {
                                 <span className={styles.resultMeta}>{item.type ?? 'Anime'}</span>
                               </div>
                             </div>
-                            <div className={styles.keyboardHint}>
-                              <span>Open</span>
-                              <span className={styles.keyBadge}>↵</span>
-                            </div>
                           </Link>
                         ))}
                       </div>
@@ -454,9 +446,8 @@ const Navbar = () => {
 
                     {cinemaResults.length > 0 && (
                       <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
-                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From the Cinema Section</div>
+                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From Cinema</div>
                         {cinemaResults.map((item) => {
-                          const releaseYear = item.releaseDate ? item.releaseDate.split('-')[0] : '';
                           return (
                             <Link 
                               key={item.id + 'cinema'} 
@@ -470,14 +461,34 @@ const Navbar = () => {
                               )}
                               <div className={styles.resultInfo}>
                                 <span className={styles.resultName}>{item.title}</span>
-                                <div className={styles.resultMetaWrapper}>
-                                  <span className={styles.resultMeta}>{item.mediaType}</span>
-                                  {releaseYear && <span className={styles.resultYear}>{releaseYear}</span>}
-                                </div>
                               </div>
                             </Link>
                           );
                         })}
+                      </div>
+                    )}
+
+                    {beyondUnlocked && beyondResults.length > 0 && (
+                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
+                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From Beyond</div>
+                        {beyondResults.map((item) => (
+                          <div 
+                            key={item.id + 'beyond'} 
+                            className={styles.resultItem}
+                            onClick={() => {
+                              closeSearch();
+                              navigate('/beyond', { state: { selectedVideo: item } });
+                            }}
+                            style={{ cursor: 'pointer', opacity: 0.7 }}
+                          >
+                            {item.thumbnail && (
+                              <SmartImage src={item.thumbnail} alt={item.title} className={styles.resultThumb} />
+                            )}
+                            <div className={styles.resultInfo}>
+                              <span className={styles.resultName}>{item.title}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </>
@@ -495,7 +506,6 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* Secret Toast notification */}
       <AnimatePresence>
         {showToast && (
           <motion.div

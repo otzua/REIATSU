@@ -1,7 +1,7 @@
 // Clean and optimized TMDB-based Cinema API service for the Reiatsu platform
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY || '';
 if (!API_KEY) {
-  throw new Error("VITE_TMDB_API_KEY is required but was not found in the environment.");
+  console.warn("REIATSU: VITE_TMDB_API_KEY is missing. Cinema features will be disabled.");
 }
 
 export interface CinemaMovie {
@@ -33,6 +33,9 @@ export interface CinemaMovieDetail {
 }
 
 async function tmdbFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+  if (!API_KEY) {
+    return { results: [] } as T;
+  }
   const queryParams = new URLSearchParams({ api_key: API_KEY, ...params });
   // Using the /tmdb-api proxy defined in vite.config.ts and vercel.json.
   // This securely proxies requests to the Cloudflare Worker server-to-server,
