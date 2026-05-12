@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X, Music } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -12,6 +12,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isCinema = location.pathname.startsWith('/cinema');
+  const isMusic = location.pathname.startsWith('/music');
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
@@ -22,10 +23,27 @@ const Navbar = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const getHomePath = () => {
+    if (isCinema) return '/cinema';
+    if (isMusic) return '/music';
+    return '/';
+  };
+
+  const getLogoPath = () => {
+    if (isCinema) return '/cinema';
+    if (isMusic) return '/music';
+    return '/';
+  };
+
+  const getLogoKanji = () => {
+    if (isCinema) return '映';
+    if (isMusic) return '音';
+    return '霊';
+  };
+
   const navItems = [
-    { id: 'home', path: isCinema ? '/cinema' : '/', icon: Home },
+    { id: 'home', path: getHomePath(), icon: Home },
     { id: 'schedule', path: '/schedule', icon: Calendar },
-    { id: 'music', path: '/music', icon: Music },
     { id: 'search', path: '#search', icon: Search },
     { id: 'switch', path: '#switch', icon: ArrowRightLeft },
   ];
@@ -110,8 +128,8 @@ const Navbar = () => {
   return (
     <>
       <div className={styles.navbarContainer}>
-        <Link to={isCinema ? "/cinema" : "/"} className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); }}>
-          <span className={styles.logoKanji}>{isCinema ? '映' : '霊'}</span>
+        <Link to={getLogoPath()} className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); }}>
+          <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </Link>
 
         <nav className={styles.navCapsule}>
