@@ -13,6 +13,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const isCinema = location.pathname.startsWith('/cinema');
   const isMusic = location.pathname.startsWith('/music');
+  const isOcean = location.pathname.startsWith('/ocean');
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
@@ -23,21 +24,31 @@ const Navbar = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Secret ocean unlocking states
+  const [oceanUnlocked, setOceanUnlocked] = useState(() => localStorage.getItem('ocean_unlocked') === 'true');
+  const [, setTypedKeys] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const logoClicksRef = useRef({ count: 0, timer: 0 });
+
   const getHomePath = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
+    if (isOcean) return '/ocean';
     return '/';
   };
 
   const getLogoPath = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
+    if (isOcean) return '/ocean';
     return '/';
   };
 
   const getLogoKanji = () => {
     if (isCinema) return '映';
     if (isMusic) return '音';
+    if (isOcean) return '海';
     return '霊';
   };
 
@@ -64,8 +75,37 @@ const Navbar = () => {
     }
   };
 
+  // Auto-dismiss secret toast
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Secret cheat code: typing 'ocean' anywhere
+      if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        const char = e.key.toLowerCase();
+        if (char >= 'a' && char <= 'z') {
+          setTypedKeys(prev => {
+            const next = (prev + char).slice(-15);
+            if (next.endsWith('ocean')) {
+              const newState = !oceanUnlocked;
+              localStorage.setItem('ocean_unlocked', String(newState));
+              setOceanUnlocked(newState);
+              setToastMsg(newState ? '🌊 Secret Ocean Interface Unlocked!' : '🔒 Secret Ocean Interface Hidden!');
+              setShowToast(true);
+              return '';
+            }
+            return next;
+          });
+        }
+      }
+
       if (e.key === '/' && !searchOpen && !switchOpen && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
         e.preventDefault();
         setSearchOpen(true);
@@ -84,7 +124,27 @@ const Navbar = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [searchOpen, switchOpen]);
+  }, [searchOpen, switchOpen, oceanUnlocked]);
+
+  const handleLogoClick = () => {
+    const now = Date.now();
+    const clicks = logoClicksRef.current;
+    if (now - clicks.timer > 3000) {
+      clicks.count = 1;
+    } else {
+      clicks.count += 1;
+    }
+    clicks.timer = now;
+
+    if (clicks.count >= 5) {
+      const newState = !oceanUnlocked;
+      localStorage.setItem('ocean_unlocked', String(newState));
+      setOceanUnlocked(newState);
+      setToastMsg(newState ? '🌊 Secret Ocean Interface Unlocked!' : '🔒 Secret Ocean Interface Hidden!');
+      setShowToast(true);
+      clicks.count = 0;
+    }
+  };
 
   const handleSwitchClick = () => {
     if (searchOpen) closeSearch();
@@ -128,7 +188,7 @@ const Navbar = () => {
   return (
     <>
       <div className={styles.navbarContainer}>
-        <Link to={getLogoPath()} className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); }}>
+        <Link to={getLogoPath()} className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }}>
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </Link>
 
@@ -221,13 +281,13 @@ const Navbar = () => {
             </div>
             <div className={styles.switchOptions}>
               <button 
-                className={`${styles.switchBtn} ${(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music')) ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/ocean')) ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
-                  <p>{(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music')) ? 'Current Interface' : 'Switch to Anime'}</p>
+                  <p>{(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/ocean')) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
               </button>
               <button 
@@ -250,6 +310,21 @@ const Navbar = () => {
                   <p>{location.pathname.startsWith('/music') ? 'Current Interface' : 'Switch to Music'}</p>
                 </div>
               </button>
+              {oceanUnlocked && (
+                <button 
+                  className={`${styles.switchBtn} ${location.pathname.startsWith('/ocean') ? styles.activeInterface : ''}`} 
+                  onClick={() => { navigate('/ocean'); setSwitchOpen(false); }}
+                  style={{
+                    border: location.pathname.startsWith('/ocean') ? '1px solid rgba(0, 245, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #0077b6, #00b4d8)', color: '#fff' }}>海</div>
+                  <div className={styles.interfaceInfo}>
+                    <h4>DEEP OCEAN</h4>
+                    <p>{location.pathname.startsWith('/ocean') ? 'Current Interface' : 'Switch to Ocean'}</p>
+                  </div>
+                </button>
+              )}
             </div>
           </motion.div>
         )}
@@ -416,6 +491,21 @@ const Navbar = () => {
                 </div>
               </div>
             ) : null}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Secret Toast notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            className={styles.secretToast}
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+          >
+            {toastMsg}
           </motion.div>
         )}
       </AnimatePresence>

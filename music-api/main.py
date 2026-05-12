@@ -1,27 +1,24 @@
 import os
-import glob
-from fastapi import FastAPI, Query, HTTPException, BackgroundTasks, Request
+import sys
+import json
+import asyncio
+import logging
+from typing import List, Optional
+from fastapi import FastAPI, Query, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import aiohttp
 import yt_dlp
-import asyncio
-from typing import List, Optional
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
-
-# Add standard macOS Python user bin directory patterns
-for user_bin in glob.glob(os.path.expanduser("~/Library/Python/*/bin")):
-    if user_bin not in os.environ.get("PATH", ""):
-        os.environ["PATH"] = f"{user_bin}:{os.environ.get('PATH', '')}"
-
-# Prepend Homebrew bin so it takes absolute precedence over outdated pip versions of yt-dlp
-homebrew_bin = "/opt/homebrew/bin"
-path_without_hb = os.environ.get("PATH", "").replace(homebrew_bin, "").replace("::", ":").strip(":")
-os.environ["PATH"] = f"{homebrew_bin}:{path_without_hb}"
 
 load_dotenv()
 
-app = FastAPI(title="REIATSU Music API")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("music-api")
+
+app = FastAPI(title="REIATSU Music API (spotDL Powered)")
 
 # Enable CORS
 app.add_middleware(
@@ -31,301 +28,223 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Optional Spotify integration ──────────────────────────────────────────────
-# Spotify search requires a Spotify Premium account linked to the developer app
-# (as of Spotify's Nov 2024 API policy change). If credentials are not available
-# or valid, the API gracefully falls back to YouTube-based search.
-
-SPOTIFY_ENABLED = False
-sp = None
-
-_client_id = os.getenv("SPOTIPY_CLIENT_ID")
-_client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-
-if _client_id and _client_secret:
-    try:
-        import spotipy
-        from spotipy.oauth2 import SpotifyClientCredentials
-        auth_manager = SpotifyClientCredentials(client_id=_client_id, client_secret=_client_secret)
-        sp = spotipy.Spotify(auth_manager=auth_manager)
-        SPOTIFY_ENABLED = True
-        print("[music-api] Spotify integration enabled.")
-    except Exception as e:
-        print(f"[music-api] Spotify init failed: {e}. Using YouTube search only.")
-else:
-    print("[music-api] No Spotify credentials — using YouTube search only.")
-
-DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR", "downloads")
+# Ensure output directory exists
+DOWNLOAD_DIR = os.getenv("OUTPUT_DIR", "downloads")
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
 
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _yt_search_tracks(q: str, limit: int = 20) -> list:
-    """Search YouTube for music tracks and return a normalised track list."""
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'quiet': True,
-        'no_warnings': True,
-        'extract_flat': True,  # Don't download, just get metadata
-    }
-    search_query = f"ytsearch{limit}:{q}"
-    results = []
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(search_query, download=False)
-        for entry in info.get('entries', []):
-            if not entry:
-                continue
-            # Thumbnail: pick largest available
-            thumbnails = entry.get('thumbnails') or []
-            poster = thumbnails[-1]['url'] if thumbnails else entry.get('thumbnail')
-            # Parse "Artist - Title" from YouTube title if possible
-            title = entry.get('title', '')
-            artist = entry.get('uploader', 'Unknown Artist').replace(' - Topic', '')
-            # Attempt split on " - "
-            if ' - ' in title:
-                parts = title.split(' - ', 1)
-                artist = parts[0].strip()
-                name = parts[1].strip()
-            else:
-                name = title
-
-            results.append({
-                'id': entry.get('id', ''),
-                'name': name,
-                'artist': artist,
-                'album': '',
-                'poster': poster or '',
-                'url': entry.get('webpage_url') or f"https://www.youtube.com/watch?v={entry.get('id','')}",
-                'duration_ms': int(entry.get('duration', 0)) * 1000,
-                'source': 'youtube',
-            })
-    return results
-
-
-# ── Endpoints ─────────────────────────────────────────────────────────────────
-
-@app.get("/search")
-async def search(q: str = Query(..., min_length=1), limit: int = 20):
-    """
-    Search for tracks.
-    - Uses Spotify if credentials are configured and valid.
-    - Falls back to YouTube search otherwise.
-    """
-    # Try Spotify first
-    if SPOTIFY_ENABLED and sp:
-        try:
-            results = sp.search(q=q, limit=limit, type="track")
-            tracks = []
-            for item in results["tracks"]["items"]:
-                tracks.append({
-                    "id": item["id"],
-                    "name": item["name"],
-                    "artist": item["artists"][0]["name"],
-                    "album": item["album"]["name"],
-                    "poster": item["album"]["images"][0]["url"] if item["album"]["images"] else "",
-                    "url": item["external_urls"]["spotify"],
-                    "duration_ms": item["duration_ms"],
-                    "source": "spotify",
-                })
-            return tracks
-        except Exception as e:
-            print(f"[music-api] Spotify search failed: {e}. Falling back to YouTube.")
-
-    # YouTube fallback
-    try:
-        return _yt_search_tracks(q, limit)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/stream")
-async def stream(q: str = Query(..., min_length=1)):
-    """
-    Get a direct streamable audio URL from YouTube.
-    Pass 'Artist - Track Name' as `q` for best accuracy.
-    If `q` looks like a YouTube URL, it's used directly.
-    """
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'quiet': True,
-        'no_warnings': True,
-        'extract_flat': False,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android']
-            }
-        }
-    }
-
-    # If q is a YouTube URL, use it directly; otherwise do a search
-    is_yt_url = 'youtube.com/watch' in q or 'youtu.be/' in q
-    search_query = q if is_yt_url else f"ytsearch1:{q}"
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(search_query, download=False)
-            entry = info if is_yt_url else (info.get('entries') or [None])[0]
-            if not entry:
-                raise HTTPException(status_code=404, detail="No stream found")
-                
-            # Extract http headers used by yt-dlp
-            http_headers = entry.get('http_headers', {})
-            user_agent = http_headers.get('User-Agent') or http_headers.get('user-agent')
-
-            return {
-                "stream_url": entry['url'],
-                "title": entry.get('title'),
-                "thumbnail": entry.get('thumbnail'),
-                "user_agent": user_agent,
-            }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/download")
-async def download_track(
-    url: str, 
-    background_tasks: BackgroundTasks,
-    name: Optional[str] = None,
-    artist: Optional[str] = None
-):
-    """Download the track to the server in the background."""
-    background_tasks.add_task(run_download, url, name, artist)
-    return {"message": "Download started in background", "url": url, "name": name, "artist": artist}
-
-
-async def run_download(url: str, name: Optional[str] = None, artist: Optional[str] = None):
-    # Automatic routing: Spotify vs YouTube
-    is_youtube = 'youtube.com' in url or 'youtu.be' in url
-    
-    success = False
-    
-    if is_youtube:
-        command = f'yt-dlp -x --audio-format flac -o "{DOWNLOAD_DIR}/%(title)s.%(ext)s" "{url}"'
-        print(f"[music-api] Running direct YouTube download command: {command}")
-        process = await asyncio.create_subprocess_shell(
-            command,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        if process.returncode == 0:
-            print(f"[music-api] Direct YouTube Downloaded successfully: {url}")
-            success = True
-        else:
-            print(f"[music-api] Error downloading direct YouTube {url}: {stderr.decode()}")
-    else:
-        # Spotify link or plain text search query. Let's try spot_flac script first.
-        is_spotify = 'spotify.com' in url
-        
-        if is_spotify:
-            # Resolve path to SuperSPOTDL/spot_flac.py
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            spot_flac_path = os.path.abspath(os.path.join(script_dir, "..", "SuperSPOTDL", "spot_flac.py"))
-            import sys
-            command = f'"{sys.executable}" "{spot_flac_path}" "{url}"'
-            print(f"[music-api] Running Spotify download command: {command}")
-            sub_env = os.environ.copy()
-            sub_env["DOWNLOAD_DIR"] = os.path.abspath(DOWNLOAD_DIR)
-            process = await asyncio.create_subprocess_shell(
-                command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                env=sub_env
-            )
-            stdout, stderr = await process.communicate()
-            if process.returncode == 0:
-                print(f"[music-api] Spotify Downloaded successfully via spot_flac: {url}")
-                success = True
-            else:
-                print(f"[music-api] Spotify download via spot_flac failed with return code {process.returncode}: {stderr.decode()}")
-        
-        # If the Spotify downloader failed or we were given a plain text query, fall back to yt-dlp search!
-        if not success and (name or artist or not is_spotify):
-            query = f"{artist} - {name}" if (artist and name) else url
-            # Escape double quotes in title/artist for the command line
-            escaped_query = query.replace('"', '\\"')
-            command = f'yt-dlp -x --audio-format flac -o "{DOWNLOAD_DIR}/%(title)s.%(ext)s" "ytsearch1:{escaped_query}"'
-            print(f"[music-api] Running premium yt-dlp fallback search and download for: {query}")
-            process = await asyncio.create_subprocess_shell(
-                command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            stdout, stderr = await process.communicate()
-            if process.returncode == 0:
-                print(f"[music-api] Fallback downloaded successfully using ytsearch: {query}")
-                success = True
-            else:
-                print(f"[music-api] Fallback downloading {query} failed: {stderr.decode()}")
-
-
-@app.get("/audio-proxy")
-async def audio_proxy(
-    request: Request, 
-    url: str = Query(..., min_length=1),
-    ua: Optional[str] = Query(None)
-):
-    """
-    Proxy audio/video streams from YouTube's server to the client's browser.
-    This resolves the classic '403 Forbidden' YouTube stream URL restriction.
-    By forwarding Range headers and matching User-Agents, it fully supports seeking,
-    pausing, and buffering under HTML5 player controls with standard 206 Partial Content.
-    """
-    # Forward any incoming Range headers from the browser
-    range_header = request.headers.get("range")
-    
-    # Use the passed-in User-Agent that yt-dlp used, otherwise fallback to standard browser UA
-    user_agent = ua or "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    
-    headers = {
-        "User-Agent": user_agent,
-    }
-    if range_header:
-        headers["Range"] = range_header
-    
-    try:
-        session = aiohttp.ClientSession()
-        response = await session.get(url, headers=headers)
-        
-        # Capture and forward all relevant streaming/cache/content headers
-        headers_to_forward = {}
-        for h in ["Content-Range", "Content-Length", "Accept-Ranges", "Content-Type", "Cache-Control"]:
-            if h in response.headers:
-                headers_to_forward[h] = response.headers[h]
-        
-        status_code = response.status
-        
-        async def stream_generator():
-            try:
-                async for chunk in response.content.iter_chunked(65536):
-                    yield chunk
-            finally:
-                await response.release()
-                await session.close()
-                
-        return StreamingResponse(
-            stream_generator(), 
-            status_code=status_code,
-            headers=headers_to_forward
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Proxy error: {str(e)}")
-
+# Spotify Auth - Use default public scraper strategy for search if rate limited
+client_id = os.getenv("SPOTIPY_CLIENT_ID")
+client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+try:
+    auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+except Exception:
+    sp = None
 
 @app.get("/status")
 async def status():
     return {
         "status": "online",
-        "engine": "yt-dlp",
-        "spotify": SPOTIFY_ENABLED,
+        "engine": "spotDL"
     }
 
+@app.get("/search")
+async def search(q: str = Query(...), limit: int = 20):
+    try:
+        if sp:
+            results = sp.search(q=q, limit=limit, type="track")
+            items = results["tracks"]["items"]
+            tracks = []
+            for item in items:
+                tracks.append({
+                    "id": item["id"],
+                    "name": item["name"],
+                    "artist": item["artists"][0]["name"],
+                    "album": item["album"]["name"],
+                    "poster": item["album"]["images"][0]["url"] if item["album"]["images"] else None,
+                    "url": item["external_urls"]["spotify"],
+                    "duration_ms": item.get("duration_ms")
+                })
+            return tracks
+    except Exception as e:
+        logger.error(f"Search error (falling back to ytmusic): {e}")
+
+    # Fallback to ytmusic search
+    from ytmusicapi import YTMusic
+    ytmusic = YTMusic()
+    search_results = ytmusic.search(q, filter="songs", limit=limit)
+    tracks = []
+    for item in search_results:
+        tracks.append({
+            "id": item.get("videoId"),
+            "name": item.get("title"),
+            "artist": item.get("artists", [{}])[0].get("name", "Unknown"),
+            "album": item.get("album", {}).get("name", "Unknown"),
+            "poster": item.get("thumbnails", [{}])[-1].get("url"),
+            "url": f"https://music.youtube.com/watch?v={item.get('videoId')}",
+            "duration_ms": None
+        })
+    return tracks
+
+@app.get("/stream")
+async def stream(q: str = Query(...)):
+    """Get a direct streamable URL."""
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'no_warnings': True,
+        'extract_flat': False,
+    }
+    
+    if "open.spotify.com" in q:
+        search_query = f"ytsearch:{q}"
+    else:
+        search_query = f"ytsearch:{q}"
+    
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            loop = asyncio.get_event_loop()
+            info = await loop.run_in_executor(None, lambda: ydl.extract_info(search_query, download=False))
+            if 'entries' in info and len(info['entries']) > 0:
+                best_entry = info['entries'][0]
+                return {
+                    "stream_url": best_entry['url'],
+                    "title": best_entry.get('title'),
+                    "thumbnail": best_entry.get('thumbnail'),
+                    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                }
+            else:
+                raise HTTPException(status_code=404, detail="No stream found")
+    except Exception as e:
+        logger.error(f"Stream error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/audio-proxy")
+async def audio_proxy(url: str, ua: str = "Mozilla/5.0"):
+    """Proxy audio streams to avoid CORS/Forbidden errors."""
+    async def stream_data():
+        async with aiohttp.ClientSession(headers={"User-Agent": ua}) as session:
+            async with session.get(url) as resp:
+                async for chunk in resp.content.iter_chunked(65536):
+                    yield chunk
+
+    return StreamingResponse(stream_data(), media_type="audio/mpeg")
+
+@app.get("/download")
+async def download_track(url: str, name: Optional[str] = None, artist: Optional[str] = None, background_tasks: BackgroundTasks = None):
+    """Download the track/playlist using spotdl engine."""
+    background_tasks.add_task(run_spotdl_download, url)
+    return {
+        "message": "Download started using spotDL engine", 
+        "url": url,
+        "name": name,
+        "artist": artist
+    }
+
+async def run_spotdl_download(url: str):
+    """Run spotdl download in a subprocess."""
+    logger.info(f"Starting spotDL download for: {url}")
+    
+    # Ensure ffmpeg and spotdl are in path for the current process
+    homebrew_bin = "/opt/homebrew/bin"
+    env = os.environ.copy()
+    if homebrew_bin not in env.get("PATH", ""):
+        env["PATH"] = f"{homebrew_bin}:{env.get('PATH', '')}"
+        
+    # Remove rate-limited spotify credentials from env so spotdl uses its internal defaults
+    if "SPOTIPY_CLIENT_ID" in env:
+        del env["SPOTIPY_CLIENT_ID"]
+    if "SPOTIPY_CLIENT_SECRET" in env:
+        del env["SPOTIPY_CLIENT_SECRET"]
+
+    spotdl_path = os.path.join(os.path.dirname(sys.executable), "spotdl")
+    cmd = [
+        spotdl_path, 
+        url,
+        "--output", DOWNLOAD_DIR,
+        "--format", "flac"
+    ]
+    
+    logger.info(f"Running command: {' '.join(cmd)}")
+    
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=env
+        )
+        stdout, stderr = await process.communicate()
+        
+        if process.returncode == 0:
+            logger.info(f"spotDL Download Finished: {url}")
+        else:
+            logger.error(f"spotDL Download Failed: {url}\nError: {stderr.decode()}")
+    except Exception as e:
+        logger.error(f"spotDL execution failed: {e}")
+
+@app.get("/ocean")
+async def get_ocean_feed():
+    """Fetch and parse HentaiOcean RSS feed into clean structured JSON."""
+    import xml.etree.ElementTree as ET
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://hentaiocean.com/rss.xml") as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail="Failed to fetch RSS feed")
+                xml_data = await response.text()
+                
+        # Parse XML
+        root = ET.fromstring(xml_data)
+        items = []
+        namespaces = {
+            'media': 'http://search.yahoo.com/mrss/'
+        }
+        
+        for item in root.findall('.//item'):
+            guid_el = item.find('guid')
+            title_el = item.find('title')
+            link_el = item.find('link')
+            desc_el = item.find('description')
+            pub_date_el = item.find('pubDate')
+            embed_url_el = item.find('embedUrl')
+            
+            # media:thumbnail format is typically <media:thumbnail url="..." />
+            thumbnail_el = item.find('media:thumbnail', namespaces)
+            thumbnail = ""
+            if thumbnail_el is not None:
+                thumbnail = thumbnail_el.attrib.get('url', '')
+            
+            items.append({
+                "id": guid_el.text if guid_el is not None else "",
+                "title": title_el.text if title_el is not None else "",
+                "link": link_el.text if link_el is not None else "",
+                "description": desc_el.text if desc_el is not None else "",
+                "pubDate": pub_date_el.text if pub_date_el is not None else "",
+                "embedUrl": embed_url_el.text if embed_url_el is not None else "",
+                "thumbnail": thumbnail
+            })
+            
+        return items
+    except Exception as e:
+        logger.error(f"Ocean feed fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/ocean/details")
+async def get_ocean_details(slug: str = Query(...)):
+    """Proxy details for a specific slug from HentaiOcean."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://hentaiocean.com/api?action=hentai&slug={slug}") as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail="Failed to fetch details")
+                return await response.json()
+    except Exception as e:
+        logger.error(f"Ocean details fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
+    print("[music-api] spotDL engine initialized. Starting server...")
     uvicorn.run(app, host="0.0.0.0", port=8000)
