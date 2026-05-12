@@ -44,6 +44,22 @@ const Navbar = () => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && !searchOpen && !switchOpen && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => inputRef.current?.focus(), 100);
+      } else if (e.key === 'Escape') {
+        closeSearch();
+        setSwitchOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [searchOpen, switchOpen]);
+
   const handleSwitchClick = () => {
     if (searchOpen) closeSearch();
     setSwitchOpen(!switchOpen);
