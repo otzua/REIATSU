@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -95,12 +95,12 @@ const Navbar = () => {
           e.preventDefault();
           if (location.pathname.startsWith('/beyond')) {
             navigate('/');
-            setToastMsg('🔒 Closed Portal');
+            setToastMsg('Portal Closed');
             setShowToast(true);
           } else {
             localStorage.setItem('beyond_unlocked', 'true');
             setBeyondUnlocked(true);
-            setToastMsg('✨ Entering Portal...');
+            setToastMsg('Entering Portal...');
             setShowToast(true);
             navigate('/beyond');
           }
@@ -142,7 +142,7 @@ const Navbar = () => {
       const newState = !beyondUnlocked;
       localStorage.setItem('beyond_unlocked', String(newState));
       setBeyondUnlocked(newState);
-      setToastMsg(newState ? '✨ Secret Interface Unlocked!' : '🔒 Secret Interface Hidden!');
+      setToastMsg(newState ? 'Interface Unlocked' : 'Interface Hidden');
       setShowToast(true);
       clicks.count = 0;
     }
@@ -368,7 +368,7 @@ const Navbar = () => {
                             className={styles.resultItem}
                             onClick={() => {
                               closeSearch();
-                              navigate('/beyond', { state: { selectedVideo: item } });
+                              navigate(`/beyond/watch/${item.id}`);
                             }}
                             style={{ cursor: 'pointer' }}
                           >
@@ -477,7 +477,7 @@ const Navbar = () => {
                             className={styles.resultItem}
                             onClick={() => {
                               closeSearch();
-                              navigate('/beyond', { state: { selectedVideo: item } });
+                              navigate(`/beyond/watch/${item.id}`);
                             }}
                             style={{ cursor: 'pointer', opacity: 0.7 }}
                           >
@@ -515,6 +515,9 @@ const Navbar = () => {
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: 'spring', damping: 20, stiffness: 200 }}
           >
+            <span className={styles.secretToastIcon}>
+              {toastMsg.includes('Closed') || toastMsg.includes('Hidden') ? <Lock size={16} /> : <Sparkles size={16} />}
+            </span>
             {toastMsg}
           </motion.div>
         )}

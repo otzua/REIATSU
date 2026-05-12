@@ -612,3 +612,8 @@
     max-width: 90vw;
   }
 }
+.secretToastIcon {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+}

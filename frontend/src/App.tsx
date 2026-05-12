@@ -8,6 +8,7 @@ import AnimeDetails from './pages/AnimeDetails';
 import Schedule from './pages/Schedule';
 import Music from './pages/Music';
 import Beyond from './pages/Beyond';
+import BeyondWatch from './pages/BeyondWatch';
 import Layout from './components/Layout';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/music" element={<Music />} />
           <Route path="/beyond" element={<Beyond />} />
+          <Route path="/beyond/watch/:id" element={<BeyondWatch />} />
         </Routes>
       </Layout>
     </div>

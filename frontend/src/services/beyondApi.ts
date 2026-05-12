@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const MUSIC_API_BASE = '';
+const MUSIC_API_BASE = '/api';
 
 export interface BeyondVideo {
   id: string; // The slug
@@ -25,8 +25,17 @@ export interface BeyondDetailInfo {
   uploaddate: string;
   coverimg: string;
   series: string | null;
+  views?: number;
+  rating?: string | null;
   status: number;
   recentrelease: number;
+  best_stream?: string | null;
+  streams?: Array<{
+    url: string;
+    filename: string;
+    resolution: string;
+    height: number;
+  }>;
 }
 
 export interface BeyondDetails {
@@ -39,26 +48,36 @@ export const beyondApi = {
    * Fetch recent videos.
    */
   getFeed: async (): Promise<BeyondVideo[]> => {
-    const res = await axios.get<BeyondVideo[]>(`${MUSIC_API_BASE}/beyond`);
-    return res.data;
+    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond`);
+    return res.data.data;
   },
 
   /**
    * Fetch full details for a video slug.
    */
   getDetails: async (slug: string): Promise<BeyondDetails> => {
-    const res = await axios.get<BeyondDetails>(`${MUSIC_API_BASE}/beyond/details`, {
+    const res = await axios.get<{ success: boolean, data: BeyondDetails }>(`${MUSIC_API_BASE}/beyond/details`, {
       params: { slug }
     });
-    return res.data;
+    return res.data.data;
   },
 
   /**
    * Search for videos.
    */
   search: async (query: string): Promise<BeyondVideo[]> => {
-    const res = await axios.get<BeyondVideo[]>(`${MUSIC_API_BASE}/beyond/search`, {
+    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond/search`, {
       params: { q: query }
+    });
+    return res.data.data;
+  },
+
+  /**
+   * Extract video streams directly from the client.
+   */
+  extractStream: async (url: string): Promise<any> => {
+    const res = await axios.get('https://www.alphaapis.org/api/v1/extract', {
+      params: { url }
     });
     return res.data;
   }
