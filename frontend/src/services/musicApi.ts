@@ -46,6 +46,7 @@ export interface DownloadResult {
   url: string;
   name?: string;
   artist?: string;
+  downloadUrl?: string;
 }
 
 export const musicApi = {

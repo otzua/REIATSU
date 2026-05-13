@@ -24,10 +24,13 @@ const BeyondWatch = () => {
   // Keyboard Shortcuts for Fullscreen, Play/Pause, and Seeking
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const target = e.target as HTMLElement;
+      if (['input', 'textarea', 'select'].includes(target.tagName.toLowerCase())) return;
       
       const key = e.key.toLowerCase();
+      
       if (key === 'f') {
+        e.preventDefault();
         if (!document.fullscreenElement) {
           playerWrapperRef.current?.requestFullscreen().catch(err => {
             console.error(`Fullscreen error: ${err.message}`);
@@ -37,6 +40,7 @@ const BeyondWatch = () => {
         }
       }
       if (e.key === ' ') {
+        if (target.tagName.toLowerCase() === 'button') return;
         e.preventDefault();
         if (videoRef.current) {
           if (videoRef.current.paused) videoRef.current.play();
@@ -44,12 +48,15 @@ const BeyondWatch = () => {
         }
       }
       if (key === 'arrowright') {
+        e.preventDefault();
         if (videoRef.current) videoRef.current.currentTime += 10;
       }
       if (key === 'arrowleft') {
+        e.preventDefault();
         if (videoRef.current) videoRef.current.currentTime -= 10;
       }
       if (key === 'm') {
+        e.preventDefault();
         if (videoRef.current) videoRef.current.muted = !videoRef.current.muted;
       }
     };
@@ -65,8 +72,11 @@ const BeyondWatch = () => {
 
     let finalUrl = activeStream;
     if (activeStream.includes('.m3u8')) {
-      // Use our backend proxy to bypass Referer checks
-      finalUrl = `${MUSIC_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
+      // Only use our backend proxy for raw Hanime manifest links that require a Referer header.
+      // AlphaAPIs extracted stream links are pre-signed CDN links that stream directly with zero buffering.
+      if (activeStream.includes('weeb.hanime.tv') || activeStream.includes('proxy-required')) {
+        finalUrl = `${MUSIC_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
+      }
       
       if (Hls.isSupported()) {
         if (hlsRef.current) {
@@ -113,6 +123,8 @@ const BeyondWatch = () => {
     } else {
       // Standard MP4 or direct link
       videoElement.src = activeStream;
+      videoElement.load();
+      videoElement.play().catch(e => console.log('Autoplay blocked:', e));
     }
 
     return () => {
@@ -145,25 +157,10 @@ const BeyondWatch = () => {
           };
           setVideo(videoObj);
           setDetails(data);
+          setActiveStream(info.best_stream || info.streams?.[0]?.url || null);
+          setLoading(false);
 
-          // Perform client-side extraction to get fresh, IP-matched stream links
-          try {
-            const extraction = await beyondApi.extractStream(videoObj.embedUrl);
-            if (extraction.success && (extraction.best_stream || (extraction.streams && extraction.streams.length > 0))) {
-              setActiveStream(extraction.best_stream || extraction.streams[0].url);
-              setDetails(prev => {
-                if (!prev) return data;
-                const newInfo = [...prev.info];
-                newInfo[0] = { ...newInfo[0], best_stream: extraction.best_stream, streams: extraction.streams };
-                return { ...prev, info: newInfo };
-              });
-            } else {
-              setActiveStream(info.best_stream || null);
-            }
-          } catch (err) {
-            console.error('Client-side extraction failed, falling back to backend stream', err);
-            setActiveStream(info.best_stream || null);
-          }
+
 
           // Update history
           const saved = localStorage.getItem('beyond_history');
@@ -179,7 +176,6 @@ const BeyondWatch = () => {
           const updated = [videoObj, ...filtered].slice(0, 10);
           localStorage.setItem('beyond_history', JSON.stringify(updated));
         }
-        setLoading(false);
       })
       .catch((err) => {
         console.error('Beyond API Error:', err);
@@ -259,8 +255,10 @@ const BeyondWatch = () => {
                       className={styles.iframe}
                       controls
                       autoPlay
+                      playsInline
+                      preload="auto"
                       poster={video.thumbnail}
-                      crossOrigin="anonymous"
+                      crossOrigin={activeStream?.includes('.m3u8') ? 'anonymous' : undefined}
                     />
                 ) : (
                   <div className={styles.iframe} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', gap: '1rem' }}>

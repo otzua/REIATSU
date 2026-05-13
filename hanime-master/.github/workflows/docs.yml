@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    build:
+        name: Build Docs
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 21
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: cd docs && pnpm i
+
+            - name: Build docs
+              run: cd docs && pnpm run build
+
+            - name: Upload Build Artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: docs/build
+
+    deploy:
+        name: Deploy docs to GitHub Pages
+        needs: build
+
+        permissions:
+            pages: write
+            id-token: write
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4

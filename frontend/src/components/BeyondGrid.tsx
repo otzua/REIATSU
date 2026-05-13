@@ -12,7 +12,7 @@ interface BeyondGridProps {
 
 const BeyondGrid = ({ videos, onVideoSelect, title }: BeyondGridProps) => {
   return (
-    <section className={styles.section} style={{ padding: 0, marginTop: '4rem' }}>
+    <section className={styles.section}>
       <div className={styles.header}>
         <div className={styles.accentBox}></div>
         <h2 className={styles.title} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>

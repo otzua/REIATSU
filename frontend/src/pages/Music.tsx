@@ -39,8 +39,16 @@ const Music = () => {
     setDlMsg('Connecting to SpotiFLAC engine...');
     try {
       const res = await musicApi.download(trimmed);
+      if (res && res.downloadUrl) {
+        const link = document.createElement('a');
+        link.href = res.downloadUrl;
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
       setDlStatus('success');
-      setDlMsg(res.message || 'Download queued successfully!');
+      setDlMsg(res.message || 'Download started successfully!');
       setDlUrl('');
       setTimeout(() => { setDlStatus('idle'); setDlMsg(''); }, 4000);
     } catch {

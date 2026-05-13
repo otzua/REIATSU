@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1, Volume2, VolumeX, ListMusic, Loader2, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -35,6 +35,48 @@ const MusicPlayer: React.FC = () => {
   } = useMusic();
   const navigate = useNavigate();
   const [resolvedArtistId, setResolvedArtistId] = useState<string | null>(null);
+  
+  const currentTimeRef = useRef(currentTime);
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      const target = e.target as HTMLElement;
+      if (['input', 'textarea', 'select'].includes(target.tagName.toLowerCase())) return;
+
+      const key = e.key.toLowerCase();
+      
+      if (key === ' ') {
+        if (target.tagName.toLowerCase() === 'button') return;
+        e.preventDefault();
+        togglePlay();
+      } else if (key === 'f') {
+        e.preventDefault();
+        setIsExpanded(!isExpanded);
+      } else if (key === 'm') {
+        if (target.tagName.toLowerCase() === 'input') return;
+        e.preventDefault();
+        setMuted(!muted);
+      } else if (key === 'arrowright') {
+        if (target.tagName.toLowerCase() === 'input') return;
+        e.preventDefault();
+        seek(Math.min(currentTimeRef.current + 10, duration));
+      } else if (key === 'arrowleft') {
+        if (target.tagName.toLowerCase() === 'input') return;
+        e.preventDefault();
+        seek(Math.max(currentTimeRef.current - 10, 0));
+      }
+    };
+    
+    // Only listen if a track is actually loaded (MusicPlayer is active)
+    if (currentTrack) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentTrack, isExpanded, setIsExpanded, togglePlay, seek, duration, muted, setMuted]);
 
   useEffect(() => {
     if (!currentTrack) return;

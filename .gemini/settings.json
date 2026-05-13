@@ -4,5 +4,8 @@
       "type": "http",
       "url": "https://mcp.vercel.com"
     }
+  },
+  "ide": {
+    "enabled": true
   }
 }

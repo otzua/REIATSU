@@ -1,0 +1,42 @@
+name: Prettify code
+on: [push]
+permissions:
+  contents: write
+
+jobs:
+  prettify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v4
+        with:
+            version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm i
+
+      - name: Prettify code
+        run: pnpm run prettify
+
+      - name: Configure git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"          
+
+      - name: Commit changes
+        run: |
+          git add .
+          git diff-index --quiet HEAD || git commit -m "style: Prettify code"
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push origin master

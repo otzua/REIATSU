@@ -6,7 +6,8 @@ import logging
 from typing import List, Optional
 from fastapi import FastAPI, Query, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
+import urllib.parse
 import aiohttp
 import yt_dlp
 try:
@@ -258,17 +259,46 @@ async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
         await session.close()
         raise HTTPException(status_code=500, detail=str(e))
 
+download_locks = {}
+completed_downloads = set()
+
 @app.get("/download")
 async def download_track(url: str, name: Optional[str] = None, artist: Optional[str] = None, background_tasks: BackgroundTasks = None):
     engine = "SpotiFLAC (Lossless)" if ("spotify.com" in url and SPOTIFLAC_AVAILABLE) else "yt-dlp (Fallback)"
     background_tasks.add_task(run_download, url)
+    encoded_url = urllib.parse.quote(url)
     return {
         "message": f"Download queued via {engine}",
         "engine": engine,
         "url": url,
         "name": name,
-        "artist": artist
+        "artist": artist,
+        "downloadUrl": f"/api/music/download-file?url={encoded_url}"
     }
+
+@app.get("/download-file")
+async def download_file(url: str):
+    await run_download(url)
+    
+    newest_file = None
+    newest_time = 0
+    for root, _, files in os.walk(DOWNLOAD_DIR):
+        for f in files:
+            if f.endswith(('.flac', '.mp3', '.m4a', '.wav', '.ogg', '.opus', '.webm')):
+                fp = os.path.join(root, f)
+                try:
+                    mtime = os.path.getmtime(fp)
+                    if mtime > newest_time:
+                        newest_time = mtime
+                        newest_file = fp
+                except Exception:
+                    pass
+
+    if not newest_file or not os.path.exists(newest_file):
+        raise HTTPException(status_code=404, detail="Download completed but file could not be located on server.")
+
+    filename = os.path.basename(newest_file)
+    return FileResponse(newest_file, media_type="audio/flac" if newest_file.endswith(".flac") else "audio/mpeg", filename=filename)
 
 async def run_download(url: str):
     """
@@ -276,75 +306,88 @@ async def run_download(url: str):
     - Spotify URLs  → SpotiFLAC (lossless FLAC from Tidal/Qobuz/Deezer)
     - Everything else → yt-dlp fallback (YT Music search → FLAC)
     """
-    logger.info(f"Starting download for: {url}")
-    loop = asyncio.get_event_loop()
-
-    # ── SpotiFLAC path: real lossless from Tidal/Qobuz/Deezer ───────────────
-    is_spotify_url = "spotify.com" in url
-    if is_spotify_url and SPOTIFLAC_AVAILABLE:
-        qobuz_token = os.getenv("QOBUZ_AUTH_TOKEN")
-
-        def spotiflac_sync():
-            logger.info("[SpotiFLAC] Starting lossless download via Tidal→Qobuz→Deezer...")
-            try:
-                _SpotiFLAC(
-                    url=url,
-                    output_dir=DOWNLOAD_DIR,
-                    # Priority: Tidal (lossless) → Qobuz (hi-res) → Deezer (flac fallback)
-                    services=["tidal", "qobuz", "deezer"],
-                    quality="LOSSLESS",
-                    use_artist_subfolders=True,
-                    use_album_subfolders=True,
-                    filename_format="{track}. {title} - {artist}",
-                    use_track_numbers=True,
-                    embed_lyrics=True,
-                    enrich_metadata=True,
-                    allow_fallback=True,
-                    qobuz_token=qobuz_token,
-                )
-                logger.info("[SpotiFLAC] Lossless download completed.")
-            except Exception as e:
-                logger.error(f"[SpotiFLAC] Download failed: {e}")
-
-        await loop.run_in_executor(None, spotiflac_sync)
+    if url in completed_downloads:
+        logger.info(f"Download already completed for {url}")
         return
 
-    # ── yt-dlp fallback: for YT Music search results ("Artist - Title") ──────
-    logger.info("[yt-dlp] No Spotify URL detected (or SpotiFLAC unavailable), using yt-dlp fallback.")
+    if url not in download_locks:
+        download_locks[url] = asyncio.Lock()
 
-    homebrew_bin = "/opt/homebrew/bin"
-    if homebrew_bin not in os.environ.get("PATH", ""):
-        os.environ["PATH"] = f"{homebrew_bin}:{os.environ.get('PATH', '')}"
+    async with download_locks[url]:
+        if url in completed_downloads:
+            return
 
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'flac',
-            'preferredquality': '320',
-        }],
-        'quiet': False,
-        'no_warnings': True,
-    }
-    if IMPERSONATE_SUPPORTED:
-        try:
-            ydl_opts['impersonate'] = ImpersonateTarget.from_str('chrome')
-        except Exception as e:
-            logger.warning(f"Failed to set yt-dlp impersonate: {e}")
+        logger.info(f"Starting download for: {url}")
+        loop = asyncio.get_event_loop()
 
-    def ytdlp_sync():
-        # If it's a plain search string, prefix with ytsearch
-        query = url if url.startswith("http") else f"ytsearch1:{url}"
-        logger.info(f"[yt-dlp] Downloading: {query}")
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        # ── SpotiFLAC path: real lossless from Tidal/Qobuz/Deezer ───────────────
+        is_spotify_url = "spotify.com" in url
+        if is_spotify_url and SPOTIFLAC_AVAILABLE:
+            qobuz_token = os.getenv("QOBUZ_AUTH_TOKEN")
+
+            def spotiflac_sync():
+                logger.info("[SpotiFLAC] Starting lossless download via Tidal→Qobuz→Deezer...")
+                try:
+                    _SpotiFLAC(
+                        url=url,
+                        output_dir=DOWNLOAD_DIR,
+                        # Priority: Tidal (lossless) → Qobuz (hi-res) → Deezer (flac fallback)
+                        services=["tidal", "qobuz", "deezer"],
+                        quality="LOSSLESS",
+                        use_artist_subfolders=True,
+                        use_album_subfolders=True,
+                        filename_format="{track}. {title} - {artist}",
+                        use_track_numbers=True,
+                        embed_lyrics=True,
+                        enrich_metadata=True,
+                        allow_fallback=True,
+                        qobuz_token=qobuz_token,
+                    )
+                    logger.info("[SpotiFLAC] Lossless download completed.")
+                except Exception as e:
+                    logger.error(f"[SpotiFLAC] Download failed: {e}")
+
+            await loop.run_in_executor(None, spotiflac_sync)
+            completed_downloads.add(url)
+            return
+
+        # ── yt-dlp fallback: for YT Music search results ("Artist - Title") ──────
+        logger.info("[yt-dlp] No Spotify URL detected (or SpotiFLAC unavailable), using yt-dlp fallback.")
+
+        homebrew_bin = "/opt/homebrew/bin"
+        if homebrew_bin not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = f"{homebrew_bin}:{os.environ.get('PATH', '')}"
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'flac',
+                'preferredquality': '320',
+            }],
+            'quiet': False,
+            'no_warnings': True,
+        }
+        if IMPERSONATE_SUPPORTED:
             try:
-                ydl.download([query])
+                ydl_opts['impersonate'] = ImpersonateTarget.from_str('chrome')
             except Exception as e:
-                logger.error(f"[yt-dlp] Failed: {e}")
+                logger.warning(f"Failed to set yt-dlp impersonate: {e}")
 
-    await loop.run_in_executor(None, ytdlp_sync)
-    logger.info("[yt-dlp] Download operation completed.")
+        def ytdlp_sync():
+            # If it's a plain search string, prefix with ytsearch
+            query = url if url.startswith("http") else f"ytsearch1:{url}"
+            logger.info(f"[yt-dlp] Downloading: {query}")
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                try:
+                    ydl.download([query])
+                except Exception as e:
+                    logger.error(f"[yt-dlp] Failed: {e}")
+
+        await loop.run_in_executor(None, ytdlp_sync)
+        completed_downloads.add(url)
+        logger.info("[yt-dlp] Download operation completed.")
 
 @app.get("/trending")
 async def trending(limit: int = 20):

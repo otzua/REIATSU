@@ -4,6 +4,11 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    target: 'esnext',
+    cssTarget: ['chrome80', 'safari13', 'edge88', 'firefox78'],
+    sourcemap: true,
+  },
   server: {
     proxy: {
       '/api/music': {

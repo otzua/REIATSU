@@ -15,15 +15,16 @@ const Beyond = () => {
   const [videos, setVideos] = useState<BeyondVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [server, setServer] = useState<'hanime' | 'watchhentai'>('hanime');
 
   
   // Continue Watching state
   const [continueWatching, setContinueWatching] = useState<BeyondVideo[]>([]);
 
-  const fetchFeed = () => {
+  const fetchFeed = (targetServer: 'hanime' | 'watchhentai' = server) => {
     setLoading(true);
     setError(null);
-    beyondApi.getFeed()
+    beyondApi.getFeed(targetServer)
       .then((data) => {
         setVideos(data);
         setLoading(false);
@@ -77,12 +78,34 @@ const Beyond = () => {
       
       <div className={pageStyles.content}>
 
+        <div className={styles.portalControls}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <span style={{ fontSize: '0.75rem', color: 'rgba(220, 201, 169, 0.4)', fontWeight: 800, letterSpacing: '0.1em' }}>PROVIDER:</span>
+            <div className={styles.serverToggle}>
+              <button 
+                className={`${styles.serverBtn} ${server === 'hanime' ? styles.active : ''}`}
+                onClick={() => { setServer('hanime'); fetchFeed('hanime'); }}
+              >
+                HANIME TV
+              </button>
+              <button 
+                className={`${styles.serverBtn} ${server === 'watchhentai' ? styles.active : ''}`}
+                onClick={() => { setServer('watchhentai'); fetchFeed('watchhentai'); }}
+              >
+                WATCHHENTAI
+              </button>
+            </div>
+          </div>
+          <button onClick={() => fetchFeed(server)} className={styles.refreshBtn} title="Refresh Portal">
+            <RefreshCw size={16} className={loading ? styles.spinning : ''} />
+          </button>
+        </div>
 
         {error && (
           <div className={styles.errorContainer}>
             <div className={styles.errorContent}>
               <p>{error}</p>
-              <button onClick={fetchFeed} className={styles.retryBtn}>
+              <button onClick={() => fetchFeed(server)} className={styles.retryBtn}>
                 <RefreshCw size={16} /> RECONNECT
               </button>
             </div>
@@ -105,48 +128,46 @@ const Beyond = () => {
               <>
                 <BeyondHero videos={heroVideos} onVideoSelect={handleVideoSelect} />
                 
-                <div className={styles.sectionsContainer}>
-                  {/* Continue Watching */}
-                  {continueWatching.length > 0 && (
-                    <section className={styles.miniSection}>
-                      <div className={styles.miniHeader}>
-                        <History size={20} style={{ color: 'var(--accent)' }} />
-                        CONTINUE WATCHING
-                      </div>
-                      <div className={styles.miniGrid}>
-                        {continueWatching.map((video) => (
-                          <div key={video.id} className={styles.miniCard} onClick={() => handleVideoSelect(video)}>
-                            <div className={styles.miniThumbWrapper}>
-                              <SmartImage src={video.thumbnail} alt={video.title} className={styles.miniThumb} />
-                              <div className={styles.miniPlayOverlay}><Flame size={24} /></div>
-                            </div>
-                            <div className={styles.miniInfo}>
-                              <div className={styles.miniTitle}>{video.title}</div>
-                            </div>
+                {/* Continue Watching */}
+                {continueWatching.length > 0 && (
+                  <section className={styles.miniSection} style={{ padding: '0 var(--space-xl)' }}>
+                    <div className={styles.miniHeader}>
+                      <History size={20} style={{ color: 'var(--accent)' }} />
+                      CONTINUE WATCHING
+                    </div>
+                    <div className={styles.miniGrid}>
+                      {continueWatching.map((video) => (
+                        <div key={video.id} className={styles.miniCard} onClick={() => handleVideoSelect(video)}>
+                          <div className={styles.miniThumbWrapper}>
+                            <SmartImage src={video.thumbnail} alt={video.title} className={styles.miniThumb} />
+                            <div className={styles.miniPlayOverlay}><Flame size={24} /></div>
                           </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
+                          <div className={styles.miniInfo}>
+                            <div className={styles.miniTitle}>{video.title}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
-                  <BeyondGrid 
-                    videos={hotVideos} 
-                    onVideoSelect={handleVideoSelect} 
-                    title="HOT TRENDS" 
-                  />
+                <BeyondGrid 
+                  videos={hotVideos} 
+                  onVideoSelect={handleVideoSelect} 
+                  title="HOT TRENDS" 
+                />
 
-                  <BeyondGrid 
-                    videos={newVideos} 
-                    onVideoSelect={handleVideoSelect} 
-                    title="NEW RELEASES" 
-                  />
+                <BeyondGrid 
+                  videos={newVideos} 
+                  onVideoSelect={handleVideoSelect} 
+                  title="NEW RELEASES" 
+                />
 
-                  <BeyondGrid 
-                    videos={famousVideos} 
-                    onVideoSelect={handleVideoSelect} 
-                    title="ALL TIME FAMOUS" 
-                  />
-                </div>
+                <BeyondGrid 
+                  videos={famousVideos} 
+                  onVideoSelect={handleVideoSelect} 
+                  title="ALL TIME FAMOUS" 
+                />
               </>
             ) : (
               <div className={styles.emptyContainer}>

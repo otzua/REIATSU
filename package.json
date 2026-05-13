@@ -4,9 +4,10 @@
   "scripts": {
     "dev:api": "cd anime-api && npm run dev",
     "dev:music": "cd music-api && ./venv/bin/python main.py",
-    "dev:backend": "npm run dev:api && npm run dev:music",
+    "dev:watchhentai": "cd watchhentai-api-main && npm run dev",
+    "dev:backend": "npm run dev:api && npm run dev:music && npm run dev:watchhentai",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:music\" \"npm run dev:frontend\""
+    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:music\" \"npm run dev:watchhentai\" \"npm run dev:frontend\""
   },
   "dependencies": {
     "concurrently": "^9.2.1"

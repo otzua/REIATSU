@@ -48,8 +48,10 @@ export const beyondApi = {
   /**
    * Fetch recent videos.
    */
-  getFeed: async (): Promise<BeyondVideo[]> => {
-    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond`);
+  getFeed: async (server: 'hanime' | 'watchhentai' = 'hanime'): Promise<BeyondVideo[]> => {
+    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond`, {
+      params: { server }
+    });
     return res.data.data;
   },
 
@@ -66,9 +68,9 @@ export const beyondApi = {
   /**
    * Search for videos.
    */
-  search: async (query: string): Promise<BeyondVideo[]> => {
+  search: async (query: string, server: 'hanime' | 'watchhentai' = 'hanime'): Promise<BeyondVideo[]> => {
     const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond/search`, {
-      params: { q: query }
+      params: { q: query, server }
     });
     return res.data.data;
   },

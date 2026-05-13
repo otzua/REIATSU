@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/[[...route]]" },
+    { "source": "/",         "destination": "/index.html" },
+    { "source": "/genre",    "destination": "/genre.html" },
+    { "source": "/series",   "destination": "/series.html" },
+    { "source": "/watch",    "destination": "/watch.html" }
+  ]
+}

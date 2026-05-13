@@ -1,0 +1,43 @@
+{
+    "name": "@nekolab/hanime",
+    "version": "0.3.0",
+    "description": "Fast and efficient hanime.tv API wrapper written in TypeScript.",
+    "main": "dist/index",
+    "types": "dist/index",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "test": "vitest run",
+        "build": "tsc -p tsconfig.build.json",
+        "lint": "npx eslint .",
+        "prettify": "npx prettier --write .",
+        "preinstall": "npx only-allow pnpm"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jokelbaf/hanime"
+    },
+    "keywords": [
+        "api",
+        "api-wrapper",
+        "hentai",
+        "hanime"
+    ],
+    "author": "JokelBaf",
+    "license": "MIT",
+    "devDependencies": {
+        "@eslint/js": "^9.29.0",
+        "@types/eslint__js": "^8.42.3",
+        "@types/node": "^22.15.32",
+        "dotenv": "^16.5.0",
+        "eslint": "^9.29.0",
+        "eslint-config-prettier": "^9.1.0",
+        "globals": "^15.15.0",
+        "jiti": "^2.4.2",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.3",
+        "typescript-eslint": "^8.34.1",
+        "vitest": "^3.2.4"
+    }
+}
