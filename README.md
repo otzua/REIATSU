@@ -26,7 +26,7 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
   - **映 CINEMA**: A cinematic gateway for movies and TV series.
   - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC. All tracks initialize at 100% volume with high-resolution visual thumbnails, active queuing, and interactive player navigation.
-- **超越 BEYOND**: A premium portal for niche high-quality titles with advanced stream extraction.
+- **超越 BEYOND**: A premium portal for niche high-quality titles featuring a multi-engine extraction architecture (AlphaAPIs, WatchHentai scraper microservice, and direct HLS manifests) with intelligent hyphenless & multi-word fallback search to guarantee flawless 1080p stream resolution.
 
 - **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
 - **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
@@ -35,8 +35,8 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
 
 ## 🛠️ Tech Stack | 技術スタック
 
-- **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js
-- **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, AlphaAPIs stream extraction, and HLS proxying.
+- **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js (Deployed live on Vercel)
+- **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, WatchHentai stream resolution, AlphaAPIs extraction, and HLS proxying (Deployed live on Vercel Serverless Functions).
 - **Cinema API (Next.js)**: A robust backend utilizing Drizzle ORM and Neon DB for movie management.
 - **Music API (FastAPI)**: A powerful Python backend utilizing `ytmusicapi`, `yt-dlp`, and the custom `SpotiFLAC` lossless downloading engine.
 - **Design**: Vanilla CSS Modules with a focus on typography and motion.
