@@ -16,5 +16,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Glassmorphism Production Fix: SVG Blur Engine -->
+    <svg style="display: none;">
+      <filter id="glass-blur" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation="20" edgeMode="duplicate" />
+      </filter>
+    </svg>
   </body>
 </html>

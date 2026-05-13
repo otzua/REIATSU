@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Play, Pause, ChevronLeft, Disc, Clock, Plus, Download, Check, AlertCircle, Users, Heart, Share2 } from 'lucide-react';
 import { useMusic } from '../context/MusicContext';
 import { musicApi, type Artist, type Track } from '../services/musicApi';
@@ -70,7 +70,7 @@ const ArtistDetails: React.FC = () => {
 
   const handlePlayArtist = () => {
     if (tracks.length === 0) return;
-    
+
     if (isCurrentArtistPlaying) {
       togglePlay();
     } else {
@@ -90,7 +90,29 @@ const ArtistDetails: React.FC = () => {
 
     try {
       setDownloadingIds(prev => ({ ...prev, [track.id]: true }));
-      await musicApi.download(track);
+      const response: any = await musicApi.download(track);
+
+      if (response && response.downloadUrl) {
+        // Case 1: Backend returns a direct URL to the file
+        const link = document.createElement('a');
+        link.href = response.downloadUrl;
+        link.setAttribute('download', `${track.artist} - ${track.name}.flac`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } else {
+        // Case 2: Backend returns the file Blob or binary data
+        const blob = response instanceof Blob ? response : new Blob([response.data || response]);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${track.artist} - ${track.name}.flac`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }
+
       setDownloadedIds(prev => ({ ...prev, [track.id]: true }));
     } catch (err) {
       console.error("Failed to download track", err);
@@ -108,7 +130,7 @@ const ArtistDetails: React.FC = () => {
   };
 
   // Animation variants
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -118,28 +140,27 @@ const ArtistDetails: React.FC = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
-        duration: 0.5,
-        ease: [0.4, 0, 0.2, 1]
+        duration: 0.5
       }
     }
   };
 
   return (
-    <motion.div 
+    <motion.div
       className={styles.container}
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       {/* Immersive blurred backdrop */}
-      <motion.div 
-        className={styles.blurredBg} 
+      <motion.div
+        className={styles.blurredBg}
         style={{ backgroundImage: `url(${artist.poster})` }}
         initial={{ opacity: 0, scale: 1.1 }}
         animate={{ opacity: 0.6, scale: 1 }}
@@ -156,32 +177,32 @@ const ArtistDetails: React.FC = () => {
 
       {/* Cinematic Artist Profile Header */}
       <header className={styles.header}>
-        <motion.div 
+        <motion.div
           className={styles.posterWrapper}
           variants={itemVariants}
         >
-          <SmartImage 
-            src={artist.poster} 
-            alt={artist.name} 
-            className={styles.posterImg} 
+          <SmartImage
+            src={artist.poster}
+            alt={artist.name}
+            className={styles.posterImg}
           />
         </motion.div>
-        
+
         <div className={styles.meta}>
-          <motion.span 
+          <motion.span
             className={styles.typeBadge}
             variants={itemVariants}
           >
             VERIFIED ARTIST
           </motion.span>
-          
-          <motion.h1 
+
+          <motion.h1
             className={styles.albumTitle}
             variants={itemVariants}
           >
             {artist.name}
           </motion.h1>
-          
+
           <motion.div className={styles.artistRow} variants={itemVariants}>
             <span className={styles.artistName}>
               <Users size={18} style={{ marginRight: '8px' }} />
@@ -196,8 +217,8 @@ const ArtistDetails: React.FC = () => {
           </motion.p>
 
           <motion.div className={styles.actionRow} variants={itemVariants}>
-            <button 
-              className={styles.mainPlayBtn} 
+            <button
+              className={styles.mainPlayBtn}
               onClick={handlePlayArtist}
             >
               {isCurrentArtistPlaying && isPlaying ? (
@@ -212,11 +233,11 @@ const ArtistDetails: React.FC = () => {
                 </>
               )}
             </button>
-            
+
             <button className={styles.secondaryBtn}>
               <Heart size={20} />
             </button>
-            
+
             <button className={styles.secondaryBtn}>
               <Share2 size={20} />
             </button>
@@ -238,10 +259,10 @@ const ArtistDetails: React.FC = () => {
         <div className={styles.trackList}>
           {tracks.map((track, idx) => {
             const isThisTrackPlaying = currentTrack?.id === track.id;
-            
+
             return (
-              <motion.div 
-                key={track.id} 
+              <motion.div
+                key={track.id}
                 className={`${styles.trackRow} ${isThisTrackPlaying ? styles.activeRow : ''}`}
                 variants={itemVariants}
                 onClick={() => handlePlayTrack(track)}
@@ -278,7 +299,7 @@ const ArtistDetails: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className={styles.actionsCol} onClick={(e) => e.stopPropagation()}>
-                  <button 
+                  <button
                     className={styles.rowActionBtn}
                     onClick={() => addToQueue(track)}
                     title="Add to Queue"
@@ -286,7 +307,7 @@ const ArtistDetails: React.FC = () => {
                     <Plus size={18} />
                   </button>
 
-                  <button 
+                  <button
                     className={`${styles.rowActionBtn} ${downloadedIds[track.id] ? styles.downloaded : ''}`}
                     onClick={(e) => handleDownloadTrack(e, track)}
                     disabled={downloadingIds[track.id]}
