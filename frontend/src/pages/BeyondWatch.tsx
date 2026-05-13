@@ -122,8 +122,10 @@ const BeyondWatch = () => {
       }
     } else {
       // Standard MP4 or direct link
-      videoElement.src = activeStream;
-      videoElement.load();
+      if (videoElement.src !== activeStream) {
+        videoElement.src = activeStream;
+        videoElement.load();
+      }
       videoElement.play().catch(e => console.log('Autoplay blocked:', e));
     }
 

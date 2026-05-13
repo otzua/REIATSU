@@ -185,8 +185,9 @@ beyond.get('/details', async (c) => {
           const watchRes = await axios.get(`${WATCHHENTAI_API}/watch/${watchSlug}`);
           const data = watchRes.data?.data;
           if (data?.player) {
-            bestStream = data.player.sources?.[0]?.src || data.player.src;
-            allStreams = data.player.sources?.map(s => ({
+            const sources = data.player.sources || [];
+            bestStream = sources.find(s => s.label === '720p')?.src || sources[0]?.src || data.player.src;
+            allStreams = sources.map(s => ({
               url: s.src,
               filename: s.label || '1080p',
               resolution: s.label || '1080p',
