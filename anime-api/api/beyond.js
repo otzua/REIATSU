@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import axios from 'axios';
-import { HanimeClient } from '../../hanime-master/dist/index.js';
+import { HanimeClient } from '../hanime/dist/index.js';
 
 const beyond = new Hono();
 const hanimeClient = new HanimeClient();
 const ALPHA_BASE = 'https://www.alphaapis.org';
 const HANIME_SEARCH_API = 'https://search.htv-services.com';
 const HANIME_VIDEO_API = 'https://hanime.tv/api/v8/video';
-const WATCHHENTAI_API = 'http://localhost:4005/api';
+const WATCHHENTAI_API = 'https://watchhentai-api-main.vercel.app/api';
 
 /**
  * GET /api/beyond

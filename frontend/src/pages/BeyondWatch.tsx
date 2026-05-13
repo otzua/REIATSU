@@ -258,6 +258,7 @@ const BeyondWatch = () => {
                       playsInline
                       preload="auto"
                       poster={video.thumbnail}
+                      src={activeStream}
                       crossOrigin={activeStream?.includes('.m3u8') ? 'anonymous' : undefined}
                     />
                 ) : (
