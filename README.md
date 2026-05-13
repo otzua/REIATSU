@@ -25,8 +25,8 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
 - **Tri-Interface Ecosystem**: A single application for three distinct worlds:
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
   - **映 CINEMA**: A cinematic gateway for movies and TV series.
-  - **音 MUSIC**: A high-fidelity, aesthetic music experience (currently being rebuilt).
-  - **超越 BEYOND**: A premium portal for niche high-quality titles with advanced stream extraction.
+  - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC.
+- **超越 BEYOND**: A premium portal for niche high-quality titles with advanced stream extraction.
 - **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
 - **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
 - **Unified Command Palette**: Press `/` to search across all media types instantly.
@@ -37,6 +37,7 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
 - **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js
 - **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, AlphaAPIs stream extraction, and HLS proxying.
 - **Cinema API (Next.js)**: A robust backend utilizing Drizzle ORM and Neon DB for movie management.
+- **Music API (FastAPI)**: A powerful Python backend utilizing `ytmusicapi`, `yt-dlp`, and the custom `SpotiFLAC` lossless downloading engine.
 - **Design**: Vanilla CSS Modules with a focus on typography and motion.
 
 ## 📁 Project Structure | プロジェクト構造
@@ -46,6 +47,8 @@ REIATSU/
 ├── frontend/           # The core React + Vite application
 ├── anime-api/          # API for Anime & Beyond extraction + HLS Proxy
 ├── cinema-api/         # Scalable backend for movies & series
+├── music-api/          # FastAPI backend for music, artist/album lookup, and streaming proxy
+├── SpotiFLAC-Module-Version-main/ # Lossless background FLAC downloader integration
 ├── ocean-api/          # Legacy/Backup extraction logic
 └── config/             # Global configuration tokens
 ```
@@ -61,11 +64,12 @@ REIATSU/
    ```
 
 2. **Run All-in-One (Recommended):**
-   *Each directory contains its own `package.json`. Follow the installation steps in each folder or use a workspace runner.*
+   *Each directory contains its own dependencies and local server configuration.*
 
    - **Frontend**: `cd frontend && npm install && npm run dev`
    - **Anime API**: `cd anime-api && npm install && npm run dev` (Runs on 4001)
    - **Cinema API**: `cd cinema-api && npm install && npm run dev`
+   - **Music API**: `cd music-api && pip install -r requirements.txt && uvicorn main:app --reload` (Runs on 8000)
 
 ## 🤝 Contributing | 貢献する
 
@@ -85,7 +89,7 @@ Reiatsu is a community-driven project. We welcome all contributions—from code 
 - [x] Cinema API Integration
 - [x] Anime Schedule & Tracking
 - [x] Beyond Portal & HLS Proxy Integration
-- [ ] Music Section Reconstruction (Currently in progress)
+- [x] Music Section Reconstruction & Lossless Sync Engine
 - [ ] Self-Hosting Docker Suite
 - [ ] PWA Support for Mobile Streaming
 
@@ -96,3 +100,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 *Built with passion and the spirit of open source by [otzua](https://github.com/otzua).*
+
