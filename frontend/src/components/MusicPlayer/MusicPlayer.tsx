@@ -69,7 +69,7 @@ const MusicPlayer: React.FC = () => {
         initial={{ y: 100 }}
         animate={{ y: isExpanded ? 100 : 0 }}
         exit={{ y: 100 }}
-        className={styles.playerBar}
+        className={`${styles.playerBar} glass`}
       >
         <div 
           className={styles.trackInfo} 

@@ -1,16 +1,15 @@
-# ── Streaming (YT Music search + yt-dlp audio extraction) ──────────────────
-yt-dlp>=2024.1.1
-ytmusicapi>=1.7.0
-requests>=2.32.3
-python-dotenv>=1.0.0
-aiohttp
 fastapi
 uvicorn
-
-# ── SpotiFLAC (lossless download engine) ───────────────────────────────────
+yt-dlp
+ytmusicapi
+mangum
+requests>=2.32.3
 mutagen>=1.47.0
 pyotp>=2.9.0
 pydantic>=2.7.0
 cryptography>=42.0.0
 packaging>=23.0
 pycryptodome>=3.20.0
+python-dotenv
+aiohttp
+aiofiles

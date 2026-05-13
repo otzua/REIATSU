@@ -199,11 +199,11 @@ const Navbar = () => {
   return (
     <>
       <div className={styles.navbarContainer}>
-        <div className={styles.logoCapsule} onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} style={{ cursor: 'pointer' }}>
+        <div className={`${styles.logoCapsule} glass`} onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} style={{ cursor: 'pointer' }}>
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </div>
 
-        <nav className={styles.navCapsule}>
+        <nav className={`${styles.navCapsule} glass`}>
           {navItems.map((item) => {
             if (item.id === 'download') {
               return (
@@ -263,7 +263,7 @@ const Navbar = () => {
           })}
         </nav>
 
-        <div className={styles.accountCapsule}>
+        <div className={`${styles.accountCapsule} glass`}>
           <button className={styles.accountBtn}>
             <User size={22} strokeWidth={2} />
           </button>
@@ -287,7 +287,7 @@ const Navbar = () => {
         {switchOpen && (
           <motion.div
             key="switch-overlay"
-            className={styles.switchOverlay}
+            className={`${styles.switchOverlay} glass`}
             initial={{ opacity: 0, y: 20, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, y: 20, x: '-50%' }}
@@ -357,7 +357,7 @@ const Navbar = () => {
         {searchOpen && (
           <motion.div
             key="search-overlay"
-            className={styles.searchOverlay}
+            className={`${styles.searchOverlay} glass`}
             initial={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
             animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}

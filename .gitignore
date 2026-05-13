@@ -52,3 +52,6 @@ venv/
 .venv/
 
 
+
+# Local Netlify folder
+.netlify

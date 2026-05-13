@@ -20,8 +20,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── SpotiFLAC: add the local module to the path ─────────────────────────────
-_SPOTIFLAC_PATH = os.path.join(os.path.dirname(__file__), "..", "SpotiFLAC-Module-Version-main")
+# ── SpotiFLAC: use the internal module ─────────────────────────────────────
+_SPOTIFLAC_PATH = os.path.join(os.path.dirname(__file__), "SpotiFLAC-Module-Version-main")
 sys.path.insert(0, os.path.abspath(_SPOTIFLAC_PATH))
 try:
     from SpotiFLAC import SpotiFLAC as _SpotiFLAC
@@ -45,9 +45,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DOWNLOAD_DIR = os.getenv("OUTPUT_DIR", "downloads")
-if not os.path.exists(DOWNLOAD_DIR):
-    os.makedirs(DOWNLOAD_DIR)
+DOWNLOAD_DIR = os.getenv("OUTPUT_DIR", "/tmp/downloads")
+try:
+    if not os.path.exists(DOWNLOAD_DIR):
+        os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+except Exception as e:
+    logger.warning(f"Could not create download directory {DOWNLOAD_DIR}: {e}. Falling back to /tmp")
+    DOWNLOAD_DIR = "/tmp"
 
 def extract_spotify_id(url: str) -> tuple:
     match = re.search(r"spotify\.com/(track|album|playlist)/([a-zA-Z0-9]+)", url)
@@ -152,64 +156,66 @@ async def search(q: str = Query(...), limit: int = 20):
 
 @app.get("/stream")
 async def stream(q: str = Query(...)):
-    # Prefer m4a/mp4 as they are most compatible with browsers
-    # Using android/ios client spoofing to bypass "Sign in to confirm you're not a bot"
-    ydl_opts = {
-        'format': 'bestaudio[ext=m4a]/bestaudio/best',
-        'quiet': True,
-        'no_warnings': True,
-        'extract_flat': False,
-        'force_generic_extractor': False,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['web_embedded', 'mweb', 'tv'],
-                'skip': ['webpage', 'hls']
-            }
-        }
-    }
-    if IMPERSONATE_SUPPORTED:
-        try:
-            ydl_opts['impersonate'] = ImpersonateTarget.from_str('chrome')
-        except Exception as e:
-            logger.warning(f"Failed to set yt-dlp impersonate: {e}")
-    
-    # Check if q is a direct youtube video ID, or a full youtube/spotify url
-    if "youtube.com" in q or "youtu.be" in q:
-        search_query = q
-    elif len(q) == 11 and all(c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_" for c in q):
-        search_query = f"https://www.youtube.com/watch?v={q}"
-    elif "spotify.com" in q:
-        try:
-            tracks = fetch_spotify_tracks(q)
-            search_query = f"ytsearch:{tracks[0]}" if tracks else f"ytsearch:{q}"
-        except Exception:
-            search_query = f"ytsearch:{q}"
-    else:
-        search_query = f"ytsearch:{q}"
-    
+    # Cobalt Engine: The Master Key for bypassing YouTube blocks
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            loop = asyncio.get_event_loop()
-            info = await loop.run_in_executor(None, lambda: ydl.extract_info(search_query, download=False))
-            if 'entries' in info:
-                if len(info['entries']) > 0:
-                    best_entry = info['entries'][0]
-                else:
-                    raise HTTPException(status_code=404, detail="No stream found")
-            else:
-                best_entry = info
+        # Extract video ID
+        video_id = q
+        if "watch?v=" in q:
+            video_id = q.split("watch?v=")[1].split("&")[0]
+        elif "youtu.be/" in q:
+            video_id = q.split("youtu.be/")[1].split("?")[0]
+        elif "music.youtube.com" in q:
+             video_id = q.split("watch?v=")[1].split("&")[0]
+        
+        url_to_extract = f"https://www.youtube.com/watch?v={video_id}" if len(video_id) == 11 else q
+        if "ytsearch:" in url_to_extract or not ("youtube.com" in url_to_extract or "youtu.be" in url_to_extract):
+             # Official YouTube Music search (Bypasses yt-dlp blocks)
+             try:
+                 from ytmusicapi import YTMusic
+                 ytm = YTMusic()
+                 search_q = q.replace("ytsearch:", "")
+                 results = ytm.search(search_q, filter="songs")
+                 if results:
+                     video_id = results[0]['videoId']
+                     url_to_extract = f"https://www.youtube.com/watch?v={video_id}"
+             except Exception as ytm_e:
+                 logger.warning(f"YTMusic search failed: {ytm_e}")
+                 # Fallback to a simple scraper if possible... or just fail
 
-            if 'url' in best_entry:
-                return {
-                    "stream_url": best_entry['url'],
-                    "title": best_entry.get('title'),
-                    "thumbnail": best_entry.get('thumbnail'),
-                    "user_agent": "Mozilla/5.0"
-                }
-            else:
-                raise HTTPException(status_code=404, detail="No stream URL in metadata")
+        # Invidious Bridge (The Decentralized Powerhouse)
+        invidious_instances = [
+            "https://inv.tux.rs",
+            "https://invidious.snopyta.org",
+            "https://invidious.sethforprivacy.com",
+            "https://invidious.flokinet.to",
+            "https://inv.river.group"
+        ]
+        
+        async with aiohttp.ClientSession() as session:
+            for instance in invidious_instances:
+                try:
+                    # Invidious has a 'latest_version' endpoint that redirects to the stream
+                    stream_url = f"{instance}/latest_version?id={video_id}&itag=140" # itag 140 is M4A audio
+                    logger.info(f"Trying Invidious instance: {instance} for ID: {video_id}")
+                    
+                    # We check if the link is actually reachable
+                    async with session.head(stream_url, allow_redirects=True, timeout=5) as resp:
+                        if resp.status == 200 or resp.status == 302:
+                            return {
+                                "stream_url": str(resp.url) if resp.url else stream_url,
+                                "title": "Streamed via Invidious",
+                                "thumbnail": f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg",
+                                "user_agent": "Mozilla/5.0"
+                            }
+                except Exception as inv_e:
+                    logger.warning(f"Invidious instance {instance} failed: {inv_e}")
+                    continue
+        
+        raise Exception("All Invidious instances failed to provide a stream")
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Playback failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Playback currently unavailable. Error: {str(e)}")
 
 @app.get("/audio-proxy")
 async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):

@@ -58,7 +58,8 @@ async function searchProvider(
 
     const data = await response.json();
     
-    let results: unknown[] = [];
+    let results: any[] = [];
+
     
     if (data.data && typeof data.data === 'object') {
       if (Array.isArray(data.data.results)) {

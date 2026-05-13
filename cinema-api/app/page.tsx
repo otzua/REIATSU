@@ -62,7 +62,8 @@ export default async function Home() {
         alt: item.title || item.name || "Movie Poster",
       };
     })
-    .filter((item): item is { src: string; alt: string } => item !== null);
+    .filter((item: any): item is { src: string; alt: string } => item !== null);
+
 
   const galleryImages = images.length > 0 ? images : undefined;
 

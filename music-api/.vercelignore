@@ -1,0 +1,10 @@
+downloads/
+venv/
+.venv/
+__pycache__/
+*.flac
+*.mp3
+*.wav
+.DS_Store
+.netlify/
+functions/

@@ -1,3 +1,3 @@
-import { PROVIDERS } from "@/lib/providers";
+import { ALL_PROVIDERS } from "@/lib/provider-cache";
 
-export const availableApis = PROVIDERS;
+export const availableApis = ALL_PROVIDERS;
