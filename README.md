@@ -25,8 +25,9 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
 - **Tri-Interface Ecosystem**: A single application for three distinct worlds:
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
   - **映 CINEMA**: A cinematic gateway for movies and TV series.
-  - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC.
+  - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC. All tracks initialize at 100% volume with high-resolution visual thumbnails, active queuing, and interactive player navigation.
 - **超越 BEYOND**: A premium portal for niche high-quality titles with advanced stream extraction.
+
 - **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
 - **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
 - **Unified Command Palette**: Press `/` to search across all media types instantly.
