@@ -1,21 +1,16 @@
-spotipy>=2.23.0
+# ── Streaming (YT Music search + yt-dlp audio extraction) ──────────────────
 yt-dlp>=2024.1.1
-mutagen>=1.47.0
-requests>=2.31.0
+ytmusicapi>=1.7.0
+requests>=2.32.3
 python-dotenv>=1.0.0
-pycryptodomex>=3.23.0
-Pillow>=10.0.0
-imageio-ffmpeg>=0.6.0
-slskd-api>=0.1.5
-lyricsgenius>=3.0.1
-tidalapi>=0.8.11
-pyotp>=2.9.0
-curl_cffi>=0.7.0
-pywidevine==1.8.0
-construct==2.8.8
-playwright>=1.52.0
-websockets>=13.0
+aiohttp
 fastapi
 uvicorn
-aiohttp
-platformdirs
+
+# ── SpotiFLAC (lossless download engine) ───────────────────────────────────
+mutagen>=1.47.0
+pyotp>=2.9.0
+pydantic>=2.7.0
+cryptography>=42.0.0
+packaging>=23.0
+pycryptodome>=3.20.0

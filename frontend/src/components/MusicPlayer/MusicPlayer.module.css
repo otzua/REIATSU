@@ -1,0 +1,331 @@
+.playerBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: rgba(15, 15, 15, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+  color: #fff;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trackInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 28%;
+  min-width: 220px;
+  max-width: 320px;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.trackInfo:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  background: #222;
+}
+
+.details {
+  min-width: 0;
+  flex: 1;
+}
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.15rem;
+  color: #fff;
+}
+
+.artist {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.artist:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.expandIcon {
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: 0.5rem;
+}
+
+.trackInfo:hover .expandIcon {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.controlsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  max-width: 500px;
+  padding: 0 1rem;
+}
+
+.mainControls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.controlButton {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.controlButton:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  transform: scale(1.08);
+}
+
+.controlButton.active {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(184, 58, 45, 0.4);
+}
+
+.playPauseButton {
+  width: 38px;
+  height: 38px;
+  background: #fff;
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.playPauseButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.playPauseButton:active {
+  transform: scale(0.92);
+}
+
+.progressBar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.time {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 35px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.seekBar {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.seekBar:hover {
+  height: 6px;
+}
+
+.seekBar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    #fff 0%,
+    #fff var(--progress),
+    rgba(255, 255, 255, 0.1) var(--progress),
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border-radius: 2px;
+}
+
+.seekBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 0;
+  height: 0;
+}
+
+.seekBar:hover::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  margin-top: -2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.sideControls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 28%;
+  justify-content: flex-end;
+}
+
+.volumeBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 110px;
+}
+
+.volumeSlider {
+  flex: 1;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.volumeSlider:hover::-webkit-slider-thumb {
+  background: #fff;
+}
+
+/* Perfect premium tablet & mobile sizing */
+@media (max-width: 900px) {
+  .trackInfo {
+    width: 35%;
+    min-width: 180px;
+  }
+  .sideControls {
+    width: 25%;
+  }
+  .volumeBar {
+    width: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .playerBar {
+    padding: 0 1.2rem;
+    height: 72px;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .sideControls {
+    display: flex;
+    width: auto;
+    gap: 0.5rem;
+  }
+  
+  .volumeBar {
+    display: none; /* Hide volume slider on mobile for space */
+  }
+
+  .trackInfo {
+    width: 60%;
+    min-width: 0;
+    padding: 0;
+  }
+  
+  .trackInfo:hover {
+    background: none;
+  }
+
+  .controlsContainer {
+    width: auto;
+    max-width: none;
+    flex: initial;
+    padding: 0;
+  }
+
+  .mainControls {
+    gap: 0.6rem;
+  }
+  
+  .controlButton {
+    display: none; /* Hide secondary buttons like shuffle/repeat on mobile bottom bar */
+  }
+
+  /* Seamless absolute progress bar on mobile */
+  .progressBar {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    gap: 0;
+  }
+  
+  .progressBar .time {
+    display: none;
+  }
+  
+  .seekBar {
+    height: 3px;
+    border-radius: 0;
+    margin: 0;
+  }
+  
+  .seekBar::-webkit-slider-runnable-track {
+    border-radius: 0;
+  }
+}

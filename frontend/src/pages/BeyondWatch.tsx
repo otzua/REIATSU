@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Info, Calendar, Tag, Flame } from 'lucide-react';
 import Hls from 'hls.js';
-import { beyondApi } from '../services/beyondApi';
+import { beyondApi, MUSIC_API_BASE } from '../services/beyondApi';
 import type { BeyondVideo, BeyondDetails } from '../services/beyondApi';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
@@ -21,11 +21,13 @@ const BeyondWatch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Keyboard Shortcuts for Fullscreen and Play/Pause
+  // Keyboard Shortcuts for Fullscreen, Play/Pause, and Seeking
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key.toLowerCase() === 'f') {
+      
+      const key = e.key.toLowerCase();
+      if (key === 'f') {
         if (!document.fullscreenElement) {
           playerWrapperRef.current?.requestFullscreen().catch(err => {
             console.error(`Fullscreen error: ${err.message}`);
@@ -41,6 +43,15 @@ const BeyondWatch = () => {
           else videoRef.current.pause();
         }
       }
+      if (key === 'arrowright') {
+        if (videoRef.current) videoRef.current.currentTime += 10;
+      }
+      if (key === 'arrowleft') {
+        if (videoRef.current) videoRef.current.currentTime -= 10;
+      }
+      if (key === 'm') {
+        if (videoRef.current) videoRef.current.muted = !videoRef.current.muted;
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -53,9 +64,9 @@ const BeyondWatch = () => {
     const videoElement = videoRef.current;
 
     let finalUrl = activeStream;
-    if (activeStream.endsWith('.m3u8')) {
+    if (activeStream.includes('.m3u8')) {
       // Use our backend proxy to bypass Referer checks
-      finalUrl = `/api/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
+      finalUrl = `${MUSIC_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
       
       if (Hls.isSupported()) {
         if (hlsRef.current) {
@@ -64,7 +75,10 @@ const BeyondWatch = () => {
         const hls = new Hls({
           enableWorker: true,
           lowLatencyMode: true,
-          backBufferLength: 90
+          backBufferLength: 90,
+          xhrSetup: (xhr) => {
+            xhr.withCredentials = false;
+          }
         });
         
         hls.on(Hls.Events.ERROR, (_, data) => {
@@ -97,8 +111,8 @@ const BeyondWatch = () => {
         videoElement.src = finalUrl;
       }
     } else {
-      // Standard MP4
-      videoElement.src = finalUrl;
+      // Standard MP4 or direct link
+      videoElement.src = activeStream;
     }
 
     return () => {
@@ -119,7 +133,6 @@ const BeyondWatch = () => {
     setLoading(true);
     beyondApi.getDetails(id)
       .then(async (data) => {
-        setDetails(data);
         if (data.info && data.info[0]) {
           const info = data.info[0];
           const videoObj = {
@@ -131,13 +144,13 @@ const BeyondWatch = () => {
             pubDate: info.releasedate
           };
           setVideo(videoObj);
+          setDetails(data);
 
           // Perform client-side extraction to get fresh, IP-matched stream links
           try {
             const extraction = await beyondApi.extractStream(videoObj.embedUrl);
-            if (extraction.success) {
-              setActiveStream(extraction.best_stream || null);
-              // Update details with fresh streams if needed
+            if (extraction.success && (extraction.best_stream || (extraction.streams && extraction.streams.length > 0))) {
+              setActiveStream(extraction.best_stream || extraction.streams[0].url);
               setDetails(prev => {
                 if (!prev) return data;
                 const newInfo = [...prev.info];
@@ -145,7 +158,6 @@ const BeyondWatch = () => {
                 return { ...prev, info: newInfo };
               });
             } else {
-              // Fallback to backend stream if client extraction fails
               setActiveStream(info.best_stream || null);
             }
           } catch (err) {
@@ -192,7 +204,8 @@ const BeyondWatch = () => {
         <HalftoneWave />
         <div className={styles.content}>
           <div className={styles.loadingWrapper}>
-            <div className={styles.loading}>BYPASSING FIREWALL...</div>
+            <div className={styles.loading} style={{ letterSpacing: '0.3em' }}>BYPASSING FIREWALL...</div>
+            <div style={{ marginTop: '1rem', color: 'var(--accent)', fontSize: '0.7rem', opacity: 0.6 }}>INITIALIZING ALPHA EXTRACTION PROTOCOL</div>
           </div>
         </div>
       </div>
@@ -205,9 +218,13 @@ const BeyondWatch = () => {
         <HalftoneWave />
         <div className={styles.content}>
           <div className={styles.errorBox}>
-            <h2>PORTAL ERROR</h2>
-            <p style={{ color: 'var(--color-cream)', opacity: 0.5, marginBottom: '1rem' }}>The requested content could not be located in the Beyond sector.</p>
-            <button onClick={() => navigate('/beyond')}>GO BACK</button>
+            <h2 style={{ letterSpacing: '0.2em' }}>PORTAL ERROR</h2>
+            <p style={{ color: 'var(--color-cream)', opacity: 0.5, marginBottom: '2rem', maxWidth: '400px', marginInline: 'auto' }}>
+              The requested content could not be located in the Beyond sector. It may have been moved or redacted.
+            </p>
+            <button onClick={() => navigate('/beyond')} className={styles.backBtn} style={{ background: 'var(--accent)', color: 'white', padding: '0.8rem 2rem' }}>
+              RETURN TO HUB
+            </button>
           </div>
         </div>
       </div>
@@ -224,7 +241,7 @@ const BeyondWatch = () => {
         <div className={styles.topNav}>
           <button onClick={() => navigate('/beyond')} className={styles.backBtn}>
             <ChevronLeft size={18} />
-            <span>BEYOND PORTAL</span>
+            <span>HUB</span>
           </button>
           <div className={styles.breadcrumb}>
             <span className={styles.activeEpName}>{video.title}</span>
@@ -246,15 +263,16 @@ const BeyondWatch = () => {
                       crossOrigin="anonymous"
                     />
                 ) : (
-                  <iframe
-                    src={`https://hanime.tv/embed/${video.id}`}
-                    title={video.title}
-                    className={styles.iframe}
-                    allowFullScreen
-                    scrolling="no"
-                    allow="autoplay; encrypted-media; fullscreen"
-                    onError={() => setError(true)}
-                  />
+                  <div className={styles.iframe} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', gap: '1rem' }}>
+                    <Flame size={48} className={styles.pulse} style={{ color: 'var(--accent)' }} />
+                    <p style={{ color: 'var(--accent)', fontWeight: 800 }}>EXTRACTION FAILED</p>
+                    <button 
+                      onClick={() => window.location.reload()}
+                      style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 800 }}
+                    >
+                      RETRY EXTRACTION
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -264,7 +282,7 @@ const BeyondWatch = () => {
                 <div className={styles.epMeta}>
                   <span className={styles.epCount} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Flame size={12} style={{ color: 'var(--accent)' }} />
-                    ALPHA EXTRACTION • PREMIUM
+                    ALPHA EXTRACTION • {activeStream ? 'SECURE' : 'UNSTABLE'}
                   </span>
                   <h1 className={styles.epTitle}>{video.title}</h1>
                 </div>

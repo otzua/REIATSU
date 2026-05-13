@@ -24,6 +24,27 @@ function buildImageCandidates(rawSrc: string): string[] {
     candidates.add(src.replace('/media/anime/cover/medium/', '/media/anime/cover/large/'));
   }
 
+  // Google User Content & YTMusic high-res upgrades (e.g. w120-h120 -> w540-h540)
+  if (src.includes('googleusercontent.com') || src.includes('ggpht.com')) {
+    const upgradedW = src.replace(/=w\d+-h\d+/, '=w540-h540');
+    const upgradedS = upgradedW.replace(/=s\d+/, '=s512');
+    candidates.add(upgradedS);
+  }
+
+  // YouTube thumbnail high-res upgrades
+  if (src.includes('i.ytimg.com') || src.includes('img.youtube.com')) {
+    if (src.includes('/default.jpg')) {
+      candidates.add(src.replace('/default.jpg', '/maxresdefault.jpg'));
+      candidates.add(src.replace('/default.jpg', '/hqdefault.jpg'));
+    } else if (src.includes('/hqdefault.jpg')) {
+      candidates.add(src.replace('/hqdefault.jpg', '/maxresdefault.jpg'));
+    } else if (src.includes('/mqdefault.jpg')) {
+      candidates.add(src.replace('/mqdefault.jpg', '/maxresdefault.jpg'));
+    } else if (src.includes('/sddefault.jpg')) {
+      candidates.add(src.replace('/sddefault.jpg', '/maxresdefault.jpg'));
+    }
+  }
+
   // Prefer upgraded candidates first while always keeping original as fallback.
   const ordered = [...candidates].filter(Boolean);
   const upgraded = ordered.filter((item) => item !== src);

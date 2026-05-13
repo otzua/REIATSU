@@ -139,6 +139,10 @@
   100% { opacity: 0.6; }
 }
 
+.pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
 /* Player Controls */
 .playerControls {
   background: rgba(255, 255, 255, 0.04);

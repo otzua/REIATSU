@@ -1,0 +1,264 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  margin-top: 0;
+  padding: 0 5%;
+}
+
+.heroGlow {
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  width: 80%;
+  height: 60%;
+  object-fit: cover;
+  filter: blur(100px) saturate(150%);
+  opacity: 0.5;
+  transform: translateZ(0);
+  transition: opacity 0.8s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sliderContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 40px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 160px rgba(0, 0, 0, 0.95);
+  z-index: 1;
+}
+
+.hero:hover .heroGlow {
+  opacity: 0.8;
+}
+
+.slidesRow {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 4rem;
+  position: relative;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.slide:active {
+  cursor: grabbing;
+}
+
+.backdropWrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.posterGlow {
+  position: absolute;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  object-fit: cover;
+  filter: blur(60px) saturate(150%);
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  z-index: 0;
+  filter: brightness(0.6) contrast(1.1);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(90deg, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.7) 40%, transparent 80%),
+    linear-gradient(to top, rgba(15,15,15,0.9) 0%, transparent 40%);
+  z-index: 1;
+}
+
+.slideContent {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+.tagRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.featuredTag {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: #fff;
+  background: var(--accent);
+  padding: 0.25rem 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(184, 58, 45, 0.4);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.artist {
+  font-size: 1.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.mainBtn {
+  background: #fff;
+  color: #000;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mainBtn:hover {
+  transform: scale(1.05) translateY(-3px);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(184, 58, 45, 0.4);
+}
+
+.secondaryBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+}
+
+.arrowBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64px;
+  height: 64px;
+  background: rgba(15, 15, 15, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
+  z-index: 20;
+  opacity: 0;
+}
+
+.hero:hover .arrowBtn {
+  opacity: 1;
+}
+
+.arrowBtn:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.left { left: 1.5rem; }
+.right { right: 1.5rem; }
+
+.indicators {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 10;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activeIndicator {
+  background: var(--accent);
+  width: 30px;
+}
+
+@media (max-width: 1024px) {
+  .hero { height: 580px; padding: 0 2rem; }
+  .title { font-size: 3.5rem; }
+}
+
+@media (max-width: 768px) {
+  .hero { height: 500px; padding: 0 1.5rem; margin-top: 6rem; }
+  .slide { padding: 2.5rem; }
+  .title { font-size: 2.5rem; }
+  .artist { font-size: 1.4rem; }
+  .arrowBtn { display: none; }
+}

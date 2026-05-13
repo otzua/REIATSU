@@ -7,6 +7,8 @@ import Watch from './pages/Watch';
 import AnimeDetails from './pages/AnimeDetails';
 import Schedule from './pages/Schedule';
 import Music from './pages/Music';
+import AlbumDetails from './pages/AlbumDetails';
+import ArtistDetails from './pages/ArtistDetails';
 import Beyond from './pages/Beyond';
 import BeyondWatch from './pages/BeyondWatch';
 import Layout from './components/Layout';
@@ -26,6 +28,8 @@ function App() {
           <Route path="/watch/:id" element={<Watch />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/music" element={<Music />} />
+          <Route path="/music/album/:id" element={<AlbumDetails />} />
+          <Route path="/music/artist/:id" element={<ArtistDetails />} />
           <Route path="/beyond" element={<Beyond />} />
           <Route path="/beyond/watch/:id" element={<BeyondWatch />} />
         </Routes>

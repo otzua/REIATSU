@@ -1,35 +1,3 @@
 .musicContainer {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background: #000;
-  color: #fff;
-  text-align: center;
-}
-
-.placeholder {
-  max-width: 600px;
-}
-
-.kanji {
-  font-size: 5rem;
-  opacity: 0.1;
-  margin-bottom: 1rem;
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.5rem;
-  color: #fff;
-}
-
-.description {
-  color: #a0a0ab;
-  font-size: 1rem;
-  line-height: 1.6;
+  /* Restored to match Home.module.css style */
 }

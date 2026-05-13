@@ -39,3 +39,16 @@ op.json
 test_*.js
 test_*.html
 
+# Media & Downloads
+music-api/downloads/
+*.flac
+*.mp3
+*.wav
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+

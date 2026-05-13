@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
 import { cinemaApi } from '../services/cinemaApi';
 import { beyondApi } from '../services/beyondApi';
+import { musicApi } from '../services/musicApi';
 import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './Navbar.module.css';
+import { useMusic } from '../context/MusicContext';
+import MusicDownloadModal from './MusicDownloadModal';
 
 const Navbar = () => {
+  const { playTrack } = useMusic();
   const location = useLocation();
   const navigate = useNavigate();
   const isCinema = location.pathname.startsWith('/cinema');
@@ -18,10 +22,12 @@ const Navbar = () => {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [animeResults, setAnimeResults] = useState<any[]>([]);
   const [cinemaResults, setCinemaResults] = useState<any[]>([]);
   const [beyondResults, setBeyondResults] = useState<any[]>([]);
+  const [musicResults, setMusicResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,7 +54,11 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'home', path: getHomePath(), icon: Home },
-    { id: 'schedule', path: '/schedule', icon: Calendar },
+    { 
+      id: isMusic ? 'download' : 'schedule', 
+      path: isMusic ? '#download' : '/schedule', 
+      icon: isMusic ? Download : Calendar 
+    },
     { id: 'search', path: '#search', icon: Search },
     { id: 'switch', path: '#switch', icon: ArrowRightLeft },
   ];
@@ -65,6 +75,7 @@ const Navbar = () => {
     setAnimeResults([]);
     setCinemaResults([]);
     setBeyondResults([]);
+    setMusicResults([]);
   };
 
   const handleSearchClick = () => {
@@ -166,15 +177,17 @@ const Navbar = () => {
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const [animeData, cinemaData, beyondData] = await Promise.all([
+        const [animeData, cinemaData, beyondData, musicData] = await Promise.all([
           animeApi.search(query).catch(() => ({ animes: [] })),
           cinemaApi.search(query).catch(() => []),
-          beyondUnlocked ? beyondApi.search(query).catch(() => []) : Promise.resolve([])
+          beyondUnlocked ? beyondApi.search(query).catch(() => []) : Promise.resolve([]),
+          musicApi.search(query).catch(() => [])
         ]);
 
         setAnimeResults((animeData as { animes: AnimeCard[] }).animes?.slice(0, 4) ?? []);
         setCinemaResults(cinemaData.slice(0, 4));
         setBeyondResults(beyondData.slice(0, 4));
+        setMusicResults(musicData.slice(0, 6));
       } catch (err) {
         console.error('Search error:', err);
       } finally {
@@ -192,6 +205,20 @@ const Navbar = () => {
 
         <nav className={styles.navCapsule}>
           {navItems.map((item) => {
+            if (item.id === 'download') {
+              return (
+                <button
+                  key={item.id}
+                  className={`${styles.navItem} ${activeTab === item.id ? styles.activeText : ''}`}
+                  onClick={() => setDownloadModalOpen(true)}
+                >
+                  {activeTab === item.id && (
+                    <motion.div layoutId="navIndicator" className={styles.activeIndicator} transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <item.icon size={22} strokeWidth={2} style={{ position: 'relative', zIndex: 1 }} />
+                </button>
+              );
+            }
             if (item.id === 'search') {
               return (
                 <button
@@ -351,13 +378,46 @@ const Navbar = () => {
               </button>
             </div>
 
-            {(animeResults.length > 0 || cinemaResults.length > 0 || beyondResults.length > 0 || searching) ? (
+            {(animeResults.length > 0 || cinemaResults.length > 0 || beyondResults.length > 0 || musicResults.length > 0 || searching) ? (
               <div className={styles.searchResults}>
                 {searching && (
                   <div className={styles.searchHint}>Searching for "{query}"...</div>
                 )}
-                
-                {isBeyond ? (
+
+                {isMusic ? (
+                  <>
+                    {musicResults.length > 0 && (
+                      <div className={styles.searchSection}>
+                        <div className={styles.sectionLabel}>Music Results</div>
+                        {musicResults.map((item) => (
+                          <div 
+                            key={item.id + 'music'} 
+                            className={styles.resultItem}
+                            onClick={() => {
+                              closeSearch();
+                              playTrack(item, musicResults);
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {item.poster && (
+                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
+                            )}
+                            <div className={styles.resultInfo}>
+                              <span className={styles.resultName}>{item.name}</span>
+                              <div className={styles.resultMetaWrapper}>
+                                <span className={styles.resultMeta}>{item.artist}</span>
+                              </div>
+                            </div>
+                            <div className={styles.keyboardHint}>
+                              <span>Play</span>
+                              <span className={styles.keyBadge}>↵</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : isBeyond ? (
                   <>
                     {beyondResults.length > 0 && (
                       <div className={styles.searchSection}>
@@ -491,6 +551,31 @@ const Navbar = () => {
                         ))}
                       </div>
                     )}
+
+                    {musicResults.length > 0 && (
+                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
+                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From Music</div>
+                        {musicResults.map((item) => (
+                          <div 
+                            key={item.id + 'music-alt'} 
+                            className={styles.resultItem}
+                            onClick={() => {
+                              closeSearch();
+                              playTrack(item, musicResults);
+                            }}
+                            style={{ cursor: 'pointer', opacity: 0.7 }}
+                          >
+                            {item.poster && (
+                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
+                            )}
+                            <div className={styles.resultInfo}>
+                              <span className={styles.resultName}>{item.name}</span>
+                              <span className={styles.resultMeta} style={{ fontSize: '0.7rem', opacity: 0.5 }}>{item.artist}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -522,6 +607,10 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <MusicDownloadModal 
+        isOpen={downloadModalOpen} 
+        onClose={() => setDownloadModalOpen(false)} 
+      />
     </>
   );
 };

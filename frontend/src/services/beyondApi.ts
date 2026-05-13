@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const MUSIC_API_BASE = '/api';
+const API_HOST = import.meta.env.VITE_API_URL || '';
+export const MUSIC_API_BASE = API_HOST ? `${API_HOST}/api` : '/api';
 
 export interface BeyondVideo {
   id: string; // The slug

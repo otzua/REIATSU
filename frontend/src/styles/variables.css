@@ -1,15 +1,21 @@
 :root {
   /* Vintage Palette */
   --color-cream: #DCC9A9;
+  --color-cream-rgb: 220, 201, 169;
   --color-black: #1A1A1A;
+  --color-black-rgb: 26, 26, 26;
   --color-red: #B83A2D;
+  --color-red-rgb: 184, 58, 45;
   --color-green: #4E6851;
+  --color-green-rgb: 78, 104, 81;
   --color-white: #FFFFFF;
+  --color-white-rgb: 255, 255, 255;
 
   /* Swapped Semantic Mapping (Dark Theme) */
   --bg-main: var(--color-black);
   --text-main: var(--color-cream);
   --accent: var(--color-red);
+  --accent-rgb: var(--color-red-rgb);
   
   /* Typography */
   --font-heading: 'Outfit', sans-serif;

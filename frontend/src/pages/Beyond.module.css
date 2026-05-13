@@ -345,13 +345,100 @@
   letter-spacing: 0.1em;
 }
 
+.searchBarWrapper {
+  max-width: 800px;
+  margin: 1.5rem auto 3rem auto;
+  padding: 0 4rem;
+}
+
+.searchForm {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.searchForm:focus-within {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent);
+  box-shadow: 0 0 30px rgba(184, 58, 45, 0.2);
+}
+
+.searchIcon {
+  color: var(--accent);
+  margin-right: 1rem;
+}
+
+.searchInput {
+  background: none;
+  border: none;
+  color: var(--color-cream);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  width: 100%;
+  letter-spacing: 0.05em;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: rgba(220, 201, 169, 0.2);
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: rgba(220, 201, 169, 0.4);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.clearBtn:hover {
+  color: var(--accent);
+}
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.retryBtn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.retryBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(184, 58, 45, 0.3);
+}
+
 .errorContainer {
   color: #ff6b6b;
 }
 
 /* Mobile Responsiveness */
 @media (max-width: 1024px) {
-  .sectionsContainer {
+  .sectionsContainer, .searchBarWrapper {
     padding: 0 2rem;
   }
 }
@@ -367,7 +454,7 @@
 }
 
 @media (max-width: 768px) {
-  .sectionsContainer {
+  .sectionsContainer, .searchBarWrapper {
     padding: 0 1.5rem;
   }
   .heroSkeleton {

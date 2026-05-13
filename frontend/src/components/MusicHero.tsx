@@ -1,128 +1,152 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Play, Info } from 'lucide-react';
+import { Play, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SmartImage from './SmartImage';
 import type { Track } from '../services/musicApi';
-import styles from './Hero.module.css';
-
-const PLACEHOLDER_MUSIC_SLIDES: Track[] = [
-  {
-    id: 'm1',
-    name: 'Neon Horizon',
-    artist: 'Antigravity Studio',
-    album: 'Neon Horizon',
-    poster: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1200&auto=format&fit=crop',
-    url: ''
-  },
-  {
-    id: 'm2',
-    name: 'Midnight Melodies',
-    artist: 'Lofi Records',
-    album: 'Midnight Melodies',
-    poster: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1200&auto=format&fit=crop',
-    url: ''
-  },
-  {
-    id: 'm3',
-    name: 'Brutalist Beats',
-    artist: 'Concrete Jungle',
-    album: 'Brutalist Beats',
-    poster: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=1200&auto=format&fit=crop',
-    url: ''
-  }
-];
+import { useMusic } from '../context/MusicContext';
+import styles from './MusicHero.module.css';
 
 interface MusicHeroProps {
+  slides: Track[];
   onPlay?: (track: Track, queue: Track[]) => void;
 }
 
-const MusicHero: React.FC<MusicHeroProps> = ({ onPlay }) => {
+const MusicHero: React.FC<MusicHeroProps> = ({ slides, onPlay }) => {
+  const { addToQueue, currentTrack, isPlaying } = useMusic();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % PLACEHOLDER_MUSIC_SLIDES.length);
-  }, []);
+    if (slides.length === 0) return;
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
+
+  const prevSlide = useCallback(() => {
+    if (slides.length === 0) return;
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
+    if (isDragging || slides.length === 0) return;
     const timer = setInterval(nextSlide, 8000);
     return () => clearInterval(timer);
-  }, [nextSlide]);
+  }, [isDragging, slides.length, nextSlide]);
 
-  const slide = PLACEHOLDER_MUSIC_SLIDES[currentSlide];
+  if (slides.length === 0) return null;
 
   return (
     <section className={styles.hero}>
       <SmartImage
-        src={slide.poster}
+        src={slides[currentSlide]?.poster}
         aria-hidden="true"
         className={styles.heroGlow}
-        style={{ '--accent-color': '#ff0055' } as any}
+        draggable={false}
       />
+      
       <div className={styles.sliderContainer}>
         <motion.div
-          key={slide.id}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2 }}
-          className={styles.slide}
+          className={styles.slidesRow}
+          animate={{ x: `-${currentSlide * 100}%` }}
+          transition={{ type: 'tween', ease: [0.25, 1, 0.5, 1], duration: 0.8 }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={(_, info) => {
+            setIsDragging(false);
+            if (info.offset.x < -50) nextSlide();
+            else if (info.offset.x > 50) prevSlide();
+          }}
         >
-          <div className={styles.slideLink}>
-            <SmartImage
-              src={slide.poster}
-              aria-hidden="true"
-              className={styles.posterGlow}
-            />
-            <SmartImage
-              src={slide.poster}
-              alt={slide.name}
-              className={styles.poster}
-            />
-            <div className={styles.overlay} />
-            <div className={styles.slideContent}>
-              <div className={styles.tagRow}>
-                <span className={styles.genreTag}>Synthwave / Electronic</span>
+          {slides.map((slide, index) => {
+            const isActive = currentTrack?.id === slide.id;
+            return (
+              <div key={`${slide.id}-${index}`} className={styles.slide}>
+                <div className={styles.backdropWrapper}>
+                  <SmartImage
+                    src={slide.poster}
+                    aria-hidden="true"
+                    className={styles.posterGlow}
+                    draggable={false}
+                  />
+                  <SmartImage
+                    src={slide.poster}
+                    alt={slide.name}
+                    className={styles.poster}
+                    draggable={false}
+                  />
+                </div>
+                
+                <div className={styles.overlay} />
+                
+                <div className={styles.slideContent}>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={styles.tagRow}
+                  >
+                    <span className={styles.featuredTag}>FEATURED TRENDING</span>
+                  </motion.div>
+                  
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className={styles.title}
+                  >
+                    {slide.name}
+                  </motion.h1>
+                  
+                  <motion.h2 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className={styles.artist}
+                  >
+                    {slide.artist}
+                  </motion.h2>
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className={styles.buttonRow}
+                  >
+                    <button 
+                      onClick={() => onPlay?.(slide, slides)}
+                      className={styles.mainBtn}
+                    >
+                      <Play size={20} fill="currentColor" /> 
+                      {isActive && isPlaying ? 'PLAYING NOW' : 'PLAY NOW'}
+                    </button>
+                    <button 
+                      onClick={() => addToQueue(slide)}
+                      className={styles.secondaryBtn}
+                    >
+                      <Plus size={20} /> ADD TO QUEUE
+                    </button>
+                  </motion.div>
+                </div>
               </div>
-              <h1 className={styles.title}>{slide.name}</h1>
-              <h2 style={{ color: 'var(--color-cream)', opacity: 0.8, marginBottom: '1rem', fontSize: '1.2rem' }}>{slide.artist}</h2>
-              <p className={styles.description}>Enjoy premium high-fidelity electronic and chill rhythms handcrafted for your listening session.</p>
-              
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button 
-                  onClick={() => onPlay?.(slide, PLACEHOLDER_MUSIC_SLIDES)}
-                  style={{
-                    background: 'var(--color-cream)',
-                    color: '#000',
-                    padding: '12px 24px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Play size={20} fill="currentColor" /> PLAY NOW
-                </button>
-                <button style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  color: '#fff',
-                  padding: '12px 24px',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  backdropFilter: 'blur(10px)'
-                }}>
-                  <Info size={20} /> DETAILS
-                </button>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </motion.div>
+      </div>
+
+      <button className={`${styles.arrowBtn} ${styles.left}`} onClick={prevSlide}>
+        <ChevronLeft size={28} />
+      </button>
+      <button className={`${styles.arrowBtn} ${styles.right}`} onClick={nextSlide}>
+        <ChevronRight size={28} />
+      </button>
+
+      <div className={styles.indicators}>
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSlide(i)}
+            className={`${styles.indicator} ${i === currentSlide ? styles.activeIndicator : ''}`}
+          />
+        ))}
       </div>
     </section>
   );
