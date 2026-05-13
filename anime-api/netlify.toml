@@ -1,0 +1,8 @@
+[build]
+  command = "npm install"
+  functions = "functions"
+
+[[redirects]]
+  from = "/api/beyond/*"
+  to = "/.netlify/functions/beyond/:splat"
+  status = 200
