@@ -162,8 +162,19 @@ beyond.get('/details', async (c) => {
       let cleanTitle = videoTitle.replace(/\b(ep|episode)?\s*\d+/i, '').trim();
       if (!cleanTitle) cleanTitle = videoTitle;
 
-      const searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: cleanTitle } });
-      const results = searchRes.data?.data?.results || [];
+      let searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: cleanTitle } });
+      let results = searchRes.data?.data?.results || [];
+      if (results.length === 0 && cleanTitle.includes('-')) {
+        const hyphenlessTitle = cleanTitle.replace(/-/g, ' ');
+        searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: hyphenlessTitle } });
+        results = searchRes.data?.data?.results || [];
+      }
+      if (results.length === 0) {
+        const firstWords = cleanTitle.split(/[-:,\s]+/).slice(0, 2).join(' ');
+        searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: firstWords } });
+        results = searchRes.data?.data?.results || [];
+      }
+
       if (results.length > 0) {
         let targetUrl = results[0].url;
         if (targetUrl.includes('/series/')) {
@@ -186,7 +197,7 @@ beyond.get('/details', async (c) => {
           const data = watchRes.data?.data;
           if (data?.player) {
             const sources = data.player.sources || [];
-            bestStream = sources.find(s => s.label === '720p')?.src || sources[0]?.src || data.player.src;
+            bestStream = sources.find(s => s.label === '1080p')?.src || sources[0]?.src || data.player.src;
             allStreams = sources.map(s => ({
               url: s.src,
               filename: s.label || '1080p',
