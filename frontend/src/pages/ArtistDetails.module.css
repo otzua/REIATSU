@@ -1,0 +1,427 @@
+.container {
+  min-height: 100vh;
+  padding-bottom: 120px;
+  position: relative;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+.blurredBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60vh;
+  background-size: cover;
+  background-position: center;
+  filter: blur(80px) saturate(1.8) brightness(0.4);
+  opacity: 0.6;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blurredBg::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, #000);
+}
+
+.navBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 40px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  
+  /* Bulletproof Glassmorphism */
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  
+  /* Force GPU rendering */
+  transform: translateZ(0);
+  will-change: backdrop-filter;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.backBtn:hover {
+  opacity: 1;
+  transform: translateX(-4px);
+}
+
+.header {
+  padding: 120px 40px 40px;
+  display: flex;
+  align-items: flex-end;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.posterWrapper {
+  width: 280px;
+  height: 280px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  border: 4px solid rgba(255,255,255,0.1);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.posterWrapper:hover {
+  transform: scale(1.03) rotate(2deg);
+}
+
+.posterImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.meta {
+  flex: 1;
+}
+
+.typeBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.albumTitle {
+  font-size: 5rem;
+  font-weight: 900;
+  margin: 0 0 15px;
+  line-height: 1;
+  letter-spacing: -2px;
+  background: linear-gradient(to bottom, #fff, #aaa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.artistRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+.artistDescription {
+  margin-top: 20px;
+  max-width: 600px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.mainPlayBtn {
+  margin-top: 30px;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1rem;
+}
+
+.mainPlayBtn:hover {
+  transform: scale(1.05);
+  background: #ff007f;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+}
+
+.tracksSection {
+  padding: 0 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 50px 1fr 120px 120px;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.trackRow {
+  display: grid;
+  grid-template-columns: 50px 1fr 120px 120px;
+  padding: 12px 20px;
+  align-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.trackRow:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.activeRow {
+  background: rgba(255, 0, 127, 0.1) !important;
+}
+
+.activeRow .trackName {
+  color: #ff007f;
+}
+
+.indexCol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rowPlayBtn {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.trackRow:hover .trackIndex {
+  display: none;
+}
+
+.trackRow:hover .rowPlayBtn {
+  display: flex;
+}
+
+.titleCol {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.trackArtwork {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.artworkImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trackName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.trackArtist {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.durationCol {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.actionsCol {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.trackRow:hover .actionsCol {
+  opacity: 1;
+}
+
+.rowActionBtn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.rowActionBtn:hover {
+  color: #fff;
+}
+
+.downloaded {
+  color: #ff007f !important;
+}
+
+.loadingContainer {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.loadingSpinner {
+  color: #ff007f;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.secondaryBtn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.errorContainer {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.errorIcon {
+  color: #ff007f;
+  margin-bottom: 20px;
+}
+
+.errorTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.errorText {
+  color: rgba(255,255,255,0.6);
+  max-width: 400px;
+  margin-bottom: 30px;
+}
+
+.backHomeBtn {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backHomeBtn:hover {
+  transform: scale(1.05);
+  background: #ff007f;
+  color: #fff;
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  letter-spacing: 1px;
+}
+
+@media (max-width: 1024px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: 80px;
+  }
+  
+  .albumTitle {
+    font-size: 3rem;
+  }
+  
+  .posterWrapper {
+    width: 220px;
+    height: 220px;
+  }
+  
+  .artistRow {
+    justify-content: center;
+  }
+  
+  .mainPlayBtn {
+    margin: 30px auto 0;
+  }
+  
+  .durationCol {
+    display: none;
+  }
+  
+  .tableHeader, .trackRow {
+    grid-template-columns: 40px 1fr 60px;
+  }
+}

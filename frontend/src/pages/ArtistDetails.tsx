@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Play, Pause, ChevronLeft, Disc, Clock, Plus, Download, Check, AlertCircle, Users } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, ChevronLeft, Disc, Clock, Plus, Download, Check, AlertCircle, Users, Heart, Share2 } from 'lucide-react';
 import { useMusic } from '../context/MusicContext';
 import { musicApi, type Artist, type Track } from '../services/musicApi';
 import SmartImage from '../components/SmartImage';
-import styles from './AlbumDetails.module.css';
+import styles from './ArtistDetails.module.css';
 
 const ArtistDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,7 +74,6 @@ const ArtistDetails: React.FC = () => {
     if (isCurrentArtistPlaying) {
       togglePlay();
     } else {
-      // Play first top track and set artist tracks as the queue
       playTrack(tracks[0], tracks);
     }
   };
@@ -108,119 +107,155 @@ const ArtistDetails: React.FC = () => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
+  };
+
   return (
     <motion.div 
       className={styles.container}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
     >
       {/* Immersive blurred backdrop */}
-      <div 
+      <motion.div 
         className={styles.blurredBg} 
-        style={{ backgroundImage: `url(${artist.poster})` }} 
+        style={{ backgroundImage: `url(${artist.poster})` }}
+        initial={{ opacity: 0, scale: 1.1 }}
+        animate={{ opacity: 0.6, scale: 1 }}
+        transition={{ duration: 1.5 }}
       />
 
       {/* Navigation Bar */}
-      <div className={styles.navBar}>
+      <nav className={styles.navBar}>
         <button className={styles.backBtn} onClick={() => navigate('/music')}>
           <ChevronLeft size={20} />
-          Back to Music
+          <span>Artist Profile</span>
         </button>
-      </div>
+      </nav>
 
-      {/* Premium Artist Profile Header */}
+      {/* Cinematic Artist Profile Header */}
       <header className={styles.header}>
-        <div className={styles.posterWrapper} style={{ borderRadius: '50%', overflow: 'hidden', boxShadow: '0 12px 30px rgba(0,0,0,0.5)' }}>
+        <motion.div 
+          className={styles.posterWrapper}
+          variants={itemVariants}
+        >
           <SmartImage 
             src={artist.poster} 
             alt={artist.name} 
             className={styles.posterImg} 
-            style={{ borderRadius: '50%', transform: 'scale(1.02)' }}
           />
-        </div>
+        </motion.div>
         
         <div className={styles.meta}>
-          <span className={styles.typeBadge} style={{ background: 'rgba(255, 0, 127, 0.2)', color: '#ff007f' }}>POPULAR ARTIST</span>
-          <h1 className={styles.albumTitle} style={{ fontSize: '3.5rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-1px' }}>
-            {artist.name}
-          </h1>
+          <motion.span 
+            className={styles.typeBadge}
+            variants={itemVariants}
+          >
+            VERIFIED ARTIST
+          </motion.span>
           
-          <div className={styles.artistRow}>
-            <span className={styles.artistName} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Users size={16} />
-              {artist.followers}
+          <motion.h1 
+            className={styles.albumTitle}
+            variants={itemVariants}
+          >
+            {artist.name}
+          </motion.h1>
+          
+          <motion.div className={styles.artistRow} variants={itemVariants}>
+            <span className={styles.artistName}>
+              <Users size={18} style={{ marginRight: '8px' }} />
+              {artist.followers} Monthly Listeners
             </span>
             <span className={styles.dot}>•</span>
-            <span className={styles.trackCount}>{tracks.length} Best Songs</span>
-          </div>
+            <span className={styles.trackCount}>{tracks.length} Discography Highlights</span>
+          </motion.div>
 
-          {artist.description && (
-            <p className={styles.artistDescription} style={{ 
-              maxWidth: '600px', 
-              fontSize: '0.9rem', 
-              color: 'rgba(255,255,255,0.6)', 
-              lineHeight: '1.5',
-              marginTop: '12px',
-              display: '-webkit-box',
-              WebkitLineClamp: '2',
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {artist.description}
-            </p>
-          )}
+          <motion.p className={styles.artistDescription} variants={itemVariants}>
+            {artist.description || `${artist.name} is one of the most influential artists on Reiatsu, bringing unique energy and soulful melodies to listeners worldwide.`}
+          </motion.p>
 
-          <button 
-            className={styles.mainPlayBtn} 
-            onClick={handlePlayArtist}
-            style={{ marginTop: '20px' }}
-          >
-            {isCurrentArtistPlaying && isPlaying ? (
-              <>
-                <Pause fill="currentColor" size={20} />
-                <span>Pause</span>
-              </>
-            ) : (
-              <>
-                <Play fill="currentColor" size={20} />
-                <span>Play Artist Hits</span>
-              </>
-            )}
-          </button>
+          <motion.div className={styles.actionRow} variants={itemVariants}>
+            <button 
+              className={styles.mainPlayBtn} 
+              onClick={handlePlayArtist}
+            >
+              {isCurrentArtistPlaying && isPlaying ? (
+                <>
+                  <Pause fill="currentColor" size={20} />
+                  <span>Pause</span>
+                </>
+              ) : (
+                <>
+                  <Play fill="currentColor" size={20} />
+                  <span>Shuffle Play</span>
+                </>
+              )}
+            </button>
+            
+            <button className={styles.secondaryBtn}>
+              <Heart size={20} />
+            </button>
+            
+            <button className={styles.secondaryBtn}>
+              <Share2 size={20} />
+            </button>
+          </motion.div>
         </div>
       </header>
 
       {/* Artist Best Hits Tracklist Section */}
       <main className={styles.tracksSection}>
-        <div className={styles.tableHeader}>
+        <motion.div className={styles.tableHeader} variants={itemVariants}>
           <div className={styles.indexCol}>#</div>
           <div className={styles.titleCol}>SONG</div>
           <div className={styles.durationCol}>
             <Clock size={16} />
           </div>
           <div className={styles.actionsCol}></div>
-        </div>
+        </motion.div>
 
         <div className={styles.trackList}>
           {tracks.map((track, idx) => {
             const isThisTrackPlaying = currentTrack?.id === track.id;
             
             return (
-              <div 
+              <motion.div 
                 key={track.id} 
                 className={`${styles.trackRow} ${isThisTrackPlaying ? styles.activeRow : ''}`}
+                variants={itemVariants}
                 onClick={() => handlePlayTrack(track)}
+                whileHover={{ x: 8, background: 'rgba(255,255,255,0.08)' }}
+                whileTap={{ scale: 0.99 }}
               >
                 {/* Number / Hover Controls */}
                 <div className={styles.indexCol}>
                   <span className={styles.trackIndex}>{idx + 1}</span>
                   <button className={styles.rowPlayBtn}>
                     {isThisTrackPlaying && isPlaying ? (
-                      <Pause size={14} fill="currentColor" />
+                      <Pause size={16} fill="currentColor" />
                     ) : (
-                      <Play size={14} fill="currentColor" style={{ marginLeft: '2px' }} />
+                      <Play size={16} fill="currentColor" />
                     )}
                   </button>
                 </div>
@@ -232,7 +267,7 @@ const ArtistDetails: React.FC = () => {
                   </div>
                   <div className={styles.trackInfo}>
                     <h3 className={styles.trackName}>{track.name}</h3>
-                    <p className={styles.trackArtist}>{track.artist} • {track.album}</p>
+                    <p className={styles.trackArtist}>{track.artist}</p>
                   </div>
                 </div>
 
@@ -248,29 +283,29 @@ const ArtistDetails: React.FC = () => {
                     onClick={() => addToQueue(track)}
                     title="Add to Queue"
                   >
-                    <Plus size={16} />
+                    <Plus size={18} />
                   </button>
 
                   <button 
                     className={`${styles.rowActionBtn} ${downloadedIds[track.id] ? styles.downloaded : ''}`}
                     onClick={(e) => handleDownloadTrack(e, track)}
                     disabled={downloadingIds[track.id]}
-                    title={downloadedIds[track.id] ? "Downloaded Lossless FLAC" : "Download Lossless FLAC"}
                   >
                     {downloadingIds[track.id] ? (
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className={styles.miniSpinner}
-                      />
+                      >
+                        <Disc size={16} />
+                      </motion.div>
                     ) : downloadedIds[track.id] ? (
-                      <Check size={16} className={styles.checkIcon} />
+                      <Check size={18} />
                     ) : (
-                      <Download size={16} />
+                      <Download size={18} />
                     )}
                   </button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
