@@ -1,0 +1,21 @@
+[build]
+  base = "frontend/"
+  command = "npm install && npm run build"
+  publish = "dist/"
+
+[[redirects]]
+  from = "/api/music/*"
+  to = "https://music-api-sigma-neon.vercel.app/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/anime/*"
+  to = "https://anime-api-chi-ten.vercel.app/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
