@@ -1,6 +1,9 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://anime-api-alpha-kohl.vercel.app/api/$1" },
+    { "source": "/api/music/(.*)", "destination": "https://music-api-sigma-neon.vercel.app/$1" },
+    { "source": "/api/beyond/(.*)", "destination": "https://anime-api-alpha-kohl.vercel.app/api/beyond/$1" },
+    { "source": "/api/anime/(.*)", "destination": "https://anime-api-alpha-kohl.vercel.app/$1" },
+    { "source": "/api/cinema/(.*)", "destination": "https://cinema-api-sglaxy936-6784s-projects.vercel.app/$1" },
     { "source": "/tmdb-api/(.*)", "destination": "https://twilight-cake-defb.hunternisha55.workers.dev/3/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
