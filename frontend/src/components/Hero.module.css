@@ -22,7 +22,7 @@
 
 .sliderContainer {
   width: 100%;
-  height: 680px;
+  height: 720px;
   position: relative;
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
@@ -150,15 +150,16 @@
   font-size: 1rem;
   font-weight: 900;
   color: #fff;
-  background: var(--accent);
+  background: #ff4d4d;
   padding: 0.4rem 1rem;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(184, 58, 45, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(255, 77, 77, 0.4);
   display: flex;
   align-items: center;
   gap: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .genreTag {
@@ -196,22 +197,55 @@
   overflow: hidden;
 }
 
-.episodePills {
+.episodeContainer {
   display: flex;
+  flex-direction: column;
   gap: 0.75rem;
+  align-items: flex-start;
 }
 
-.pill {
-  font-size: 0.8rem;
+.mainCapsule {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
   font-weight: 800;
-  padding: 0.5rem 1.25rem;
+  color: #fff;
+  background: var(--accent);
+  padding: 0.6rem 1.4rem;
   border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(184, 58, 45, 0.3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.subDubRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.badgeCapsule {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--color-cream);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: rgba(220, 201, 169, 0.8);
+  letter-spacing: 0.1rem;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sub {
+  background: rgba(184, 58, 45, 0.1);
+  border-color: rgba(184, 58, 45, 0.2);
+  color: #ff9e9e;
+}
+
+.dub {
+  background: rgba(80, 160, 255, 0.1);
+  border-color: rgba(80, 160, 255, 0.2);
+  color: #9ec9ff;
 }
 
 .watchPill {
@@ -336,15 +370,18 @@
 
 @media (max-width: 768px) {
   .hero {
-    padding: 0 1.5rem;
-    margin-top: 6rem;
+    padding: 0;
+    margin-top: 0;
   }
   .sliderContainer {
-    height: 580px;
+    height: 70vh;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid rgba(220, 201, 169, 0.12);
   }
 
-  .slide {
-    padding: 2.5rem;
+  .slideContent {
+    padding: 2.5rem 1.5rem;
   }
 
   .title {
@@ -361,21 +398,36 @@
   }
 
   .indicators {
-    margin-top: 1rem;
+    margin-top: -2rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  .slideLink:active {
+    opacity: 0.95;
+  }
+  
+  .slideLink:active .poster,
+  .slideLink:active .posterGlow {
+    transform: scale(0.99);
+    transition: transform 0.1s ease-out;
   }
 }
 
 @media (max-width: 480px) {
   .hero {
-    padding: 0 1rem;
-    margin-top: 5rem;
+    padding: 0;
+    margin-top: 0;
   }
   .sliderContainer {
-    height: 520px;
+    height: 75vh;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid rgba(220, 201, 169, 0.12);
   }
 
-  .slide {
-    padding: 1.5rem;
+  .slideContent {
+    padding: 2rem 1.2rem;
   }
 
   .title {
@@ -389,6 +441,6 @@
   }
 
   .indicators {
-    margin-top: 0.75rem;
+    margin-top: -2.5rem;
   }
 }

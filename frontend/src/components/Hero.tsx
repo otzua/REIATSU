@@ -8,7 +8,7 @@ import type { SpotlightAnime } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './Hero.module.css';
 
-const Hero = () => {
+const Hero = ({ provider }: { provider?: string }) => {
   const [slides, setSlides] = useState<SpotlightAnime[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -31,13 +31,13 @@ const Hero = () => {
   }, [emblaApi, onSelect]);
 
   useEffect(() => {
-    animeApi.getHome()
+    animeApi.getHome(provider)
       .then((data) => {
         if (data.spotlightAnimes?.length) setSlides(data.spotlightAnimes.slice(0, 15));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [provider]);
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
@@ -65,7 +65,7 @@ const Hero = () => {
         <div className={styles.emblaContainer}>
           {slides.map((slide, index) => (
             <div key={`${slide.id}-${index}`} className={styles.emblaSlide}>
-              <Link to={`/anime/${slide.id}`} className={styles.slideLink}>
+              <Link to={`/anime/${slide.id}${provider ? `?provider=${provider}` : ''}`} className={styles.slideLink}>
                 <div className={styles.backdropWrapper}>
                   <SmartImage
                     src={slide.poster}
@@ -94,12 +94,34 @@ const Hero = () => {
                   </div>
                   <h1 className={styles.title}>{slide.name}</h1>
                   <p className={styles.description}>{slide.description?.slice(0, 160)}...</p>
-                  <div className={styles.episodePills}>
-                    <span className={styles.pill}>
-                      {Math.max(slide.episodes.sub || 0, slide.episodes.dub || 0)} Episodes
-                    </span>
-                    {slide.episodes.sub != null && <span className={styles.pill}>SUB</span>}
-                    {slide.episodes.dub != null && <span className={styles.pill}>DUB</span>}
+                  <div className={styles.episodeContainer}>
+                    <div className={styles.mainCapsule}>
+                      {(() => {
+                        const subCount = slide.episodes.sub || 0;
+                        const dubCount = slide.episodes.dub || 0;
+                        const mainCount = Math.max(subCount, dubCount);
+                        
+                        const otherInfoCount = slide.otherInfo?.find(info => 
+                          (info.toLowerCase().includes('eps') || info.toLowerCase().includes('episode')) && 
+                          /\d+/.test(info)
+                        );
+                        
+                        if (otherInfoCount) return otherInfoCount;
+                        
+                        const potentialNum = slide.otherInfo?.find(info => /^\d+$/.test(info) && parseInt(info) > 1);
+                        if (potentialNum) return `${potentialNum} Episodes`;
+
+                        return mainCount > 0 ? `${mainCount} ${mainCount === 1 ? 'Episode' : 'Episodes'}` : 'TBA';
+                      })()}
+                    </div>
+                    <div className={styles.subDubRow}>
+                      {slide.episodes.sub != null && slide.episodes.sub > 0 && (
+                        <div className={`${styles.badgeCapsule} ${styles.sub}`}>SUB</div>
+                      )}
+                      {slide.episodes.dub != null && slide.episodes.dub > 0 && (
+                        <div className={`${styles.badgeCapsule} ${styles.dub}`}>DUB</div>
+                      )}
+                    </div>
                   </div>
                   <div className={styles.ctaRow} style={{ marginTop: '2.5rem' }}>
                     <span className={styles.watchPill}>

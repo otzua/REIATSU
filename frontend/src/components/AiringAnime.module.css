@@ -201,14 +201,32 @@
 
 @media (max-width: 768px) {
   .section {
-    padding: var(--space-md);
+    padding: var(--space-md) 0 var(--space-md) var(--space-md);
+  }
+  .header {
+    padding-right: var(--space-md);
   }
   .title {
     font-size: 2.2rem;
   }
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
     gap: 1.2rem;
+    padding-bottom: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+  .animeCard {
+    flex: 0 0 180px;
+    scroll-snap-align: start;
+  }
+  .cardLink:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
   }
 }
 
@@ -220,8 +238,10 @@
     margin-bottom: 2rem;
   }
   .grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 0.8rem;
+  }
+  .animeCard {
+    flex: 0 0 150px;
   }
   .accentBox {
     height: 32px;

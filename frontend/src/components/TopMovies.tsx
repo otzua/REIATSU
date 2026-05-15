@@ -6,18 +6,18 @@ import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './TopMovies.module.css';
 
-const TopMovies = () => {
+const TopMovies = ({ provider }: { provider?: string }) => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    animeApi.getType('movie')
+    animeApi.getType('movie', 1, provider)
       .then((data) => {
         setAnimes((data.animes || []).slice(0, 12));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [provider]);
 
   if (!loading && animes.length === 0) return null;
 
@@ -43,7 +43,7 @@ const TopMovies = () => {
               transition={{ delay: index * 0.04 }}
               whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
             >
-              <Link to={`/anime/${anime.id}`} className={styles.cardLink}>
+              <Link to={`/anime/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
                   <div className={styles.badge}>MOVIE</div>
                   <div className={styles.cardBadges} style={{ left: 'unset', right: '1rem' }}>

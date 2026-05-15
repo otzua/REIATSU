@@ -6,7 +6,7 @@ import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './TopAnime.module.css';
 
-const TopAnime = () => {
+const TopAnime = ({ provider }: { provider?: string }) => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,40 +27,49 @@ const TopAnime = () => {
 
   useEffect(() => {
     let mounted = true;
-    const fetchLegends = async () => {
+    const fetchAnimes = async () => {
       try {
-        const promises = LEGENDARY_IDS.map(id => animeApi.getAnime(id).catch(() => null));
-        const details = await Promise.all(promises);
-        
-        const valid = details
-          .filter(d => d && d.anime)
-          .map(d => ({
-            id: d!.anime.id,
-            name: d!.anime.name,
-            jname: null,
-            poster: d!.anime.poster,
-            type: d!.anime.type,
-            episodes: d!.anime.episodes
-          }));
+        if (provider) {
+          // For specific providers like miruro, we use their home data's top 10
+          const data = await animeApi.getHome(provider);
+          if (mounted) {
+            setAnimes((data.top10Animes?.month || data.latestEpisodeAnimes || []).slice(0, 12));
+          }
+        } else {
+          // Standard legends for default provider
+          const promises = LEGENDARY_IDS.map(id => animeApi.getAnime(id).catch(() => null));
+          const details = await Promise.all(promises);
           
-        if (mounted) {
-           if (valid.length > 0) {
-             setAnimes(valid);
-           } else {
-             const data = await animeApi.getHome();
-             setAnimes((data.top10Animes?.month || data.topUpcomingAnimes || []).slice(0, 12));
-           }
+          const valid = details
+            .filter(d => d && d.anime)
+            .map(d => ({
+              id: d!.anime.id,
+              name: d!.anime.name,
+              jname: null,
+              poster: d!.anime.poster,
+              type: d!.anime.type,
+              episodes: d!.anime.episodes
+            }));
+            
+          if (mounted) {
+            if (valid.length > 0) {
+              setAnimes(valid);
+            } else {
+              const data = await animeApi.getHome();
+              setAnimes((data.top10Animes?.month || data.topUpcomingAnimes || []).slice(0, 12));
+            }
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch legends', error);
+        console.error('Failed to fetch top anime', error);
       } finally {
         if (mounted) setLoading(false);
       }
     };
 
-    fetchLegends();
+    fetchAnimes();
     return () => { mounted = false; };
-  }, []);
+  }, [provider]);
 
   if (!loading && animes.length === 0) return null;
 
@@ -86,7 +95,7 @@ const TopAnime = () => {
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -10, scale: 1.05, transition: { duration: 0.15, ease: "easeOut" } }}
             >
-              <Link to={`/anime/${anime.id}`} className={styles.cardLink}>
+              <Link to={`/anime/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
                   <div className={styles.rankBadge}>
                     {index + 1}

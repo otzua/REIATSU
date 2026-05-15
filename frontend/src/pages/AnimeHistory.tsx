@@ -13,6 +13,7 @@ interface AnimeCWData {
   animePoster: string;
   episodeNumber: number;
   episodeTitle: string;
+  provider?: string;
   timestamp: number;
 }
 
@@ -78,7 +79,7 @@ const AnimeHistory = () => {
               marginTop: '1.5rem' 
             }}>
               {history.map((item, index) => {
-                const watchLink = `/watch/${item.animeId}?ep=${item.episodeNumber}`;
+                const watchLink = `/watch/${item.animeId}?ep=${item.episodeNumber}${item.provider ? `&provider=${item.provider}` : ''}`;
 
                 return (
                   <motion.div 

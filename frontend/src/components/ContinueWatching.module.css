@@ -196,13 +196,47 @@
   max-width: 400px;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
 @media (max-width: 768px) {
   .section {
-    padding: var(--space-md);
+    padding: var(--space-md) 0 var(--space-md) var(--space-md);
+  }
+  
+  .header {
+    padding-right: var(--space-md);
   }
 
   .title {
     font-size: 2.2rem;
+  }
+
+  .grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1.2rem;
+    padding-bottom: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+  }
+
+  .cardLink:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-out;
   }
 
   .cardLink {
@@ -241,5 +275,11 @@
 
   .epTitle {
     max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    flex: 0 0 240px;
   }
 }

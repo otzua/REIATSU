@@ -14,6 +14,7 @@ const Watch = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const epParam = searchParams.get('ep');
+  const provider = searchParams.get('provider') || undefined;
   
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [anime, setAnime] = useState<AnimeDetail | null>(null);
@@ -66,8 +67,8 @@ const Watch = () => {
     let isSubscribed = true;
     
     Promise.all([
-      animeApi.getAnime(id),
-      animeApi.getEpisodes(id),
+      animeApi.getAnime(id, provider),
+      animeApi.getEpisodes(id, provider),
     ])
       .then(([info, eps]) => {
         if (!isSubscribed) return;
@@ -98,7 +99,7 @@ const Watch = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [id, refreshKey]);
+  }, [id, refreshKey, provider]);
 
   const decodeEntities = (text: string) => {
     if (!text) return '';
@@ -122,7 +123,7 @@ const Watch = () => {
     if (individualSource?.ep === currentEp || sourceFetchFailedEp === currentEp) return;
 
     // We let the previous source remain briefly until the new one loads or we fail
-    animeApi.getEpisode(id, currentEp)
+    animeApi.getEpisode(id, currentEp, provider)
       .then(res => {
         if (isSubscribed) {
           setIndividualSource({ ep: currentEp, sources: res.episode.sources as Record<string, string> });
@@ -136,7 +137,7 @@ const Watch = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [id, currentEp, currentEpisode, individualSource?.ep, sourceFetchFailedEp]);
+  }, [id, currentEp, currentEpisode, individualSource?.ep, sourceFetchFailedEp, provider]);
 
   // Save to Continue Watching History
   useEffect(() => {
@@ -148,6 +149,7 @@ const Watch = () => {
       animePoster: anime.anime.poster,
       episodeNumber: currentEp,
       episodeTitle: currentEpisode?.title || `Episode ${currentEp}`,
+      provider: provider,
       timestamp: Date.now()
     };
 

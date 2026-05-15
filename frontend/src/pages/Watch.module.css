@@ -580,6 +580,56 @@
   font-family: var(--font-heading);
   font-size: 0.8rem;
   letter-spacing: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.subHint {
+  font-size: 0.7rem;
+  letter-spacing: 0.05rem;
+  color: rgba(220, 201, 169, 0.4);
+  text-transform: none;
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.fallbackBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.fallbackBtn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  color: var(--color-cream);
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.15rem;
+  cursor: pointer;
+  transition: all 0.05s ease;
+  width: 100%;
+}
+
+.fallbackBtn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(184, 58, 45, 0.3);
+}
+
+.fallbackBtn.anikai:hover {
+  background: #3a8cff;
+  border-color: #3a8cff;
+  box-shadow: 0 5px 15px rgba(58, 140, 255, 0.3);
 }
 
 .name {

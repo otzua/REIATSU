@@ -1,10 +1,12 @@
 import * as anikai from '../providers/anikai/index.js';
 import * as anikoto from '../providers/anikoto/index.js';
+import * as miruro from '../providers/miruro/index.js';
 import { config } from './config.js';
 
 const providers = {
   anikai,
   anikoto,
+  miruro,
 };
 
 const lazyProviders = {};

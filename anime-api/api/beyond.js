@@ -147,7 +147,12 @@ beyond.get('/details', async (c) => {
   }
 
   try {
-    const hanimeData = await hanimeClient.getHentaiVideo(slug);
+    let hanimeData = {};
+    try {
+      hanimeData = await hanimeClient.getHentaiVideo(slug);
+    } catch (err) {
+      console.warn('[Hanime API Failed] Falling back to WatchHentai directly:', err.message);
+    }
 
     const vManifest = hanimeData.videosManifest || hanimeData.videos_manifest;
     const hVideo = hanimeData.hentaiVideo || hanimeData.hentai_video;
@@ -155,10 +160,11 @@ beyond.get('/details', async (c) => {
 
     let bestStream = null;
     let allStreams = [];
+    let whData = null;
 
     // Use WatchHentai API as the high-fidelity extraction engine
     try {
-      const videoTitle = hVideo?.name || slug;
+      const videoTitle = hVideo?.name || slug.replace(/-/g, ' ');
       let cleanTitle = videoTitle.replace(/\b(ep|episode)?\s*\d+/i, '').trim();
       if (!cleanTitle) cleanTitle = videoTitle;
 
@@ -195,6 +201,7 @@ beyond.get('/details', async (c) => {
           const watchSlug = targetUrl.split('/videos/')[1]?.replace(/\//g, '');
           const watchRes = await axios.get(`${WATCHHENTAI_API}/watch/${watchSlug}`);
           const data = watchRes.data?.data;
+          whData = data;
           if (data?.player) {
             const sources = data.player.sources || [];
             bestStream = sources.find(s => s.label === '1080p')?.src || sources[0]?.src || data.player.src;
@@ -225,22 +232,22 @@ beyond.get('/details', async (c) => {
 
     const result = {
       info: [{
-        id: hVideo?.id || Date.now(),
+        id: hVideo?.id || whData?.id || Date.now(),
         urlname: hVideo?.slug || slug,
-        videoname: hVideo?.name || slug,
-        description: hVideo?.description ? hVideo.description.replace(/<[^>]*>?/gm, '').trim() : '',
-        releasedate: hVideo?.releasedAt || hVideo?.released_at || new Date().toISOString(),
-        uploaddate: hVideo?.createdAt || hVideo?.created_at || new Date().toISOString(),
-        coverimg: hVideo?.posterUrl || hVideo?.poster_url ? `/api/beyond/proxy-image?url=${encodeURIComponent(hVideo.posterUrl || hVideo.poster_url)}` : '',
-        series: hVideo?.brand || null,
-        views: hVideo?.views || 0,
-        rating: hVideo?.rating || 0,
+        videoname: hVideo?.name || whData?.title || slug.replace(/-/g, ' '),
+        description: hVideo?.description ? hVideo.description.replace(/<[^>]*>?/gm, '').trim() : (whData?.synopsis || ''),
+        releasedate: hVideo?.releasedAt || hVideo?.released_at || whData?.uploadDate || new Date().toISOString(),
+        uploaddate: hVideo?.createdAt || hVideo?.created_at || whData?.uploadDate || new Date().toISOString(),
+        coverimg: hVideo?.posterUrl || hVideo?.poster_url ? `/api/beyond/proxy-image?url=${encodeURIComponent(hVideo.posterUrl || hVideo.poster_url)}` : (whData?.thumbnail || ''),
+        series: hVideo?.brand || whData?.seriesTitle || null,
+        views: hVideo?.views || parseInt(whData?.views) || 0,
+        rating: hVideo?.rating || "9.5",
         status: 1,
         recentrelease: 1,
         best_stream: bestStream,
         streams: allStreams
       }],
-      genres: hTags?.map(tag => ({ genre: tag.text })) || []
+      genres: hTags?.map(tag => ({ genre: tag.text })) || whData?.genres?.map(g => ({ genre: g.name })) || []
     };
 
     detailsCache.set(slug, { data: result, time: Date.now() });
@@ -358,14 +365,12 @@ beyond.get('/proxy-m3u8', async (c) => {
     manifest = manifest.replace(/^(?!#)(.+)$/gm, (match) => {
       const segmentUrl = match.startsWith('http') ? match : baseUrl + match;
       const encodedUrl = encodeURIComponent(segmentUrl);
-      
-      if (segmentUrl.includes('.m3u8')) {
-        return `/api/beyond/proxy-m3u8?url=${encodedUrl}`;
-      }
       return `/api/beyond/proxy-segment?url=${encodedUrl}`;
     });
 
-    c.header('Content-Type', 'application/x-mpegURL');
+    c.header('Content-Type', 'application/vnd.apple.mpegurl');
+    c.header('Cache-Control', 'no-cache');
+    c.header('Access-Control-Allow-Origin', '*');
     return c.text(manifest);
   } catch (error) {
     return c.text('Failed to proxy m3u8', 500);
@@ -381,10 +386,7 @@ beyond.get('/proxy-segment', async (c) => {
 
   try {
     const response = await axios.get(url, {
-      headers: { 
-        'Referer': 'https://hanime.tv/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
+      headers: { 'Referer': 'https://hanime.tv/' },
       responseType: 'arraybuffer',
       timeout: 10000
     });

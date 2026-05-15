@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ChevronLeft, Play, Tv, Film, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { cinemaApi } from '../services/cinemaApi';
-import type { CinemaMovieDetail } from '../services/cinemaApi';
+import type { CinemaMovieDetail, CinemaMovie } from '../services/cinemaApi';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
 import styles from './Watch.module.css'; // Reusing Watch styles

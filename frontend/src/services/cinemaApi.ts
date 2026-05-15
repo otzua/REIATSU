@@ -30,6 +30,7 @@ export interface CinemaMovieDetail {
     episode_count: number;
     name?: string;
   }[];
+  status?: string;
 }
 
 async function tmdbFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {

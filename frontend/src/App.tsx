@@ -12,6 +12,7 @@ import ArtistDetails from './pages/ArtistDetails';
 import Beyond from './pages/Beyond';
 import BeyondWatch from './pages/BeyondWatch';
 import SearchPage from './pages/SearchPage';
+import MiruroHome from './pages/MiruroHome';
 import Layout from './components/Layout';
 
 import AnimeHistory from './pages/AnimeHistory';
@@ -27,6 +28,7 @@ function App() {
       <Layout>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
+          <Route path="/miruro" element={<MiruroHome />} />
           <Route path="/anime/history" element={<AnimeHistory />} />
           <Route path="/cinema" element={<Cinema />} />
           <Route path="/cinema/history" element={<CinemaHistory />} />

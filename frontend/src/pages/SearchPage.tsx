@@ -11,6 +11,7 @@ const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const typeParam = searchParams.get('type') || 'all';
+  const provider = searchParams.get('provider') || undefined;
   
   const [animeResults, setAnimeResults] = useState<AnimeCard[]>([]);
   const [cinemaResults, setCinemaResults] = useState<any[]>([]);
@@ -31,7 +32,7 @@ const SearchPage = () => {
       setLoading(true);
       try {
         const [animeData, cinemaData] = await Promise.all([
-          animeApi.search(query).catch(() => ({ animes: [] })),
+          animeApi.search(query, provider).catch(() => ({ animes: [] })),
           cinemaApi.search(query).catch(() => [])
         ]);
 
@@ -212,7 +213,7 @@ const SearchPage = () => {
                         <div className={styles.grid}>
                           {animeResults.map((anime) => (
                             <motion.div key={anime.id} variants={itemVariants}>
-                              <Link to={`/anime/${anime.id}`} className={styles.card}>
+                              <Link to={`/anime/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.card}>
                                 <div className={styles.cardMedia}>
                                   <SmartImage src={anime.poster} alt={anime.name} className={styles.cardPoster} />
                                   <div className={styles.cardOverlay}>
@@ -250,7 +251,7 @@ const SearchPage = () => {
                         <div className={styles.grid}>
                           {animeResults.map((anime) => (
                             <motion.div key={anime.id} variants={itemVariants}>
-                              <Link to={`/anime/${anime.id}`} className={styles.card}>
+                              <Link to={`/anime/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.card}>
                                 <div className={styles.cardMedia}>
                                   <SmartImage src={anime.poster} alt={anime.name} className={styles.cardPoster} />
                                   <div className={styles.cardOverlay}>

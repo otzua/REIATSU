@@ -198,7 +198,8 @@ const Navbar = () => {
           const data = await cinemaApi.search(query).catch(() => []);
           topName = (data as any[])[0]?.title || '';
         } else {
-          const data = await animeApi.search(query).catch(() => ({ animes: [] }));
+          const isMiruro = location.pathname === '/miruro';
+          const data = await animeApi.search(query, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] }));
           topName = (data as { animes: AnimeCard[] }).animes?.[0]?.name || '';
         }
         // Only show suggestion if the top result starts with the user's query (case-insensitive)
@@ -247,8 +248,9 @@ const Navbar = () => {
           promises.push(Promise.resolve([]));
           promises.push(cinemaApi.search(query).catch(() => []));
         } else {
+          const isMiruro = location.pathname === '/miruro';
           promises.push(Promise.resolve([]));
-          promises.push(animeApi.search(query).catch(() => ({ animes: [] })));
+          promises.push(animeApi.search(query, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] })));
           promises.push(Promise.resolve([]));
           promises.push(cinemaApi.search(query).catch(() => []));
         }
@@ -427,6 +429,7 @@ const Navbar = () => {
                   <p>{isMusic ? 'Current Interface' : 'Switch to Music'}</p>
                 </div>
               </button>
+
               {beyondUnlocked && (
                 <button 
                   className={`${styles.switchBtn} ${isBeyond ? styles.activeInterface : ''}`} 
@@ -486,7 +489,8 @@ const Navbar = () => {
                       return;
                     }
                     if (e.key === 'Enter' && query.trim()) {
-                      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+                      const isMiruro = location.pathname === '/miruro';
+                      navigate(`/search?q=${encodeURIComponent(query.trim())}${isMiruro ? '&provider=miruro' : ''}`);
                       closeSearch();
                     }
                   }}
@@ -601,24 +605,27 @@ const Navbar = () => {
                     {(searchFilter === 'all' || searchFilter === 'anime') && animeResults.length > 0 && (
                       <div className={styles.searchSection}>
                         <div className={styles.sectionLabel}>Anime Results</div>
-                        {animeResults.map((item) => (
-                          <Link 
-                            key={item.id + 'anime'} 
-                            to={`/anime/${item.id}`} 
-                            className={styles.resultItem}
-                            onClick={closeSearch}
-                          >
-                            {item.poster && (
-                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
-                            )}
-                            <div className={styles.resultInfo}>
-                              <span className={styles.resultName}>{item.name}</span>
-                              <div className={styles.resultMetaWrapper}>
-                                <span className={styles.resultMeta}>{item.type ?? 'Anime'}</span>
+                        {animeResults.map((item) => {
+                          const isMiruro = location.pathname === '/miruro';
+                          return (
+                            <Link 
+                              key={item.id + 'anime'} 
+                              to={`/anime/${item.id}${isMiruro ? '?provider=miruro' : ''}`} 
+                              className={styles.resultItem}
+                              onClick={closeSearch}
+                            >
+                              {item.poster && (
+                                <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
+                              )}
+                              <div className={styles.resultInfo}>
+                                <span className={styles.resultName}>{item.name}</span>
+                                <div className={styles.resultMetaWrapper}>
+                                  <span className={styles.resultMeta}>{item.type ?? 'Anime'}</span>
+                                </div>
                               </div>
-                            </div>
-                          </Link>
-                        ))}
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
  

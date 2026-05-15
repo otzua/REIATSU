@@ -14,6 +14,7 @@ export interface SpotlightAnime {
   rank: number;
   genres: string[];
   episodes: { sub: number | null; dub: number | null };
+  otherInfo?: string[];
 }
 
 export interface AnimeCard {
@@ -23,6 +24,7 @@ export interface AnimeCard {
   poster: string;
   type: string | null;
   episodes: { sub: number | null; dub: number | null };
+  otherInfo?: string[];
 }
 
 export interface HomeData {
@@ -103,28 +105,31 @@ export interface EpisodeDetail {
 
 
 export const animeApi = {
-  getHome: () => apiFetch<HomeData>(`${BASE}/home`),
+  getHome: (provider?: string) => 
+    apiFetch<HomeData>(provider ? `${BASE}/v2/${provider}/home` : `${BASE}/home`),
 
-  search: (query: string, page = 1) =>
-    apiFetch<SearchResult>(`${BASE}/search?q=${encodeURIComponent(query)}&page=${page}`),
+  search: (query: string, page = 1, provider?: string) =>
+    apiFetch<SearchResult>(provider 
+      ? `${BASE}/v2/${provider}/search?q=${encodeURIComponent(query)}&page=${page}`
+      : `${BASE}/search?q=${encodeURIComponent(query)}&page=${page}`),
 
-  getAnime: (id: string) => apiFetch<AnimeDetail>(`${BASE}/anime/${id}`),
+  getAnime: (id: string, provider?: string) => 
+    apiFetch<AnimeDetail>(provider ? `${BASE}/v2/${provider}/anime/${id}` : `${BASE}/anime/${id}`),
 
-  getEpisodes: async (id: string): Promise<EpisodeData> => {
-    const data = await apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`);
-    if (!data.episodes || data.episodes.length === 0) {
-      console.warn(`REIATSU: No episodes found for ${id}, retrying...`);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      return apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`);
-    }
-    return data;
+  getEpisodes: async (id: string, provider?: string): Promise<EpisodeData> => {
+    const url = provider ? `${BASE}/v2/${provider}/anime/${id}/episodes` : `${BASE}/anime/${id}/episodes`;
+    return apiFetch<EpisodeData>(url);
   },
 
-  getEpisode: (id: string, num: number) => 
-    apiFetch<EpisodeDetail>(`${BASE}/anime/${id}/ep/${num}`),
+  getEpisode: (id: string, num: number, provider?: string) => 
+    apiFetch<EpisodeDetail>(provider 
+      ? `${BASE}/v2/${provider}/anime/${id}/ep/${num}`
+      : `${BASE}/anime/${id}/ep/${num}`),
 
-  getType: (name: string, page = 1) =>
-    apiFetch<{ type: string; animes: AnimeCard[] }>(`${BASE}/type/${name}?page=${page}`),
+  getType: (name: string, page = 1, provider?: string) =>
+    apiFetch<{ type: string; animes: AnimeCard[] }>(provider
+      ? `${BASE}/v2/${provider}/type/${name}?page=${page}`
+      : `${BASE}/type/${name}?page=${page}`),
 
   getSchedule: (day: string) =>
     apiFetch<any[]>(`${BASE}/schedule?day=${day}`),

@@ -21,6 +21,11 @@ export function each($, selector, fn) {
 }
 
 export function num(str) {
-  const n = parseInt(str?.trim(), 10);
-  return isNaN(n) ? null : n;
+  if (!str) return null;
+  const m = str.match(/\d+/);
+  if (m) {
+    const n = parseInt(m[0], 10);
+    return isNaN(n) ? null : n;
+  }
+  return null;
 }

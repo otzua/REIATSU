@@ -5,9 +5,10 @@
     "dev:api": "cd anime-api && npm run dev",
     "dev:music": "cd music-api && ./venv/bin/python main.py",
     "dev:watchhentai": "cd watchhentai-api-main && npm run dev",
-    "dev:backend": "npm run dev:api && npm run dev:music && npm run dev:watchhentai",
+    "dev:miruro": "cd anime-api/providers/miruro && ./venv/bin/uvicorn api:app --port 4004 --host 0.0.0.0 --reload",
+    "dev:backend": "npx concurrently \"npm run dev:api\" \"npm run dev:music\" \"npm run dev:watchhentai\" \"npm run dev:miruro\"",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:music\" \"npm run dev:watchhentai\" \"npm run dev:frontend\""
+    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:music\" \"npm run dev:watchhentai\" \"npm run dev:miruro\" \"npm run dev:frontend\""
   },
   "dependencies": {
     "concurrently": "^9.2.1"
