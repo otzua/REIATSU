@@ -26,8 +26,11 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
   - **映 CINEMA**: A cinematic gateway for movies and TV series, now featuring an interactive **12-Month Release Calendar** with desktop-optimized timeline navigation.
   - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC. All tracks initialize at 100% volume with high-resolution visual thumbnails, active queuing, and interactive player navigation.
-- **超越 BEYOND**: A premium portal for niche high-quality titles featuring a multi-engine extraction architecture (AlphaAPIs, WatchHentai scraper microservice, and direct HLS manifests) with intelligent hyphenless & multi-word fallback search to guarantee flawless 1080p stream resolution.
 - **Unified History System**: Automatically track your progress across all sections (Anime, Cinema, Music, Beyond) with persistent history logs.
+- **Glassmorphic UI**: High-fidelity glass surfaces with real-time backdrop blurring and reactive halftone backgrounds.
+
+## 🎨 Design Philosophy | デザイン
+Reiatsu is built on the **Neo-Vintage Digital** aesthetic. We combine 90s brutalism with modern glassmorphism to create an interface that feels both nostalgic and futuristic. Every element is designed to respond to user interaction, creating a living multimedia environment.
 
 - **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
 - **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
