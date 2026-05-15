@@ -24,9 +24,10 @@ Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the a
 - **Open Source & Transparent**: 100% open source. Audit the code, self-host the data, and contribute to the evolution.
 - **Tri-Interface Ecosystem**: A single application for three distinct worlds:
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
-  - **映 CINEMA**: A cinematic gateway for movies and TV series.
+  - **映 CINEMA**: A cinematic gateway for movies and TV series, now featuring an interactive **12-Month Release Calendar** with desktop-optimized timeline navigation.
   - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC. All tracks initialize at 100% volume with high-resolution visual thumbnails, active queuing, and interactive player navigation.
 - **超越 BEYOND**: A premium portal for niche high-quality titles featuring a multi-engine extraction architecture (AlphaAPIs, WatchHentai scraper microservice, and direct HLS manifests) with intelligent hyphenless & multi-word fallback search to guarantee flawless 1080p stream resolution.
+- **Unified History System**: Automatically track your progress across all sections (Anime, Cinema, Music, Beyond) with persistent history logs.
 
 - **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
 - **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
@@ -91,6 +92,8 @@ Reiatsu is a community-driven project. We welcome all contributions—from code 
 - [x] Anime Schedule & Tracking
 - [x] Beyond Portal & HLS Proxy Integration
 - [x] Music Section Reconstruction & Lossless Sync Engine
+- [x] Interactive Cinema Release Calendar & Timeline
+- [x] Cross-Section User History Tracking
 - [ ] Self-Hosting Docker Suite
 - [ ] PWA Support for Mobile Streaming
 
