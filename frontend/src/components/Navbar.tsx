@@ -16,7 +16,8 @@ const Navbar = () => {
   const { playTrack } = useMusic();
   const location = useLocation();
   const navigate = useNavigate();
-  const isCinema = location.pathname.startsWith('/cinema');
+  const searchParams = new URLSearchParams(location.search);
+  const isCinema = location.pathname.startsWith('/cinema') || (location.pathname === '/schedule' && searchParams.get('type') === 'cinema');
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
 
@@ -56,7 +57,7 @@ const Navbar = () => {
     { id: 'home', path: getHomePath(), icon: Home },
     { 
       id: isMusic ? 'download' : 'schedule', 
-      path: isMusic ? '#download' : '/schedule', 
+      path: isMusic ? '#download' : (isCinema ? '/schedule?type=cinema' : '/schedule'), 
       icon: isMusic ? Download : Calendar 
     },
     { id: 'search', path: '#search', icon: Search },
@@ -304,47 +305,47 @@ const Navbar = () => {
             </div>
             <div className={styles.switchOptions}>
               <button 
-                className={`${styles.switchBtn} ${(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/beyond')) ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${(!isCinema && !isMusic && !isBeyond) ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
-                  <p>{(!location.pathname.startsWith('/cinema') && !location.pathname.startsWith('/music') && !location.pathname.startsWith('/beyond')) ? 'Current Interface' : 'Switch to Anime'}</p>
+                  <p>{(!isCinema && !isMusic && !isBeyond) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
               </button>
               <button 
-                className={`${styles.switchBtn} ${location.pathname.startsWith('/cinema') ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${isCinema ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/cinema'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>映</div>
                 <div className={styles.interfaceInfo}>
                   <h4>CINEMA</h4>
-                  <p>{location.pathname.startsWith('/cinema') ? 'Current Interface' : 'Switch to Movies'}</p>
+                  <p>{isCinema ? 'Current Interface' : 'Switch to Movies'}</p>
                 </div>
               </button>
               <button 
-                className={`${styles.switchBtn} ${location.pathname.startsWith('/music') ? styles.activeInterface : ''}`} 
+                className={`${styles.switchBtn} ${isMusic ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/music'); setSwitchOpen(false); }}
               >
                 <div className={styles.interfaceIcon}>音</div>
                 <div className={styles.interfaceInfo}>
                   <h4>HIFI MUSIC</h4>
-                  <p>{location.pathname.startsWith('/music') ? 'Current Interface' : 'Switch to Music'}</p>
+                  <p>{isMusic ? 'Current Interface' : 'Switch to Music'}</p>
                 </div>
               </button>
               {beyondUnlocked && (
                 <button 
-                  className={`${styles.switchBtn} ${location.pathname.startsWith('/beyond') ? styles.activeInterface : ''}`} 
+                  className={`${styles.switchBtn} ${isBeyond ? styles.activeInterface : ''}`} 
                   onClick={() => { navigate('/beyond'); setSwitchOpen(false); }}
                   style={{
-                    border: location.pathname.startsWith('/beyond') ? '1px solid rgba(0, 245, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+                    border: isBeyond ? '1px solid rgba(0, 245, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
                   }}
                 >
                   <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #2c3e50, #000000)', color: '#fff' }}>過</div>
                   <div className={styles.interfaceInfo}>
                     <h4>THE BEYOND</h4>
-                    <p>{location.pathname.startsWith('/beyond') ? 'Current Interface' : 'Switch to Beyond'}</p>
+                    <p>{isBeyond ? 'Current Interface' : 'Switch to Beyond'}</p>
                   </div>
                 </button>
               )}

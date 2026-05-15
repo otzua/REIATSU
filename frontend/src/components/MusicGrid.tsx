@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import SmartImage from './SmartImage';
 import type { Track } from '../services/musicApi';
 import { useMusic } from '../context/MusicContext';
@@ -14,17 +14,25 @@ interface MusicGridProps {
   onPlay?: (track: Track, queue: Track[]) => void;
   currentTrackId?: string;
   isPlaying?: boolean;
+  historyLink?: string;
 }
 
-const MusicGrid: React.FC<MusicGridProps> = ({ title, data, isCircular, onPlay, currentTrackId, isPlaying }) => {
+const MusicGrid: React.FC<MusicGridProps> = ({ title, data, isCircular, onPlay, currentTrackId, isPlaying, historyLink }) => {
   const { addToQueue } = useMusic();
   const navigate = useNavigate();
 
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-        <div className={styles.accentBox} />
-        <h2 className={styles.title}>{title}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+          <div className={styles.accentBox} />
+          <h2 className={styles.title}>{title}</h2>
+        </div>
+        {historyLink && (
+          <Link to={historyLink} style={{ fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.05rem', fontWeight: 600 }}>
+            VIEW FULL HISTORY
+          </Link>
+        )}
       </div>
 
       <div className={styles.grid}>

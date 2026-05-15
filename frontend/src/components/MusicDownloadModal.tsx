@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, RefreshCw, CheckCircle2, AlertCircle, Loader2, Music } from 'lucide-react';
+import { X, Download, CheckCircle2, AlertCircle, Loader2, Music } from 'lucide-react';
 import { musicApi } from '../services/musicApi';
 import styles from './MusicDownloadModal.module.css';
 
@@ -16,28 +16,64 @@ const MusicDownloadModal = ({ isOpen, onClose }: MusicDownloadModalProps) => {
 
   const handleSync = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!spotifyUrl.trim()) return;
+    const trimmed = spotifyUrl.trim();
+    if (!trimmed) return;
 
     setStatus('syncing');
-    setMessage('Connecting to SpotiFLAC lossless engine...');
+    setMessage('Connecting to SpotiFLAC engine...');
 
     try {
-      const response = await musicApi.download(spotifyUrl);
-      setStatus('success');
-      setMessage(response.message || 'Lossless download started successfully!');
-      setSpotifyUrl('');
+      // 1. Start the download process (triggers background task)
+      await musicApi.download(trimmed);
       
-      // Auto close after success? Or let them see the message.
-      // Let's keep it open for a bit then close.
-      setTimeout(() => {
-        onClose();
-        setStatus('idle');
-        setMessage('');
-      }, 3000);
+      // 2. Poll for status until completed or error
+      let isDone = false;
+      let attempts = 0;
+      const maxAttempts = 240; // 20 minutes (5s interval)
+      
+      while (!isDone && attempts < maxAttempts) {
+        attempts++;
+        const statusData = await musicApi.downloadStatus(trimmed);
+        
+        if (statusData.status === 'completed') {
+          isDone = true;
+          setMessage(`Ready! Starting browser download...`);
+          
+          const link = document.createElement('a');
+          link.href = `/api/music/download-file?url=${encodeURIComponent(trimmed)}`;
+          link.setAttribute('download', statusData.file || 'music_download');
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          
+          setStatus('success');
+          setMessage('Download complete! Check your files.');
+          setSpotifyUrl('');
+          
+          // Auto-close after a delay on success
+          setTimeout(() => {
+            onClose();
+            setStatus('idle');
+            setMessage('');
+          }, 4000);
+          break;
+        } else if (statusData.status === 'error') {
+          throw new Error('Download failed on server');
+        } else {
+          // Update message with current progress
+          setMessage(statusData.status);
+          await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5s
+        }
+      }
+      
+      if (!isDone && attempts >= maxAttempts) {
+        throw new Error('Download timed out');
+      }
+
     } catch (err) {
       console.error('Download failed:', err);
       setStatus('error');
-      setMessage('Failed to connect to SpotiFLAC engine. Check your API.');
+      setMessage('Failed — check the URL or try again later.');
     }
   };
 
@@ -62,17 +98,21 @@ const MusicDownloadModal = ({ isOpen, onClose }: MusicDownloadModalProps) => {
             <div className={styles.header}>
               <div className={styles.titleInfo}>
                 <div className={styles.iconBox}>
-                  <Download size={20} />
+                  <Music size={20} />
                 </div>
                 <div>
-                  <h3>SpotiFLAC Download</h3>
-                  <p>Paste Spotify link to download in High-Res FLAC</p>
+                  <div className={styles.engineBadge}>SPOTIFLAC ENGINE</div>
+                  <h3>Lossless Sync</h3>
                 </div>
               </div>
               <button className={styles.closeBtn} onClick={onClose}>
                 <X size={20} />
               </button>
             </div>
+
+            <p className={styles.description}>
+              Paste a Spotify link below. We'll search for the highest quality lossless versions across our high-fidelity providers.
+            </p>
 
             <form onSubmit={handleSync} className={styles.form}>
               <div className={styles.inputWrapper}>
@@ -93,13 +133,13 @@ const MusicDownloadModal = ({ isOpen, onClose }: MusicDownloadModalProps) => {
               >
                 {status === 'syncing' ? (
                   <>
-                    <Loader2 className="animate-spin" size={18} />
-                    <span>Syncing Lossless...</span>
+                    <Loader2 className={styles.spinner} size={18} />
+                    <span>Processing...</span>
                   </>
                 ) : (
                   <>
-                    <RefreshCw size={18} />
-                    <span>Start Download</span>
+                    <Download size={18} />
+                    <span>Initialize Download</span>
                   </>
                 )}
               </button>
@@ -110,6 +150,7 @@ const MusicDownloadModal = ({ isOpen, onClose }: MusicDownloadModalProps) => {
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
                   className={`${styles.message} ${styles[status]}`}
                 >
                   {status === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
@@ -120,12 +161,13 @@ const MusicDownloadModal = ({ isOpen, onClose }: MusicDownloadModalProps) => {
 
             <div className={styles.footer}>
               <div className={styles.badge}>
-                <Music size={12} />
                 <span>24-bit Hi-Res</span>
               </div>
               <div className={styles.badge}>
-                <RefreshCw size={12} />
                 <span>Auto-Metadata</span>
+              </div>
+              <div className={styles.badge}>
+                <span>FLAC / ZIP</span>
               </div>
             </div>
           </motion.div>

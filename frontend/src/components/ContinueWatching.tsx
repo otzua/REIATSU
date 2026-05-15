@@ -56,8 +56,13 @@ const ContinueWatching = () => {
   return (
     <section className={styles.section} style={{ marginBottom: '4rem' }}>
       <div className={styles.header}>
-        <div className={styles.accentBox}></div>
-        <h2 className={styles.title}>CONTINUE WATCHING</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1 }}>
+          <div className={styles.accentBox}></div>
+          <h2 className={styles.title}>CONTINUE WATCHING</h2>
+        </div>
+        <Link to="/anime/history" style={{ fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.05rem', fontWeight: 600 }}>
+          VIEW FULL HISTORY
+        </Link>
       </div>
 
       <div style={{ 

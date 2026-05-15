@@ -159,4 +159,53 @@ export const cinemaApi = {
       overview: m.overview || '',
     }));
   },
+
+  // Get releases for a specific month/year
+  getReleasesByMonth: async (year: number, month: number): Promise<CinemaMovie[]> => {
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-${lastDay}`;
+    
+    // We fetch both movies and TV for a complete schedule
+    const [movieData, tvData] = await Promise.all([
+      tmdbFetch<any>('/discover/movie', {
+        'primary_release_date.gte': startDate,
+        'primary_release_date.lte': endDate,
+        'sort_by': 'popularity.desc'
+      }),
+      tmdbFetch<any>('/discover/tv', {
+        'first_air_date.gte': startDate,
+        'first_air_date.lte': endDate,
+        'sort_by': 'popularity.desc'
+      })
+    ]);
+
+    const movies = (movieData.results || []).map((m: any) => ({
+      id: m.id.toString(),
+      title: m.title || m.original_title || 'Untitled Movie',
+      imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+      backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
+      mediaType: 'movie' as const,
+      releaseDate: m.release_date || '',
+      rating: m.vote_average || 0,
+      overview: m.overview || '',
+    }));
+
+    const tv = (tvData.results || []).map((m: any) => ({
+      id: m.id.toString(),
+      title: m.name || m.original_name || 'Untitled Show',
+      imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+      backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
+      mediaType: 'tv' as const,
+      releaseDate: m.first_air_date || '',
+      rating: m.vote_average || 0,
+      overview: m.overview || '',
+    }));
+
+    return [...movies, ...tv].sort((a, b) => {
+      const dateA = a.releaseDate || '9999-99-99';
+      const dateB = b.releaseDate || '9999-99-99';
+      return dateA.localeCompare(dateB);
+    });
+  },
 };

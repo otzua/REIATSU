@@ -13,6 +13,11 @@ import Beyond from './pages/Beyond';
 import BeyondWatch from './pages/BeyondWatch';
 import Layout from './components/Layout';
 
+import AnimeHistory from './pages/AnimeHistory';
+import CinemaHistory from './pages/CinemaHistory';
+import MusicHistory from './pages/MusicHistory';
+import BeyondHistory from './pages/BeyondHistory';
+
 function App() {
   const location = useLocation();
 
@@ -21,16 +26,20 @@ function App() {
       <Layout>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
+          <Route path="/anime/history" element={<AnimeHistory />} />
           <Route path="/cinema" element={<Cinema />} />
+          <Route path="/cinema/history" element={<CinemaHistory />} />
           <Route path="/cinema/details/:id" element={<CinemaDetails />} />
           <Route path="/cinema/watch/:id" element={<CinemaWatch />} />
           <Route path="/anime/:id" element={<AnimeDetails />} />
           <Route path="/watch/:id" element={<Watch />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/music" element={<Music />} />
+          <Route path="/music/history" element={<MusicHistory />} />
           <Route path="/music/album/:id" element={<AlbumDetails />} />
           <Route path="/music/artist/:id" element={<ArtistDetails />} />
           <Route path="/beyond" element={<Beyond />} />
+          <Route path="/beyond/history" element={<BeyondHistory />} />
           <Route path="/beyond/watch/:id" element={<BeyondWatch />} />
         </Routes>
       </Layout>

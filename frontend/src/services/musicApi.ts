@@ -193,4 +193,14 @@ export const musicApi = {
       return false;
     }
   },
+
+  /**
+   * Get the current status of a background download.
+   */
+  downloadStatus: async (url: string): Promise<{ status: string; file?: string }> => {
+    const res = await axios.get<{ status: string; file?: string }>(`${MUSIC_API_BASE}/download-status`, {
+      params: { url }
+    });
+    return res.data;
+  },
 };

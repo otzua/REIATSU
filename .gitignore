@@ -55,3 +55,8 @@ venv/
 
 # Local Netlify folder
 .netlify
+
+# MCP / Tool Configs (Contain Secrets)
+.mcp.json
+.cursor/mcp.json
+.gemini/settings.json

@@ -17,6 +17,9 @@ except ImportError:
     IMPERSONATE_SUPPORTED = False
 import requests
 import re
+import time
+import zipfile
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -259,13 +262,30 @@ async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
         await session.close()
         raise HTTPException(status_code=500, detail=str(e))
 
-download_locks = {}
-completed_downloads = set()
+# ── Improved Download Tracking ───────────────────────────────────────────
+class DownloadStatus:
+    def __init__(self):
+        self.completed = {} # url -> file_path
+        self.locks = {}     # url -> asyncio.Lock()
+        self.progress = {}  # url -> status_string (e.g. "Downloading 5/56")
+
+dl_manager = DownloadStatus()
+
+@app.get("/download-status")
+async def get_download_status(url: str):
+    if url in dl_manager.completed:
+        return {"status": "completed", "file": os.path.basename(dl_manager.completed[url])}
+    
+    status = dl_manager.progress.get(url, "queued")
+    return {"status": status}
 
 @app.get("/download")
 async def download_track(url: str, name: Optional[str] = None, artist: Optional[str] = None, background_tasks: BackgroundTasks = None):
     engine = "SpotiFLAC (Lossless)" if ("spotify.com" in url and SPOTIFLAC_AVAILABLE) else "yt-dlp (Fallback)"
+    
+    # We trigger the download in background, but the client will follow up with /download-file
     background_tasks.add_task(run_download, url)
+    
     encoded_url = urllib.parse.quote(url)
     return {
         "message": f"Download queued via {engine}",
@@ -278,11 +298,24 @@ async def download_track(url: str, name: Optional[str] = None, artist: Optional[
 
 @app.get("/download-file")
 async def download_file(url: str):
-    await run_download(url)
+    # This will wait if a download is already in progress for this URL
+    file_path = await run_download(url)
     
+    if not file_path or not os.path.exists(file_path):
+        # Last ditch effort: scan for newest file if path tracking failed
+        file_path = find_newest_file(DOWNLOAD_DIR)
+        
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Download failed or file could not be located on server.")
+
+    filename = os.path.basename(file_path)
+    media_type = "audio/flac" if file_path.endswith(".flac") else "audio/mpeg"
+    return FileResponse(file_path, media_type=media_type, filename=filename)
+
+def find_newest_file(directory):
     newest_file = None
     newest_time = 0
-    for root, _, files in os.walk(DOWNLOAD_DIR):
+    for root, _, files in os.walk(directory):
         for f in files:
             if f.endswith(('.flac', '.mp3', '.m4a', '.wav', '.ogg', '.opus', '.webm')):
                 fp = os.path.join(root, f)
@@ -293,101 +326,266 @@ async def download_file(url: str):
                         newest_file = fp
                 except Exception:
                     pass
+    return newest_file
 
-    if not newest_file or not os.path.exists(newest_file):
-        raise HTTPException(status_code=404, detail="Download completed but file could not be located on server.")
-
-    filename = os.path.basename(newest_file)
-    return FileResponse(newest_file, media_type="audio/flac" if newest_file.endswith(".flac") else "audio/mpeg", filename=filename)
-
-async def run_download(url: str):
+async def run_download(url: str) -> Optional[str]:
     """
-    Routes downloads based on source:
-    - Spotify URLs  → SpotiFLAC (lossless FLAC from Tidal/Qobuz/Deezer)
-    - Everything else → yt-dlp fallback (YT Music search → FLAC)
+    Routes downloads based on source and returns the path to the downloaded file.
     """
-    if url in completed_downloads:
-        logger.info(f"Download already completed for {url}")
-        return
+    if url in dl_manager.completed:
+        path = dl_manager.completed[url]
+        if os.path.exists(path):
+            return path
+        else:
+            del dl_manager.completed[url]
 
-    if url not in download_locks:
-        download_locks[url] = asyncio.Lock()
+    if url not in dl_manager.locks:
+        dl_manager.locks[url] = asyncio.Lock()
 
-    async with download_locks[url]:
-        if url in completed_downloads:
-            return
+    async with dl_manager.locks[url]:
+        # Double check after acquiring lock
+        if url in dl_manager.completed:
+            return dl_manager.completed[url]
 
         logger.info(f"Starting download for: {url}")
-        loop = asyncio.get_event_loop()
-
-        # ── SpotiFLAC path: real lossless from Tidal/Qobuz/Deezer ───────────────
+        start_time = time.time()
         is_spotify_url = "spotify.com" in url
         if is_spotify_url and SPOTIFLAC_AVAILABLE:
-            qobuz_token = os.getenv("QOBUZ_AUTH_TOKEN")
-
             def spotiflac_sync():
-                logger.info("[SpotiFLAC] Starting lossless download via Tidal→Qobuz→Deezer...")
                 try:
+                    logger.info("[SpotiFLAC] Attempting lossless download...")
+                    dl_manager.progress[url] = "Initializing SpotiFLAC..."
+                    # SpotiFLAC will handle tracks, albums, and playlists
                     _SpotiFLAC(
                         url=url,
                         output_dir=DOWNLOAD_DIR,
-                        # Priority: Tidal (lossless) → Qobuz (hi-res) → Deezer (flac fallback)
                         services=["tidal", "qobuz", "deezer"],
-                        quality="LOSSLESS",
-                        use_artist_subfolders=True,
-                        use_album_subfolders=True,
-                        filename_format="{track}. {title} - {artist}",
-                        use_track_numbers=True,
-                        embed_lyrics=True,
-                        enrich_metadata=True,
-                        allow_fallback=True,
-                        qobuz_token=qobuz_token,
+                        quality="lossless",
+                        threads=4
                     )
-                    logger.info("[SpotiFLAC] Lossless download completed.")
+                    return True
                 except Exception as e:
-                    logger.error(f"[SpotiFLAC] Download failed: {e}")
+                    logger.error(f"[SpotiFLAC] Failed: {e}")
+                    return False
+            
+            # Since SpotiFLAC doesn't easily expose progress callbacks, 
+            # we'll update based on folder changes or just general state
+            dl_manager.progress[url] = "Downloading tracks..."
+            success = await asyncio.to_thread(spotiflac_sync)
+            
+            # Find what file was created
+            if success:
+                dl_manager.progress[url] = "Verifying files..."
+                # Give it a second to flush to disk
+                await asyncio.sleep(1)
+                
+                # Check for directories (playlists/albums)
+                for entry in os.listdir(DOWNLOAD_DIR):
+                    ep = os.path.join(DOWNLOAD_DIR, entry)
+                    if os.path.isdir(ep):
+                        mtime = os.path.getmtime(ep)
+                        if mtime > start_time:
+                            # It's a new directory, zip it!
+                            dl_manager.progress[url] = "Creating ZIP archive..."
+                            zip_path = ep + ".zip"
+                            logger.info(f"[ZIP] Creating zip for playlist: {zip_path}")
+                            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                                for root, _, files in os.walk(ep):
+                                    for file in files:
+                                        file_path = os.path.join(root, file)
+                                        arcname = os.path.relpath(file_path, ep)
+                                        zipf.write(file_path, arcname)
+                            
+                            dl_manager.completed[url] = zip_path
+                            return zip_path
 
-            await loop.run_in_executor(None, spotiflac_sync)
-            completed_downloads.add(url)
-            return
+                # Check for individual files
+                candidate = None
+                newest_mtime = 0
+                for root, _, files in os.walk(DOWNLOAD_DIR):
+                    for f in files:
+                        if f.endswith(('.flac', '.m4a', '.mp3')):
+                            fp = os.path.join(root, f)
+                            mtime = os.path.getmtime(fp)
+                            if mtime > start_time and mtime > newest_mtime:
+                                newest_mtime = mtime
+                                candidate = fp
+                
+                if candidate:
+                    logger.info(f"[SpotiFLAC] Download successful: {candidate}")
+                    dl_manager.completed[url] = candidate
+                    return candidate
+                else:
+                    logger.warning("[SpotiFLAC] Could not find newly created file, falling back to yt-dlp.")
+            else:
+                logger.warning("[SpotiFLAC] Process failed or returned False, falling back to yt-dlp.")
 
-        # ── yt-dlp fallback: for YT Music search results ("Artist - Title") ──────
-        logger.info("[yt-dlp] No Spotify URL detected (or SpotiFLAC unavailable), using yt-dlp fallback.")
+        # ── yt-dlp fallback (or direct search) ───────────────────────────────
+        logger.info("[yt-dlp] Using fallback downloader.")
 
-        homebrew_bin = "/opt/homebrew/bin"
-        if homebrew_bin not in os.environ.get("PATH", ""):
-            os.environ["PATH"] = f"{homebrew_bin}:{os.environ.get('PATH', '')}"
+        def get_spotify_track_list(spotify_url: str):
+            """
+            Fetch track names from a Spotify playlist/album using the public embed JSON.
+            Returns a dict with 'title' and 'tracks' (list of 'Artist - Track' strings).
+            Returns None if not a collection or if fetch fails.
+            """
+            is_collection = "/playlist/" in spotify_url or "/album/" in spotify_url
+            if not is_collection:
+                return None
 
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': os.path.join(DOWNLOAD_DIR, '%(title)s.%(ext)s'),
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'flac',
-                'preferredquality': '320',
-            }],
-            'quiet': False,
-            'no_warnings': True,
-        }
-        if IMPERSONATE_SUPPORTED:
             try:
-                ydl_opts['impersonate'] = ImpersonateTarget.from_str('chrome')
-            except Exception as e:
-                logger.warning(f"Failed to set yt-dlp impersonate: {e}")
+                parts = spotify_url.rstrip("/").split("/")
+                resource_id = parts[-1].split("?")[0]
+                resource_type = parts[-2]  # "playlist" or "album"
 
-        def ytdlp_sync():
-            # If it's a plain search string, prefix with ytsearch
-            query = url if url.startswith("http") else f"ytsearch1:{url}"
-            logger.info(f"[yt-dlp] Downloading: {query}")
+                embed_url = f"https://open.spotify.com/embed/{resource_type}/{resource_id}"
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+                    "Accept": "text/html",
+                }
+                resp = requests.get(embed_url, headers=headers, timeout=15)
+                resp.raise_for_status()
+
+                # The embed page has a __NEXT_DATA__ script tag with full track data
+                next_data_match = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.+?)</script>', resp.text, re.DOTALL)
+                if not next_data_match:
+                    logger.warning("[Playlist] No __NEXT_DATA__ found in embed page")
+                    return None
+
+                data = json.loads(next_data_match.group(1))
+
+                # Navigate: props -> pageProps -> state -> data -> entity -> trackList
+                entity = (
+                    data.get("props", {})
+                        .get("pageProps", {})
+                        .get("state", {})
+                        .get("data", {})
+                        .get("entity", {})
+                )
+
+                playlist_title = entity.get("name", "playlist")
+                track_list_raw = entity.get("trackList", [])
+
+                if not track_list_raw:
+                    logger.warning("[Playlist] trackList is empty in embed data")
+                    return {"title": playlist_title, "tracks": []}
+
+                # Each item has "title" (track name) and "subtitle" (artist)
+                tracks = []
+                for item in track_list_raw:
+                    title = item.get("title", "").strip()
+                    artist = item.get("subtitle", "").strip()
+                    if title:
+                        query = f"{artist} - {title}" if artist else title
+                        tracks.append(query)
+
+                logger.info(f"[Playlist] Fetched {len(tracks)} tracks from '{playlist_title}'")
+                return {"title": playlist_title, "tracks": tracks[:100]}
+
+            except Exception as e:
+                logger.error(f"[Playlist] Failed to fetch track list: {e}")
+                return None
+
+
+        def download_single_track_ytdlp(search_query: str, out_dir: str) -> Optional[str]:
+            """Download a single track to out_dir and return its path."""
+            final_query = f"ytsearch1:{search_query}" if not search_query.startswith("http") else search_query
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': os.path.join(out_dir, '%(title)s.%(ext)s'),
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'flac',
+                    'preferredquality': '320',
+                }],
+                'quiet': True,
+                'no_warnings': True,
+            }
+            before = set(os.listdir(out_dir))
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 try:
-                    ydl.download([query])
+                    ydl.extract_info(final_query, download=True)
                 except Exception as e:
-                    logger.error(f"[yt-dlp] Failed: {e}")
+                    logger.warning(f"[yt-dlp] Failed for '{search_query}': {e}")
+                    return None
+            after = set(os.listdir(out_dir))
+            new_files = after - before
+            for f in new_files:
+                if f.endswith(('.flac', '.m4a', '.mp3')):
+                    return os.path.join(out_dir, f)
+            return None
 
-        await loop.run_in_executor(None, ytdlp_sync)
-        completed_downloads.add(url)
-        logger.info("[yt-dlp] Download operation completed.")
+        is_spotify = "spotify.com" in url
+        is_collection = is_spotify and ("/playlist/" in url or "/album/" in url)
+
+        if is_collection:
+            # Playlist/Album fallback: download all tracks individually, then ZIP
+            logger.info("[Fallback] Detected Spotify collection, fetching track list...")
+            dl_manager.progress[url] = "Fetching playlist tracks..."
+            
+            collection_info = await asyncio.to_thread(get_spotify_track_list, url)
+            
+            if collection_info and collection_info.get("tracks"):
+                tracks_list = collection_info["tracks"]
+                safe_title = re.sub(r'[<>:"/\\|?*]', '_', collection_info["title"])[:60]
+                playlist_dir = os.path.join(DOWNLOAD_DIR, safe_title)
+                os.makedirs(playlist_dir, exist_ok=True)
+                
+                total = len(tracks_list)
+                logger.info(f"[Fallback] Downloading {total} tracks to '{safe_title}'...")
+                
+                for i, track_name in enumerate(tracks_list, 1):
+                    dl_manager.progress[url] = f"Downloading track {i}/{total}: {track_name[:40]}..."
+                    logger.info(f"[Fallback] [{i}/{total}] {track_name}")
+                    await asyncio.to_thread(download_single_track_ytdlp, track_name, playlist_dir)
+                
+                # Count what we actually got
+                downloaded_files = [
+                    f for f in os.listdir(playlist_dir)
+                    if f.endswith(('.flac', '.m4a', '.mp3'))
+                ]
+                
+                if downloaded_files:
+                    dl_manager.progress[url] = f"Creating ZIP of {len(downloaded_files)} tracks..."
+                    zip_path = os.path.join(DOWNLOAD_DIR, f"{safe_title}.zip")
+                    logger.info(f"[ZIP] Creating {zip_path} with {len(downloaded_files)} files")
+                    
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                        for f in os.listdir(playlist_dir):
+                            fp = os.path.join(playlist_dir, f)
+                            if os.path.isfile(fp):
+                                zipf.write(fp, f)
+                    
+                    dl_manager.completed[url] = zip_path
+                    return zip_path
+                else:
+                    logger.error("[Fallback] No tracks were downloaded successfully.")
+            else:
+                logger.warning("[Fallback] Could not retrieve track list. Falling back to single search.")
+
+        # Single track fallback
+        if is_spotify:
+            # Resolve title via OEmbed for single tracks
+            search_query = url
+            try:
+                oembed_resp = requests.get(f"https://open.spotify.com/oembed?url={url}", timeout=5)
+                if oembed_resp.status_code == 200:
+                    search_query = oembed_resp.json().get("title", url)
+                    logger.info(f"[Fallback] Resolved track title: {search_query}")
+            except Exception as e:
+                logger.warning(f"[Fallback] OEmbed resolution failed: {e}")
+        else:
+            search_query = url
+        
+        dl_manager.progress[url] = f"Searching YouTube for: {search_query[:50]}..."
+        result_path = await asyncio.to_thread(download_single_track_ytdlp, search_query, DOWNLOAD_DIR)
+        
+        if result_path and os.path.exists(result_path):
+            logger.info(f"[yt-dlp] Resolved file: {result_path}")
+            dl_manager.completed[url] = result_path
+            return result_path
+        
+        return None
 
 @app.get("/trending")
 async def trending(limit: int = 20):
