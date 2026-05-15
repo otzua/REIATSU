@@ -122,6 +122,29 @@ const CinemaDetails = () => {
                   )}
                 </div>
 
+                <div className={styles.genreList}>
+                  {movie.genres?.map((genre) => (
+                    <span key={genre} className={styles.genreBadge}>{genre}</span>
+                  ))}
+                </div>
+
+                <div className={styles.infoGrid}>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>RELEASED</span>
+                    <span className={styles.infoValue}>{movie.releaseDate || 'N/A'}</span>
+                  </div>
+                  {movie.mediaType === 'tv' && movie.seasons && (
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>SEASONS</span>
+                      <span className={styles.infoValue}>{movie.seasons.filter(s => s.season_number > 0).length}</span>
+                    </div>
+                  )}
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>STATUS</span>
+                    <span className={styles.infoValue}>{movie.status || 'N/A'}</span>
+                  </div>
+                </div>
+
                 <div className={styles.descriptionBox}>
                   <h3>SYNOPSIS</h3>
                   <p className={styles.description}>{movie.description}</p>

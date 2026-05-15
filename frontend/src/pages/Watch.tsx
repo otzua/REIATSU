@@ -47,6 +47,14 @@ const Watch = () => {
           document.exitFullscreen();
         }
       }
+
+      if (e.key.toLowerCase() === 'n') {
+        handleNextEp();
+      }
+
+      if (e.key.toLowerCase() === 'p') {
+        handlePrevEp();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -65,13 +73,14 @@ const Watch = () => {
         if (!isSubscribed) return;
         setAnime(info);
         setEpisodeData(eps);
-        setCurrentEp(1);
+        setCurrentEp(epParam ? parseInt(epParam, 10) : 1);
         setIndividualSource(null);
         setSourceFetchFailedEp(null);
         
         // Initialize range if many episodes (> 28)
         if (eps.totalEpisodes > 28) {
-          setSelectedRange([1, Math.min(100, eps.totalEpisodes)]);
+          const start = Math.floor((currentEp - 1) / 100) * 100 + 1;
+          setSelectedRange([start, Math.min(start + 99, eps.totalEpisodes)]);
         } else {
           setSelectedRange(null);
         }
@@ -490,8 +499,45 @@ const Watch = () => {
             </div>
           </div>
         </div>
+        {/* Recommended Section at the bottom */}
+        {anime.recommended && anime.recommended.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className={styles.recommendedSection}
+          >
+            <div className={styles.sectionHeaderLine}>
+              <div className={styles.accentBox}></div>
+              <h2>RECOMMENDED FOR YOU</h2>
+            </div>
+            <div className={styles.recommendedGrid}>
+              {anime.recommended.slice(0, 12).map((rec, index) => (
+                <motion.div
+                  key={rec.id}
+                  className={styles.recCard}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
+                >
+                  <Link to={`/anime/${rec.id}`} className={styles.cardLink}>
+                    <div className={styles.posterPlaceholder}>
+                      <SmartImage src={rec.poster} aria-hidden="true" className={styles.recPosterGlow} draggable={false} />
+                      <SmartImage src={rec.poster} alt={rec.name} className={styles.recPosterImg} draggable={false} />
+                    </div>
+                    <div className={styles.recInfo}>
+                      <h3 className={styles.recTitle}>{rec.name}</h3>
+                      <p className={styles.recMeta}>{rec.type || 'Anime'}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
-
     </div>
   );
 };

@@ -56,12 +56,14 @@ const AnimeHistory = () => {
       <HalftoneWave />
       <div className={pageStyles.content} style={{ paddingTop: '2rem' }}>
         <section className={cwStyles.section}>
-          <div className={cwStyles.header} style={{ marginBottom: '2rem' }}>
-            <Link to="/" style={{ color: 'var(--color-cream)', marginRight: '1rem', display: 'flex', alignItems: 'center' }}>
+          <div className={cwStyles.header} style={{ marginBottom: '3rem', justifyContent: 'flex-start', gap: '2rem' }}>
+            <Link to="/" className={cwStyles.backBtn}>
               <ArrowLeft size={24} />
             </Link>
-            <div className={cwStyles.accentBox}></div>
-            <h2 className={cwStyles.title}>WATCH HISTORY</h2>
+            <div className={cwStyles.titleGroup}>
+              <div className={cwStyles.accentBox}></div>
+              <h2 className={cwStyles.title}>WATCH HISTORY</h2>
+            </div>
           </div>
 
           {history.length === 0 ? (

@@ -4,6 +4,8 @@ import { cors } from 'hono/cors';
 import { handle } from '@hono/node-server/vercel';
 import { getProvider, getProviderWithFallback } from '../core/providerManager.js';
 import { cacheStats, cacheDel } from '../utils/cache.js';
+import { findClosestMatch } from '../utils/string.js';
+import { POPULAR_TITLES } from '../constants/popular.js';
 import beyond from './beyond.js';
 
 
@@ -140,7 +142,43 @@ app.get('/api/v2/:provider/search', async (c) => {
     );
     
     const data = await p.search.query(q, page, filters);
-    return ok(c, data);
+
+    let suggestion = null;
+
+    // --- RELEVANCE FILTERING & SUGGESTION ---
+    // Make search more accurate by scoring results against the query
+    if (data.animes && data.animes.length > 0) {
+      const queryLower = q.toLowerCase();
+      data.animes = data.animes
+        .map(anime => {
+          const nameLower = (anime.name || '').toLowerCase();
+          const jnameLower = (anime.jname || '').toLowerCase();
+          let score = 0;
+
+          // Exact match
+          if (nameLower === queryLower || jnameLower === queryLower) score += 100;
+          // Starts with query
+          else if (nameLower.startsWith(queryLower) || jnameLower.startsWith(queryLower)) score += 80;
+          // Contains query as a word
+          else if (nameLower.includes(` ${queryLower}`) || nameLower.includes(`${queryLower} `)) score += 60;
+          // Contains query anywhere
+          else if (nameLower.includes(queryLower) || jnameLower.includes(queryLower)) score += 40;
+          
+          return { ...anime, _score: score };
+        })
+        // Filter out absolute noise (results with 0 score that don't even contain the query)
+        // We only filter if it's the first page to avoid empty results on deep browsing
+        .filter(anime => page > 1 || anime._score > 0)
+        .sort((a, b) => b._score - a._score)
+        .map(({ _score, ...rest }) => rest);
+    }
+
+    // If no results on first page, look for a suggestion
+    if (page === 1 && (!data.animes || data.animes.length === 0)) {
+      suggestion = findClosestMatch(q, POPULAR_TITLES);
+    }
+
+    return ok(c, { ...data, suggestion });
   } catch (e) {
     return err(c, e.message);
   }
@@ -284,7 +322,35 @@ app.get('/api/search', async (c) => {
   const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
   const page = parseInt(c.req.query('page') || '1', 10);
   try {
-    return ok(c, { provider: name, ...(await p.search.query(q, page)) });
+    const data = await p.search.query(q, page);
+    
+    let suggestion = null;
+
+    // --- RELEVANCE FILTERING ---
+    if (data.animes && data.animes.length > 0) {
+      const queryLower = q.toLowerCase();
+      data.animes = data.animes
+        .map(anime => {
+          const nameLower = (anime.name || '').toLowerCase();
+          const jnameLower = (anime.jname || '').toLowerCase();
+          let score = 0;
+          if (nameLower === queryLower || jnameLower === queryLower) score += 100;
+          else if (nameLower.startsWith(queryLower) || jnameLower.startsWith(queryLower)) score += 80;
+          else if (nameLower.includes(` ${queryLower}`) || nameLower.includes(`${queryLower} `)) score += 60;
+          else if (nameLower.includes(queryLower) || jnameLower.includes(queryLower)) score += 40;
+          return { ...anime, _score: score };
+        })
+        .filter(anime => page > 1 || anime._score > 0)
+        .sort((a, b) => b._score - a._score)
+        .map(({ _score, ...rest }) => rest);
+    }
+
+    // If no results on first page, look for a suggestion
+    if (page === 1 && (!data.animes || data.animes.length === 0)) {
+      suggestion = findClosestMatch(q, POPULAR_TITLES);
+    }
+
+    return ok(c, { provider: name, ...data, suggestion });
   } catch (e) {
     return err(c, e.message);
   }

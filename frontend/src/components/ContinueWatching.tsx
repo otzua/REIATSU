@@ -60,7 +60,7 @@ const ContinueWatching = () => {
           <div className={styles.accentBox}></div>
           <h2 className={styles.title}>CONTINUE WATCHING</h2>
         </div>
-        <Link to="/anime/history" style={{ fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.05rem', fontWeight: 600 }}>
+        <Link to="/anime/history" className={styles.titleLink}>
           VIEW FULL HISTORY
         </Link>
       </div>
@@ -71,7 +71,7 @@ const ContinueWatching = () => {
         gap: '1.5rem',
         marginTop: '1.5rem' 
       }}>
-        {history.slice(0, 6).map((item, index) => {
+        {history.slice(0, 8).map((item, index) => {
           const watchLink = `/watch/${item.animeId}?ep=${item.episodeNumber}`;
 
           return (

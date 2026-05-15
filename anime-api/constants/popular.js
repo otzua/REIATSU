@@ -1,0 +1,20 @@
+export const POPULAR_TITLES = [
+  "Bleach", "Bleach: Thousand-Year Blood War", "Naruto", "Naruto Shippuden", "One Piece",
+  "Dragon Ball Z", "Dragon Ball Super", "Jujutsu Kaisen", "Demon Slayer", "Chainsaw Man",
+  "Attack on Titan", "Death Note", "Fullmetal Alchemist", "My Hero Academia", "One Punch Man",
+  "Hunter x Hunter", "Solo Leveling", "Oshi no Ko", "Spy x Family", "Blue Lock",
+  "Black Clover", "Sword Art Online", "Tokyo Ghoul", "Fairy Tail", "Boruto",
+  "Dr. Stone", "Mob Psycho 100", "Vinland Saga", "Haikyuu!!", "Blue Exorcist",
+  "Steins;Gate", "Code Geass", "Cowboy Bebop", "Neon Genesis Evangelion", "Your Name",
+  "Weathering With You", "Suzume", "A Silent Voice", "Spirited Away", "Princess Mononoke",
+  "Interstellar", "Inception", "The Dark Knight", "Oppenheimer", "Dune", "Avatar",
+  "The Matrix", "Spider-Man", "The Avengers", "Iron Man", "Doctor Strange", "Batman",
+  "Joker", "The Whale", "Everything Everywhere All At Once", "Barbie", "John Wick",
+  "Deadpool", "Guardians of the Galaxy", "Star Wars", "Harry Potter", "Lord of the Rings",
+  "Gintama", "JoJo's Bizarre Adventure", "Kingdom", "Monster", "Berserk", "Slam Dunk",
+  "Initial D", "Great Teacher Onizuka", "Hellsing", "Claymore", "Fate/Zero", "Fate/stay night",
+  "Mushoku Tensei", "The Rising of the Shield Hero", "That Time I Got Reincarnated as a Slime",
+  "Re:Zero", "Konosuba", "Overlord", "No Game No Life", "Log Horizon", "The Eminence in Shadow",
+  "Hell's Paradise", "Mashle: Magic and Muscles", "Frieren: Beyond Journey's End", "Undead Unluck",
+  "The Apothecary Diaries", "Shangri-La Frontier", "Kaiju No. 8"
+];

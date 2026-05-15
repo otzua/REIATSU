@@ -630,6 +630,105 @@
   transform: scale(1.05);
 }
 
+.animeDetails {
+  margin-top: 3rem;
+  padding-bottom: 4rem;
+}
+
+.recommendedSection {
+  margin-top: 2rem;
+  padding-bottom: 5rem;
+}
+
+.sectionHeaderLine {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.accentBox {
+  width: 8px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(184, 58, 45, 0.4);
+}
+
+.sectionHeaderLine h2 {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--color-cream);
+  letter-spacing: 0.15em;
+}
+
+.recommendedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 2rem;
+}
+
+.recCard {
+  position: relative;
+}
+
+.posterPlaceholder {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 201, 169, 0.05);
+}
+
+.recPosterImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.recPosterGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(40px);
+  opacity: 0.3;
+  transform: scale(1.1);
+  pointer-events: none;
+}
+
+.recCard:hover .recPosterImg {
+  transform: scale(1.1);
+}
+
+.recInfo {
+  margin-top: 1rem;
+}
+
+.recTitle {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-cream);
+  margin-bottom: 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.recMeta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(220, 201, 169, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 @media (max-width: 1400px) {
   .mainGrid {
     grid-template-columns: 1fr 300px;
@@ -645,6 +744,21 @@
   .sidebar {
     position: static;
     height: 600px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    height: 600px;
+  }
+
+  .recommendedGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.5rem;
   }
 }
 

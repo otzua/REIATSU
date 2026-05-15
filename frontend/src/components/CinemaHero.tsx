@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Star, Play } from 'lucide-react';
-import { motion } from 'framer-motion';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { cinemaApi } from '../services/cinemaApi';
 import type { CinemaMovie } from '../services/cinemaApi';
@@ -18,9 +19,25 @@ const TOP_TIER_MOVIE_IDS = [
 
 const CinemaHero = () => {
   const [slides, setSlides] = useState<CinemaMovie[]>([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, duration: 30 },
+    [Autoplay({ delay: 8000, stopOnInteraction: false })]
+  );
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+  }, [emblaApi, onSelect]);
 
   useEffect(() => {
     const fetchTopMovies = async () => {
@@ -45,7 +62,6 @@ const CinemaHero = () => {
         setSlides(heroSlides);
       } catch (err) {
         console.error('Error fetching hero movies:', err);
-        // Fallback to trending if specific ones fail
         const trending = await cinemaApi.getTrendingMovies();
         setSlides(trending.slice(0, 10));
       } finally {
@@ -56,51 +72,33 @@ const CinemaHero = () => {
     fetchTopMovies();
   }, []);
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % (slides.length || 1));
-  }, [slides.length]);
-
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + (slides.length || 1)) % (slides.length || 1));
-  }, [slides.length]);
-
-  useEffect(() => {
-    if (isDragging || slides.length === 0) return;
-    const timer = setInterval(nextSlide, 8000);
-    return () => clearInterval(timer);
-  }, [isDragging, slides.length, nextSlide]);
+  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
 
   if (loading) {
-    return <div className={styles.hero}><div className={styles.sliderContainer + ' ' + styles.skeleton}></div></div>;
+    return (
+      <div className={styles.hero}>
+        <div className={`${styles.sliderContainer} ${styles.skeleton}`}></div>
+      </div>
+    );
   }
 
   return (
     <section className={styles.hero}>
       {slides.length > 0 && (
         <SmartImage
-          src={slides[currentSlide]?.backdropUrl || slides[currentSlide]?.imageUrl}
+          src={slides[selectedIndex]?.backdropUrl || slides[selectedIndex]?.imageUrl}
           aria-hidden="true"
           className={styles.heroGlow}
           draggable={false}
         />
       )}
-      <div className={styles.sliderContainer}>
-        <motion.div
-          className={styles.slidesRow}
-          animate={{ x: `-${currentSlide * 100}%` }}
-          transition={{ type: 'tween', ease: [0.25, 1, 0.5, 1], duration: 0.8 }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          onDragStart={() => setIsDragging(true)}
-          onDragEnd={(_, info) => {
-            setIsDragging(false);
-            if (info.offset.x < -50) nextSlide();
-            else if (info.offset.x > 50) prevSlide();
-          }}
-        >
+      
+      <div className={styles.sliderContainer} ref={emblaRef}>
+        <div className={styles.emblaContainer}>
           {slides.map((slide, index) => (
-            <div key={`${slide.id}-${index}`} className={styles.slide}>
-              <Link to={`/cinema/details/${slide.id}?type=${slide.mediaType}`} className={styles.slideLink} onClick={(e) => isDragging && e.preventDefault()}>
+            <div key={`${slide.id}-${index}`} className={styles.emblaSlide}>
+              <Link to={`/cinema/details/${slide.id}?type=${slide.mediaType}`} className={styles.slideLink}>
                 <div className={styles.backdropWrapper}>
                   <SmartImage
                     src={slide.backdropUrl || slide.imageUrl}
@@ -112,25 +110,27 @@ const CinemaHero = () => {
                     src={slide.backdropUrl || slide.imageUrl}
                     alt={slide.title}
                     className={styles.poster}
-                    loading="eager"
-                    fetchPriority="high"
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "low"}
                     draggable={false}
                   />
                 </div>
+                
                 <div className={styles.overlay} />
+                
                 <div className={styles.slideContent}>
                   <div className={styles.tagRow}>
-                    <span className={styles.rankBadge} style={{ background: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span className={styles.rankBadge}>
                       <Star size={12} fill="currentColor" />
                       {slide.rating?.toFixed(1)}
                     </span>
-                    <span className={styles.genreTag} style={{ textTransform: 'uppercase' }}>{slide.mediaType}</span>
+                    <span className={styles.genreTag}>{slide.mediaType}</span>
                     {slide.releaseDate && <span className={styles.genreTag}>{slide.releaseDate.split('-')[0]}</span>}
                   </div>
                   <h1 className={styles.title}>{slide.title}</h1>
                   <p className={styles.description}>{slide.overview?.slice(0, 180)}...</p>
-                  <div className={styles.episodePills}>
-                    <span className={styles.pill} style={{ background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.5rem' }}>
+                  <div className={styles.ctaRow} style={{ marginTop: '2.5rem' }}>
+                    <span className={styles.watchPill}>
                       <Play size={16} fill="currentColor" />
                       WATCH NOW
                     </span>
@@ -139,15 +139,25 @@ const CinemaHero = () => {
               </Link>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
-      <button className={`${styles.arrowBtn} ${styles.left}`} onClick={prevSlide}>
+      <button className={`${styles.arrowBtn} ${styles.left}`} onClick={scrollPrev}>
         <ChevronLeft size={28} />
       </button>
-      <button className={`${styles.arrowBtn} ${styles.right}`} onClick={nextSlide}>
+      <button className={`${styles.arrowBtn} ${styles.right}`} onClick={scrollNext}>
         <ChevronRight size={28} />
       </button>
+
+      <div className={styles.indicators}>
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => emblaApi?.scrollTo(i)}
+            className={`${styles.indicator} ${i === selectedIndex ? styles.activeIndicator : ''}`}
+          />
+        ))}
+      </div>
     </section>
   );
 };

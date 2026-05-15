@@ -91,6 +91,10 @@ const TopAnime = () => {
                   <div className={styles.rankBadge}>
                     {index + 1}
                   </div>
+                  <div className={styles.cardBadges}>
+                    {anime.episodes?.sub != null && <span className={styles.subBadge}>SUB {anime.episodes.sub}</span>}
+                    {anime.episodes?.dub != null && <span className={styles.dubBadge}>DUB {anime.episodes.dub}</span>}
+                  </div>
                   {anime.poster && (
                     <>
                       <SmartImage src={anime.poster} aria-hidden="true" className={styles.posterGlow} draggable={false} />

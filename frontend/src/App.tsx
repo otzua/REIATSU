@@ -11,6 +11,7 @@ import AlbumDetails from './pages/AlbumDetails';
 import ArtistDetails from './pages/ArtistDetails';
 import Beyond from './pages/Beyond';
 import BeyondWatch from './pages/BeyondWatch';
+import SearchPage from './pages/SearchPage';
 import Layout from './components/Layout';
 
 import AnimeHistory from './pages/AnimeHistory';
@@ -41,6 +42,7 @@ function App() {
           <Route path="/beyond" element={<Beyond />} />
           <Route path="/beyond/history" element={<BeyondHistory />} />
           <Route path="/beyond/watch/:id" element={<BeyondWatch />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
       </Layout>
     </div>

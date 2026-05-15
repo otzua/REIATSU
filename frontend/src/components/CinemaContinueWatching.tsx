@@ -41,7 +41,7 @@ const CinemaContinueWatching = () => {
           <div className={styles.accentBox}></div>
           <h2 className={styles.title}>CONTINUE WATCHING</h2>
         </div>
-        <Link to="/cinema/history" style={{ fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.05rem', fontWeight: 600 }}>
+        <Link to="/cinema/history" className={styles.titleLink}>
           VIEW FULL HISTORY
         </Link>
       </div>
@@ -52,7 +52,7 @@ const CinemaContinueWatching = () => {
         gap: '1.5rem',
         marginTop: '1.5rem' 
       }}>
-        {history.map((item, index) => {
+        {history.slice(0, 8).map((item, index) => {
           const watchLink = item.mediaType === 'tv' 
             ? `/cinema/watch/${item.id}?type=tv&season=${item.season}&episode=${item.episode}`
             : `/cinema/watch/${item.id}?type=movie`;

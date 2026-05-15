@@ -146,26 +146,74 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: rgba(15, 15, 15, 0.85);
-  border: 1px solid rgba(220, 201, 169, 0.15);
-  border-radius: 28px;
+  background: rgba(15, 15, 15, 0.7);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(220, 201, 169, 0.2);
+  border-radius: 24px;
   padding: 0 1.75rem;
   height: 72px;
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
   transform: translateZ(0);
   box-shadow: 
-    0 40px 100px rgba(0,0,0,0.8),
-    0 0 0 1px rgba(220, 201, 169, 0.05);
-  transition: all 0.2s ease;
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .searchBar:focus-within {
   border-color: var(--accent);
-  background: rgba(20, 20, 20, 0.95);
+  background: rgba(15, 15, 15, 0.85);
   box-shadow: 
-    0 40px 120px rgba(0,0,0,0.9),
-    0 0 20px rgba(184, 58, 45, 0.2);
+    0 40px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(184, 58, 45, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+.searchToggles {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(220, 201, 169, 0.05);
+}
+
+.toggleBtn {
+  position: relative;
+  padding: 0.5rem 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(220, 201, 169, 0.4);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.toggleBtn:hover {
+  color: rgba(220, 201, 169, 0.8);
+}
+
+.activeToggle {
+  color: white !important;
+}
+
+.toggleIndicator {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: 6px;
+  z-index: 0;
+  box-shadow: 0 0 15px rgba(184, 58, 45, 0.4);
+}
+
+.toggleText {
+  position: relative;
+  z-index: 1;
 }
 
 .searchIcon {
@@ -184,6 +232,54 @@
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Ghost text typeahead — absolute layer under the real input */
+.ghostText {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  white-space: pre;
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  z-index: 0;
+  animation: ghostFadeIn 0.15s ease;
+}
+
+@keyframes ghostFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ghostCompletion {
+  color: rgba(220, 201, 169, 0.25);
+}
+
+.tabHint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(220, 201, 169, 0.3);
+  font-size: 0.65rem;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: ghostFadeIn 0.2s ease;
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
 }
 
 .searchInput::placeholder {
@@ -213,18 +309,19 @@
 }
 
 .searchResults {
-  background: rgba(15, 15, 15, 0.6);
-  border: 1px solid rgba(220, 201, 169, 0.12);
-  border-radius: 28px;
+  background: rgba(15, 15, 15, 0.7);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(220, 201, 169, 0.15);
+  border-radius: 24px;
   overflow: hidden;
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
   transform: translateZ(0);
-  box-shadow: 0 50px 150px rgba(0,0,0,0.95);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
   max-height: 60vh;
   overflow-y: auto;
+  margin-top: 0.5rem;
 }
 
 .searchResults::-webkit-scrollbar {
@@ -234,6 +331,37 @@
 .searchResults::-webkit-scrollbar-thumb {
   background: rgba(220, 201, 169, 0.1);
   border-radius: 10px;
+}
+
+.searchHint, .didYouMean {
+  padding: 1rem 1.5rem;
+  color: rgba(220, 201, 169, 0.4);
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(220, 201, 169, 0.05);
+}
+
+.didYouMean {
+  color: var(--color-cream);
+  font-weight: 500;
+  background: rgba(184, 58, 45, 0.05);
+}
+
+.didYouMean button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 800;
+  padding: 0;
+  margin: 0 0.3rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: all 0.2s ease;
+}
+
+.didYouMean button:hover {
+  color: white;
+  text-shadow: 0 0 10px var(--accent);
 }
 
 .searchSection {

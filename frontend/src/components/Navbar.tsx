@@ -30,8 +30,12 @@ const Navbar = () => {
   const [beyondResults, setBeyondResults] = useState<any[]>([]);
   const [musicResults, setMusicResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchFilter, setSearchFilter] = useState<'all' | 'anime' | 'cinema'>('all');
+  const [suggestion, setSuggestion] = useState('');
+  const [didYouMean, setDidYouMean] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Secret portal unlocking states
   const [beyondUnlocked, setBeyondUnlocked] = useState(() => localStorage.getItem('beyond_unlocked') === 'true');
@@ -73,6 +77,7 @@ const Navbar = () => {
   const closeSearch = () => {
     setSearchOpen(false);
     setQuery('');
+    setSuggestion('');
     setAnimeResults([]);
     setCinemaResults([]);
     setBeyondResults([]);
@@ -85,6 +90,12 @@ const Navbar = () => {
       closeSearch();
     } else {
       setSearchOpen(true);
+      // Set initial filter based on current context
+      if (isCinema) setSearchFilter('cinema');
+      else if (isMusic) setSearchFilter('all');
+      else if (isBeyond) setSearchFilter('all');
+      else setSearchFilter('anime');
+      
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
@@ -165,6 +176,44 @@ const Navbar = () => {
     setSwitchOpen(!switchOpen);
   };
 
+  // Fast suggestion typeahead (150ms) — fetches first result for ghost text
+  useEffect(() => {
+    if (suggestionDebounceRef.current) clearTimeout(suggestionDebounceRef.current);
+
+    if (!query.trim() || query.length < 2) {
+      setSuggestion('');
+      return;
+    }
+
+    suggestionDebounceRef.current = setTimeout(async () => {
+      try {
+        let topName = '';
+        if (isMusic) {
+          const data = await musicApi.search(query).catch(() => []);
+          topName = (data as any[])[0]?.name || '';
+        } else if (isBeyond) {
+          const data = await beyondApi.search(query).catch(() => []);
+          topName = (data as any[])[0]?.title || '';
+        } else if (isCinema) {
+          const data = await cinemaApi.search(query).catch(() => []);
+          topName = (data as any[])[0]?.title || '';
+        } else {
+          const data = await animeApi.search(query).catch(() => ({ animes: [] }));
+          topName = (data as { animes: AnimeCard[] }).animes?.[0]?.name || '';
+        }
+        // Only show suggestion if the top result starts with the user's query (case-insensitive)
+        if (topName && topName.toLowerCase().startsWith(query.toLowerCase())) {
+          setSuggestion(topName);
+        } else {
+          setSuggestion('');
+        }
+      } catch {
+        setSuggestion('');
+      }
+    }, 150);
+  }, [query, isMusic, isBeyond, isCinema]);
+
+  // Full results fetch (400ms debounce)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     
@@ -172,23 +221,67 @@ const Navbar = () => {
       setAnimeResults([]);
       setCinemaResults([]);
       setBeyondResults([]);
+      setSuggestion('');
       return;
     }
 
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const [animeData, cinemaData, beyondData, musicData] = await Promise.all([
-          animeApi.search(query).catch(() => ({ animes: [] })),
-          cinemaApi.search(query).catch(() => []),
-          beyondUnlocked ? beyondApi.search(query).catch(() => []) : Promise.resolve([]),
-          musicApi.search(query).catch(() => [])
-        ]);
+        const promises: Promise<any>[] = [];
+        
+        // Context-aware API calls
+        if (isMusic) {
+          promises.push(musicApi.search(query).catch(() => []));
+          promises.push(Promise.resolve({ animes: [] }));
+          promises.push(Promise.resolve([]));
+          promises.push(Promise.resolve([]));
+        } else if (isBeyond) {
+          promises.push(Promise.resolve([]));
+          promises.push(Promise.resolve({ animes: [] }));
+          promises.push(beyondApi.search(query).catch(() => []));
+          promises.push(Promise.resolve([]));
+        } else if (isCinema) {
+          promises.push(Promise.resolve([]));
+          promises.push(Promise.resolve({ animes: [] }));
+          promises.push(Promise.resolve([]));
+          promises.push(cinemaApi.search(query).catch(() => []));
+        } else {
+          promises.push(Promise.resolve([]));
+          promises.push(animeApi.search(query).catch(() => ({ animes: [] })));
+          promises.push(Promise.resolve([]));
+          promises.push(cinemaApi.search(query).catch(() => []));
+        }
 
-        setAnimeResults((animeData as { animes: AnimeCard[] }).animes?.slice(0, 4) ?? []);
-        setCinemaResults(cinemaData.slice(0, 4));
-        setBeyondResults(beyondData.slice(0, 4));
-        setMusicResults(musicData.slice(0, 6));
+        const [musicData, animeData, beyondData, cinemaData] = await Promise.all(promises);
+
+        const queryLower = query.toLowerCase();
+        const aData = animeData as any;
+        
+        // Handle "Did you mean?" from API
+        setDidYouMean(aData?.suggestion || '');
+        
+        // Final sanity filter on frontend to catch any backend leaks
+        setAnimeResults(aData.animes?.slice(0, 4) ?? []);
+        
+        // Cinema results often contain noise (trending) if search is broad, filter it strictly
+        setCinemaResults(
+          (cinemaData as any[])
+            .filter(item => (item.title || '').toLowerCase().includes(queryLower))
+            .slice(0, 4)
+        );
+        
+        setBeyondResults(
+          (beyondData as any[])
+            .filter(item => (item.title || item.name || '').toLowerCase().includes(queryLower))
+            .slice(0, 4)
+        );
+        
+        setMusicResults(
+          (musicData as any[])
+            .filter(item => (item.name || '').toLowerCase().includes(queryLower))
+            .slice(0, 6)
+        );
       } catch (err) {
         console.error('Search error:', err);
       } finally {
@@ -358,7 +451,7 @@ const Navbar = () => {
         {searchOpen && (
           <motion.div
             key="search-overlay"
-            className={`${styles.searchOverlay} glass`}
+            className={styles.searchOverlay}
             initial={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
             animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
@@ -366,23 +459,83 @@ const Navbar = () => {
           >
             <div className={styles.searchBar}>
               <Search size={24} className={styles.searchIcon} />
-              <input
-                ref={inputRef}
-                className={styles.searchInput}
-                placeholder="Search everything..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <div className={styles.keyBadge} style={{ opacity: query ? 0 : 0.5, fontSize: '0.6rem', padding: '0.2rem 0.5rem' }}>ESC TO CLOSE</div>
-              <button className={styles.closeBtn} onClick={closeSearch}>
-                <X size={20} />
-              </button>
-            </div>
+              <div className={styles.searchInputWrapper}>
+                {/* Ghost text layer — sits behind the real input */}
+                {suggestion && query && (
+                  <div className={styles.ghostText} aria-hidden="true">
+                    <span style={{ visibility: 'hidden' }}>{query}</span>
+                    <span className={styles.ghostCompletion}>{suggestion.slice(query.length)}</span>
+                  </div>
+                )}
+                <input
+                  ref={inputRef}
+                  className={styles.searchInput}
+                  placeholder="Search..."
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    // Clear suggestion if user deletes text
+                    if (e.target.value.length < query.length) setSuggestion('');
+                  }}
+                  onKeyDown={(e) => {
+                    // Tab or ArrowRight accepts the ghost suggestion
+                    if ((e.key === 'Tab' || e.key === 'ArrowRight') && suggestion && query) {
+                      e.preventDefault();
+                      setQuery(suggestion);
+                      setSuggestion('');
+                      return;
+                    }
+                    if (e.key === 'Enter' && query.trim()) {
+                      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+                      closeSearch();
+                    }
+                  }}
+                />
+              </div>
+              {suggestion && query ? (
+                <div className={styles.tabHint}>
+                  <span className={styles.keyBadge}>TAB</span>
+                  <span>to complete</span>
+                </div>
+              ) : (
+                <div className={styles.keyBadge} style={{ opacity: query ? 0 : 0.5, fontSize: '0.6rem', padding: '0.2rem 0.5rem' }}>ESC TO CLOSE</div>
+              )}
+                <button className={styles.closeBtn} onClick={closeSearch}>
+                  <X size={20} />
+                </button>
+              </div>
 
-            {(animeResults.length > 0 || cinemaResults.length > 0 || beyondResults.length > 0 || musicResults.length > 0 || searching) ? (
+              {!isMusic && !isBeyond && (
+                <div className={styles.searchToggles}>
+                  {(['all', 'anime', 'cinema'] as const).map((filter) => (
+                    <button
+                      key={filter}
+                      className={`${styles.toggleBtn} ${searchFilter === filter ? styles.activeToggle : ''}`}
+                      onClick={() => setSearchFilter(filter)}
+                    >
+                      {searchFilter === filter && (
+                        <motion.div 
+                          layoutId="searchFilterIndicator" 
+                          className={styles.toggleIndicator}
+                          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      <span className={styles.toggleText}>{filter.toUpperCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+            {(animeResults.length > 0 || cinemaResults.length > 0 || beyondResults.length > 0 || musicResults.length > 0 || searching || didYouMean) ? (
               <div className={styles.searchResults}>
                 {searching && (
                   <div className={styles.searchHint}>Searching for "{query}"...</div>
+                )}
+
+                {didYouMean && !searching && animeResults.length === 0 && (
+                  <div className={styles.didYouMean}>
+                    Did you mean <button onClick={() => setQuery(didYouMean)}>{didYouMean}</button>?
+                  </div>
                 )}
 
                 {isMusic ? (
@@ -419,69 +572,33 @@ const Navbar = () => {
                     )}
                   </>
                 ) : isBeyond ? (
-                  <>
-                    {beyondResults.length > 0 && (
-                      <div className={styles.searchSection}>
-                        <div className={styles.sectionLabel}>Beyond Results</div>
-                        {beyondResults.map((item) => (
-                          <div 
-                            key={item.id + 'beyond'} 
-                            className={styles.resultItem}
-                            onClick={() => {
-                              closeSearch();
-                              navigate(`/beyond/watch/${item.id}`);
-                            }}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            {item.thumbnail && (
-                              <SmartImage src={item.thumbnail} alt={item.title} className={styles.resultThumb} />
-                            )}
-                            <div className={styles.resultInfo}>
-                              <span className={styles.resultName}>{item.title}</span>
-                              <div className={styles.resultMetaWrapper}>
-                                <span className={styles.resultMeta}>BEYOND</span>
-                              </div>
-                            </div>
-                            <div className={styles.keyboardHint}>
-                              <span>Open</span>
-                              <span className={styles.keyBadge}>↵</span>
-                            </div>
+                  <div className={styles.searchSection}>
+                    <div className={styles.sectionLabel}>Beyond Results</div>
+                    {beyondResults.length > 0 ? beyondResults.map((item) => (
+                      <div 
+                        key={item.id + 'beyond'} 
+                        className={styles.resultItem}
+                        onClick={() => {
+                          closeSearch();
+                          navigate(`/beyond/watch/${item.id}`);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {item.thumbnail && (
+                          <SmartImage src={item.thumbnail} alt={item.title} className={styles.resultThumb} />
+                        )}
+                        <div className={styles.resultInfo}>
+                          <span className={styles.resultName}>{item.title}</span>
+                          <div className={styles.resultMetaWrapper}>
+                            <span className={styles.resultMeta}>BEYOND</span>
                           </div>
-                        ))}
+                        </div>
                       </div>
-                    )}
-                  </>
-                ) : isCinema ? (
-                  <>
-                    {cinemaResults.length > 0 && (
-                      <div className={styles.searchSection}>
-                        <div className={styles.sectionLabel}>Cinema Results</div>
-                        {cinemaResults.map((item) => {
-                          return (
-                            <Link 
-                              key={item.id + 'cinema'} 
-                              to={`/cinema/details/${item.id}?type=${item.mediaType}`} 
-                              className={styles.resultItem}
-                              onClick={closeSearch}
-                            >
-                              {item.imageUrl && (
-                                <SmartImage src={item.imageUrl} alt={item.title} className={styles.resultThumb} />
-                              )}
-                              <div className={styles.resultInfo}>
-                                <span className={styles.resultName}>{item.title}</span>
-                                <div className={styles.resultMetaWrapper}>
-                                  <span className={styles.resultMeta}>{item.mediaType}</span>
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
+                    )) : <div className={styles.searchHint}>No results in Beyond</div>}
+                  </div>
                 ) : (
                   <>
-                    {animeResults.length > 0 && (
+                    {(searchFilter === 'all' || searchFilter === 'anime') && animeResults.length > 0 && (
                       <div className={styles.searchSection}>
                         <div className={styles.sectionLabel}>Anime Results</div>
                         {animeResults.map((item) => (
@@ -504,76 +621,27 @@ const Navbar = () => {
                         ))}
                       </div>
                     )}
-
-                    {cinemaResults.length > 0 && (
-                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
-                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From Cinema</div>
-                        {cinemaResults.map((item) => {
-                          return (
-                            <Link 
-                              key={item.id + 'cinema'} 
-                              to={`/cinema/details/${item.id}?type=${item.mediaType}`} 
-                              className={styles.resultItem}
-                              onClick={closeSearch}
-                              style={{ opacity: 0.7 }}
-                            >
-                              {item.imageUrl && (
-                                <SmartImage src={item.imageUrl} alt={item.title} className={styles.resultThumb} />
-                              )}
-                              <div className={styles.resultInfo}>
-                                <span className={styles.resultName}>{item.title}</span>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {beyondUnlocked && beyondResults.length > 0 && (
-                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
-                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From Beyond</div>
-                        {beyondResults.map((item) => (
-                          <div 
-                            key={item.id + 'beyond'} 
+ 
+                    {(searchFilter === 'all' || searchFilter === 'cinema') && cinemaResults.length > 0 && (
+                      <div className={styles.searchSection} style={{ borderTop: (searchFilter === 'all' && animeResults.length > 0) ? '1px solid rgba(220, 201, 169, 0.1)' : 'none' }}>
+                        <div className={styles.sectionLabel} style={{ opacity: 0.6 }}>Cinema Results</div>
+                        {cinemaResults.map((item) => (
+                          <Link 
+                            key={item.id + 'cinema'} 
+                            to={`/cinema/details/${item.id}?type=${item.mediaType}`} 
                             className={styles.resultItem}
-                            onClick={() => {
-                              closeSearch();
-                              navigate(`/beyond/watch/${item.id}`);
-                            }}
-                            style={{ cursor: 'pointer', opacity: 0.7 }}
+                            onClick={closeSearch}
                           >
-                            {item.thumbnail && (
-                              <SmartImage src={item.thumbnail} alt={item.title} className={styles.resultThumb} />
+                            {item.imageUrl && (
+                              <SmartImage src={item.imageUrl} alt={item.title} className={styles.resultThumb} />
                             )}
                             <div className={styles.resultInfo}>
                               <span className={styles.resultName}>{item.title}</span>
+                              <div className={styles.resultMetaWrapper}>
+                                <span className={styles.resultMeta}>{item.mediaType}</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {musicResults.length > 0 && (
-                      <div className={styles.searchSection} style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
-                        <div className={styles.sectionLabel} style={{ opacity: 0.5 }}>From Music</div>
-                        {musicResults.map((item) => (
-                          <div 
-                            key={item.id + 'music-alt'} 
-                            className={styles.resultItem}
-                            onClick={() => {
-                              closeSearch();
-                              playTrack(item, musicResults);
-                            }}
-                            style={{ cursor: 'pointer', opacity: 0.7 }}
-                          >
-                            {item.poster && (
-                              <SmartImage src={item.poster} alt={item.name} className={styles.resultThumb} />
-                            )}
-                            <div className={styles.resultInfo}>
-                              <span className={styles.resultName}>{item.name}</span>
-                              <span className={styles.resultMeta} style={{ fontSize: '0.7rem', opacity: 0.5 }}>{item.artist}</span>
-                            </div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     )}

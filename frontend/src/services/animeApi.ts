@@ -62,6 +62,10 @@ export interface AnimeDetail {
     status: string;
     rating?: string;
     episodes: { sub: number | null; dub: number | null };
+    genres?: string[];
+    studios?: string[];
+    duration?: string;
+    premiered?: string;
     malId?: string;
     alId?: string;
   };

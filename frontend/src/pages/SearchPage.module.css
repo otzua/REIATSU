@@ -1,0 +1,383 @@
+.searchPage {
+  min-height: 100vh;
+  background: var(--bg-main);
+  padding: 8rem 4rem 4rem 4rem;
+  color: var(--color-cream);
+}
+
+.header {
+  max-width: 1200px;
+  margin: 0 auto 4rem auto;
+}
+
+.searchTitle {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.titleIcon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 15px rgba(184, 58, 45, 0.4));
+}
+
+.header h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin: 0;
+  background: linear-gradient(to right, var(--color-cream), rgba(220, 201, 169, 0.5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.queryDisplay {
+  font-size: 1.2rem;
+  color: rgba(220, 201, 169, 0.4);
+  font-family: var(--font-heading);
+  margin-bottom: 3rem;
+}
+
+.queryDisplay span {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.filtersContainer {
+  margin-top: 2rem;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.filters {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.4rem;
+  border-radius: 16px;
+  border: 1px solid rgba(220, 201, 169, 0.08);
+  backdrop-filter: blur(20px);
+  position: relative;
+}
+
+.filterBtn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  color: rgba(220, 201, 169, 0.4);
+  font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterBtn:hover {
+  color: rgba(220, 201, 169, 0.8);
+}
+
+.filterBtn.active {
+  color: #fff;
+}
+
+.btnText {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 2;
+}
+
+.activeIndicator {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: 12px;
+  z-index: 1;
+  box-shadow: 0 8px 20px rgba(184, 58, 45, 0.3);
+}
+
+.count {
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.1rem 0.5rem;
+  border-radius: 6px;
+  opacity: 0.6;
+}
+
+.active .count {
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+}
+
+.resultsGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section {
+  margin-bottom: 5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  color: var(--accent);
+}
+
+.sectionHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0;
+  color: var(--color-cream);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+}
+
+.cardMedia {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(220, 201, 169, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.cardBadges {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+.subBadge, .dubBadge, .typeBadge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.subBadge {
+  background: rgba(184, 58, 45, 0.85);
+  color: white;
+}
+
+.dubBadge {
+  background: rgba(220, 201, 169, 0.85);
+  color: #1a1a1a;
+}
+
+.typeBadge {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cardPoster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .cardPoster {
+  transform: scale(1.05);
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .cardOverlay {
+  opacity: 1;
+}
+
+.playIcon, .infoIcon {
+  width: 64px;
+  height: 64px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transform: scale(0.8);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card:hover .playIcon, .card:hover .infoIcon {
+  transform: scale(1);
+}
+
+.cardInfo {
+  padding: 1.25rem 0.5rem;
+}
+
+.cardInfo h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--color-cream);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardType {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(220, 201, 169, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.epCount {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent);
+  background: rgba(184, 58, 45, 0.1);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10rem 0;
+  color: rgba(220, 201, 169, 0.4);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(184, 58, 45, 0.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.noResults {
+  text-align: center;
+  padding: 10rem 0;
+}
+
+.noResults h2 {
+  font-size: 2.5rem;
+  margin: 2rem 0 1rem 0;
+}
+
+.noResults p {
+  color: rgba(220, 201, 169, 0.4);
+  max-width: 400px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.didYouMeanBanner {
+  background: rgba(184, 58, 45, 0.05);
+  border: 1px solid rgba(220, 201, 169, 0.05);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.didYouMeanBanner p {
+  margin: 0 !important;
+  color: var(--color-cream);
+  font-size: 1.1rem;
+}
+
+.didYouMeanBanner a {
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.backHome {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 16px;
+  text-decoration: none;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.backHome:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(184, 58, 45, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .searchPage {
+    padding: 8rem 2rem 4rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 2.5rem;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.5rem;
+  }
+}

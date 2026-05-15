@@ -15,6 +15,7 @@ const CinemaWatch = () => {
   
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [movie, setMovie] = useState<CinemaMovieDetail | null>(null);
+  const [recommended, setRecommended] = useState<CinemaMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   
@@ -25,6 +26,55 @@ const CinemaWatch = () => {
   const [seasons, setSeasons] = useState<any[]>([]);
   const [activeSeason, setActiveSeason] = useState<number>(1);
   const [activeEpisode, setActiveEpisode] = useState<number>(1);
+  
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'f') {
+        if (!document.fullscreenElement) {
+          playerWrapperRef.current?.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+          });
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      if (e.key.toLowerCase() === 'n' && movie?.mediaType === 'tv') {
+        const currentSeasonObj = seasons.find(s => s.season_number === activeSeason);
+        if (currentSeasonObj && activeEpisode < currentSeasonObj.episode_count) {
+          setActiveEpisode(prev => prev + 1);
+        } else if (currentSeasonObj) {
+          // Check if there is a next season
+          const nextSeasonIdx = seasons.findIndex(s => s.season_number === activeSeason) + 1;
+          if (nextSeasonIdx < seasons.length) {
+            setActiveSeason(seasons[nextSeasonIdx].season_number);
+            setActiveEpisode(1);
+          }
+        }
+      }
+
+      if (e.key.toLowerCase() === 'p' && movie?.mediaType === 'tv') {
+        if (activeEpisode > 1) {
+          setActiveEpisode(prev => prev - 1);
+        } else {
+          // Check if there is a previous season
+          const prevSeasonIdx = seasons.findIndex(s => s.season_number === activeSeason) - 1;
+          if (prevSeasonIdx >= 0) {
+            setActiveSeason(seasons[prevSeasonIdx].season_number);
+            setActiveEpisode(seasons[prevSeasonIdx].episode_count);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [movie, activeSeason, activeEpisode, seasons]);
 
   useEffect(() => {
     console.log('CinemaWatch Mounted, ID:', id, 'MediaType:', mediaTypeParam);
@@ -35,10 +85,14 @@ const CinemaWatch = () => {
     }
     
     setLoading(true);
-    cinemaApi.getMovieDetails(id, mediaTypeParam)
-      .then((data) => {
+    Promise.all([
+      cinemaApi.getMovieDetails(id, mediaTypeParam),
+      cinemaApi.getRecommendations(id, mediaTypeParam)
+    ])
+      .then(([data, recData]) => {
         console.log('Cinema Movie Data:', data);
         setMovie(data);
+        setRecommended(recData);
         
         if (data.mediaType === 'tv' && data.seasons) {
           // Filter out season 0 (specials) unless it's the only season
@@ -368,6 +422,45 @@ const CinemaWatch = () => {
             </div>
           </div>
         </div>
+
+        {/* Recommended Section at the bottom */}
+        {recommended && recommended.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className={styles.recommendedSection}
+          >
+            <div className={styles.sectionHeaderLine}>
+              <div className={styles.accentBox}></div>
+              <h2>RECOMMENDED FOR YOU</h2>
+            </div>
+            <div className={styles.recommendedGrid}>
+              {recommended.slice(0, 12).map((rec, index) => (
+                <motion.div
+                  key={rec.id}
+                  className={styles.recCard}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
+                >
+                  <Link to={`/cinema/watch/${rec.id}?type=${rec.mediaType}`} className={styles.cardLink}>
+                    <div className={styles.posterPlaceholder}>
+                      <SmartImage src={rec.imageUrl} aria-hidden="true" className={styles.recPosterGlow} draggable={false} />
+                      <SmartImage src={rec.imageUrl} alt={rec.title} className={styles.recPosterImg} draggable={false} />
+                    </div>
+                    <div className={styles.recInfo}>
+                      <h3 className={styles.recTitle}>{rec.title}</h3>
+                      <p className={styles.recMeta}>{rec.mediaType === 'movie' ? 'Movie' : 'TV Show'}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

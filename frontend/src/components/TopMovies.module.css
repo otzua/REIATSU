@@ -140,6 +140,42 @@
   z-index: 2;
 }
 
+.cardBadges {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+.subBadge, .dubBadge, .typeBadge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.subBadge {
+  background: rgba(184, 58, 45, 0.85);
+  color: white;
+}
+
+.dubBadge {
+  background: rgba(220, 201, 169, 0.85);
+  color: #1a1a1a;
+}
+
+.typeBadge {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .animeTitle {
   color: var(--color-cream);
   font-size: 1.05rem;

@@ -244,7 +244,14 @@ export function parseHome(html) {
     rank: i + 1,
     otherInfo: [$(el).find('.meta i.quality').text().trim(), $(el).find('.meta i.date').text().trim()].filter(Boolean),
     genres: [],
-    episodes: { sub: $(el).find('.meta i.sub').length ? 1 : null, dub: $(el).find('.meta i.dub').length ? 1 : null },
+    episodes: { 
+      sub: $(el).find('.meta i.sub').parent().text().match(/sub\s*(\d+)/i)?.[1] 
+        ? parseInt($(el).find('.meta i.sub').parent().text().match(/sub\s*(\d+)/i)[1], 10) 
+        : ($(el).find('.meta i.sub').length ? 1 : null),
+      dub: $(el).find('.meta i.dub').parent().text().match(/dub\s*(\d+)/i)?.[1]
+        ? parseInt($(el).find('.meta i.dub').parent().text().match(/dub\s*(\d+)/i)[1], 10)
+        : ($(el).find('.meta i.dub').length ? 1 : null)
+    },
   }));
   const latestEpisodeAnimes = each($, '#recent-update .ani.items .item', (el) => ({
     id: extractId($(el).find('.ani.poster a').attr('href')),

@@ -119,6 +119,33 @@ const AnimeDetails = () => {
                   )}
                 </div>
 
+                <div className={styles.genreList}>
+                  {anime.genres?.map((genre) => (
+                    <span key={genre} className={styles.genreBadge}>{genre}</span>
+                  ))}
+                </div>
+
+                <div className={styles.infoGrid}>
+                  {anime.studios && anime.studios.length > 0 && (
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>STUDIO</span>
+                      <span className={styles.infoValue}>{anime.studios.join(', ')}</span>
+                    </div>
+                  )}
+                  {anime.duration && (
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>DURATION</span>
+                      <span className={styles.infoValue}>{anime.duration}</span>
+                    </div>
+                  )}
+                  {anime.premiered && (
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>PREMIERED</span>
+                      <span className={styles.infoValue}>{anime.premiered}</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className={styles.descriptionBox}>
                   <h3>SYNOPSIS</h3>
                   <p className={styles.description}>{anime.description}</p>
