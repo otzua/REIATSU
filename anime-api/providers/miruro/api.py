@@ -57,8 +57,8 @@ async def secure_api(request: Request, call_next):
 
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-    "Referer": "https://www.miruro.tv/",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Referer": "https://www.miruro.bz/",
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9",
     "Sec-Fetch-Dest": "empty",
@@ -66,7 +66,7 @@ HEADERS = {
     "Sec-Fetch-Site": "same-origin",
 }
 ANILIST_URL = "https://graphql.anilist.co"
-MIRURO_PIPE_URL = "https://www.miruro.tv/api/secure/pipe"
+MIRURO_PIPE_URL = "https://www.miruro.bz/api/secure/pipe"
 
 
 # ─── Standard JSON response helpers ──────────────────────────────────────────
@@ -256,6 +256,7 @@ def _inject_source_slugs(data: dict, anilist_id: int):
                     continue
                 if "id" in ep and "number" in ep:
                     orig_id = ep["id"]
+                    ep["orig_id"] = orig_id
                     prefix = orig_id.split(":")[0] if ":" in orig_id else orig_id
                     ep["id"] = f"watch/{provider_name}/{anilist_id}/{category}/{prefix}-{ep['number']}"
     return data
@@ -287,7 +288,7 @@ async def _fetch_raw_episodes(anilist_id: int) -> dict:
                 return data
             return {"providers": {}}
         except Exception as e:
-            print(f"[MIRURO] Pipe fetch error: {str(e)}")
+            print(f"[MIRURO] Pipe fetch error: {repr(e)}")
             return {"providers": {}}
 
 
@@ -437,13 +438,12 @@ async def root():
 #           top10Animes { today (trending), week (popularity), month (favourites) }
 # All fired in parallel via asyncio.gather for speed.
 
-import time
-_HOME_CACHE = {"time": 0, "data": None}
+# ─── Home Page Cache ──────────────────────────────────────────────────────────
+_HOME_CACHE = TTLCache(maxsize=1, ttl=300)
 
 @app.get("/home")
 async def get_home():
-    global _HOME_CACHE
-    if time.time() - _HOME_CACHE["time"] < 300 and _HOME_CACHE["data"] is not None:
+    if "data" in _HOME_CACHE:
         return _HOME_CACHE["data"]
 
     spotlight_gql = f"""
@@ -508,8 +508,6 @@ async def get_home():
         },
     })
     _HOME_CACHE["data"] = response
-    _HOME_CACHE["time"] = time.time()
-    
     return response
 
 # ─── INDEX / LANDING PAGE ────────────────────────────────────────────────────
@@ -1022,16 +1020,20 @@ async def get_sources(
     category: str = Query("sub"),
 ):
     enc_id = base64.urlsafe_b64encode(episodeId.encode()).decode().rstrip('=')
-    if provider == "hanime":
+    # Detect Hanime or WatchHentai slugs (wh: prefix or path segments)
+    is_hanime_id = provider == "hanime" or episodeId.startswith("wh:") or "watch/hanime/" in episodeId
+    
+    if is_hanime_id:
         real_id = episodeId
         if episodeId.startswith("watch/hanime/"):
             parts = episodeId.split("/")
             if len(parts) >= 5:
                 real_id = parts[4]
+        
         sources = await get_hanime_sources(real_id)
         if sources:
-            return ok(sources)
-        return err_response("Hanime sources not found", 404)
+            return ok({"streams": sources})
+        return err_response("Hentai sources not found", 404)
 
     payload = {
         "path": "sources",
@@ -1044,16 +1046,21 @@ async def get_sources(
     headers = HEADERS.copy()
     headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
-    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, http2=False) as client:
+    async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, http2=False) as client:
         try:
             res = await client.get(f"{MIRURO_PIPE_URL}?e={encoded_req}", headers=headers)
+
+            # If HTTP/1.1 failed, try HTTP/2 once
             if res.status_code != 200:
-                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, http2=True) as client2:
-                    res = await client2.get(f"{MIRURO_PIPE_URL}?e={encoded_req}", headers=headers)
+                async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, http2=True) as c2:
+                    res = c2.get(f"{MIRURO_PIPE_URL}?e={encoded_req}", headers=headers)
+                    if asyncio.iscoroutine(res): res = await res
 
             if res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail="Pipe request failed")
             return ok(_decode_pipe_response(res.text.strip()))
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Pipe connection failed: {str(e)}")
 
@@ -1081,7 +1088,7 @@ async def get_watch_sources(provider: str, anilist_id: int, category: str, slug:
                 if len(parts) >= 5:
                     target_id = parts[4]
             else:
-                target_id = actual_id
+                target_id = ep.get("orig_id") or actual_id
             break
 
     # If the above failed, try a more aggressive match
@@ -1096,7 +1103,7 @@ async def get_watch_sources(provider: str, anilist_id: int, category: str, slug:
                     if len(parts) >= 5:
                         target_id = parts[4]
                 else:
-                    target_id = aid
+                    target_id = ep.get("orig_id") or aid
                 break
 
     if not target_id:

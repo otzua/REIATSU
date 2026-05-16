@@ -29,6 +29,14 @@ const AnimeDetails = () => {
       .then((info) => {
         if (isCancelled) return;
         setAnimeInfo(info);
+        if (info.provider && info.provider !== provider && info.provider !== 'anikoto') {
+          navigate(`/${info.provider}/anime/${id}`, { replace: true });
+          return;
+        }
+        if (info.provider === 'anikoto' && provider && provider !== 'anime') {
+          navigate(`/anime/${id}`, { replace: true });
+          return;
+        }
         setLoading(false);
       })
       .catch((err) => {

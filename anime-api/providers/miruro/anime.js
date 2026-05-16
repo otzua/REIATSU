@@ -4,12 +4,12 @@ const MIRURO_API_BASE = process.env.MIRURO_API_URL || 'http://localhost:4004';
 
 const api = axios.create({
   baseURL: MIRURO_API_BASE,
-  timeout: 30000,
+  timeout: 10000,
 });
 
 export async function getHome() {
   const res = await api.get('/home');
-  return res.data.data;
+  return res.data.data || {};
 }
 
 export async function getIndex() {
@@ -92,41 +92,48 @@ export async function getEpisodes(id) {
 }
 
 export async function getEpisode(animeId, number) {
-  // Miruro doesn't have a direct /ep/{num} but we can get it from getEpisodes
-  const epsData = await getEpisodes(animeId);
-  const ep = epsData.episodes.find(e => e.number === Number(number));
-  if (!ep) throw new Error('Episode not found');
-  
   try {
-    // ep.id is the full watch path (e.g., "watch/gogoanime/182205/sub/gogoanime-1")
-    // We need to ensure it has a leading slash if we use it with api.get
-    const watchPath = ep.id.startsWith('/') ? ep.id : `/${ep.id}`;
-    const sourcesRes = await api.get(watchPath);
-    const sourcesData = sourcesRes.data.data;
+    const res = await api.get(`/episodes/${animeId}`);
+    const data = res.data.data;
+    const providers = data.providers || {};
     
-    // Normalize sources to Reiatsu format
-    // We pick the first m3u8 source as primary 'sub'
-    const mainSource = sourcesData.sources?.find(s => s.isM3U8)?.url || sourcesData.sources?.[0]?.url;
-    
-    return {
-      episode: {
-        number: ep.number,
-        title: ep.title,
-        sources: {
-          sub: mainSource,
-          // You could add more sources here if needed
+    // Try to find a working stream across all providers
+    for (const [provName, provData] of Object.entries(providers)) {
+      const eps = provData.episodes?.sub || provData.episodes || [];
+      const ep = eps.find(e => e.number === Number(number));
+      if (!ep) continue;
+      
+      try {
+        const watchPath = ep.id.startsWith('/') ? ep.id : `/${ep.id}`;
+        const sourcesRes = await api.get(watchPath);
+        const sourcesData = sourcesRes.data.data;
+        
+        const streams = sourcesData.streams || sourcesData.sources || [];
+        const mainSource = streams.find(s => s.isM3U8 || s.type === 'm3u8' || s.type === 'mp4')?.url || streams[0]?.url;
+        
+        if (mainSource) {
+          return {
+            episode: {
+              number: Number(number),
+              title: ep.title || `Episode ${number}`,
+              sources: {
+                sub: mainSource,
+              }
+            }
+          };
         }
+      } catch (e) {
+        console.warn(`[Miruro] Failed to get sources for provider ${provName}: ${e.message}`);
+        // Try next provider
       }
-    };
+    }
+    
+    // If no provider worked
+    throw new Error(`No sources found for ${animeId} ep ${number}`);
+    
   } catch (error) {
-    console.error(`[Miruro] Failed to fetch sources for ${ep.id}:`, error.message);
-    return {
-      episode: {
-        number: ep.number,
-        title: ep.title,
-        sources: {}
-      }
-    };
+    console.error(`[Miruro] Episode fetch failed: ${error.message}`);
+    throw error; // Re-throw to trigger global fallback
   }
 }
 

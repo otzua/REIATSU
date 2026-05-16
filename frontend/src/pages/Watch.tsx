@@ -7,7 +7,24 @@ import type { AnimeDetail, EpisodeData } from '../services/animeApi';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
 import NextEpisodeTimer from '../components/NextEpisodeTimer';
+import DirectPlayer from '../components/DirectPlayer';
 import styles from './Watch.module.css';
+
+/** Returns true if the URL is a direct stream file (m3u8 / mp4 / cdn link), not an embed HTML page */
+function isDirectStreamUrl(url: string): boolean {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return (
+    lower.includes('.m3u8') ||
+    lower.includes('.mp4') ||
+    lower.includes('fast4speed') ||
+    lower.includes('allmanga') ||
+    lower.includes('proxy-m3u8') ||
+    lower.includes('cdn.') ||
+    // Fallback: URLs that are clearly not embed HTML pages
+    (/\/media[0-9]?\//.test(lower) && !lower.includes('.html'))
+  );
+}
 
 const Watch = () => {
   const { id, provider: pathProvider } = useParams<{ id: string, provider?: string }>();
@@ -15,10 +32,11 @@ const Watch = () => {
   const [searchParams] = useSearchParams();
   const epParam = searchParams.get('ep');
   const location = useLocation();
-  // Use route provider, fallback to miruro if path starts with /miruro, else default provider
+  // Use route provider, fallback to miruro or animekai if path starts with them, else default provider
   let provider = (pathProvider && pathProvider !== 'anime') ? pathProvider : (searchParams.get('provider') || undefined);
-  if (!provider && location.pathname.startsWith('/miruro')) {
-    provider = 'miruro';
+  const providerMatch = location.pathname.match(/^\/(miruro|animekai)/);
+  if (!provider && providerMatch) {
+    provider = providerMatch[1];
   }
   
   const playerWrapperRef = useRef<HTMLDivElement>(null);
@@ -35,6 +53,7 @@ const Watch = () => {
   const [activeServer, setActiveServer] = useState<'primary' | 'ani'>('primary');
   const [individualSource, setIndividualSource] = useState<{ ep: number; sources: Record<string, string> } | null>(null);
   const [sourceFetchFailedEp, setSourceFetchFailedEp] = useState<number | null>(null);
+  const [redirectingTo, setRedirectingTo] = useState<string | null>(null);
   
 
   // Keyboard Shortcuts
@@ -70,20 +89,44 @@ const Watch = () => {
   useEffect(() => {
     if (!id) return;
     let isSubscribed = true;
-    
-    Promise.all([
-      animeApi.getAnime(id, provider),
-      animeApi.getEpisodes(id, provider),
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out. The server took too long to respond.')), 20000)
+    );
+
+    Promise.race([
+      Promise.all([
+        animeApi.getAnime(id, provider),
+        animeApi.getEpisodes(id, provider),
+      ]),
+      timeout,
     ])
       .then(([info, eps]) => {
         if (!isSubscribed) return;
+        console.log('[REIATSU] Watch Data:', { provider, infoProvider: info.provider, episodes: eps.totalEpisodes });
 
-        if (eps.totalEpisodes === 0 && provider) {
-          console.warn(`[REIATSU] ${provider} returned 0 episodes, falling back to default provider.`);
-          navigate(`/watch/${id}${epParam ? `?ep=${epParam}` : ''}`, { replace: true });
-          return;
+        if (eps.totalEpisodes === 0) {
+          console.warn(`[REIATSU] ${provider || 'default'} provider returned 0 episodes. Staying on page for troubleshooting.`);
+          // We do not navigate away so the user can troubleshoot the empty provider state
         }
 
+        if (info.provider && info.provider !== provider && info.provider !== 'anikoto') {
+          console.log(`[REIATSU] Redirecting to ${info.provider} watch page`);
+          setRedirectingTo(info.provider);
+          setTimeout(() => {
+            navigate(`/${info.provider}/watch/${id}${epParam ? `?ep=${epParam}` : ''}`, { replace: true });
+          }, 1500);
+          return;
+        }
+        if (info.provider === 'anikoto' && provider && provider !== 'anime') {
+          console.log(`[REIATSU] Redirecting to default watch page`);
+          setRedirectingTo('anime');
+          setTimeout(() => {
+            navigate(`/anime/watch/${id}${epParam ? `?ep=${epParam}` : ''}`, { replace: true });
+          }, 1500);
+          return;
+        }
+        
         setAnime(info);
         setEpisodeData(eps);
         setCurrentEp(epParam ? parseInt(epParam, 10) : 1);
@@ -104,8 +147,8 @@ const Watch = () => {
       .catch((err) => {
         if (!isSubscribed) return;
         console.error('REIATSU ERROR:', err);
-        setLoading(false);
         setError(err.message || String(err));
+        setLoading(false);
       });
 
     return () => {
@@ -275,6 +318,22 @@ const Watch = () => {
   }, [episodeData, selectedRange, searchQuery]);
 
 
+  if (redirectingTo) {
+    return (
+      <div className={styles.container}>
+        <HalftoneWave />
+        <div className={styles.content}>
+          <div className={styles.loadingWrapper}>
+            <div className={styles.loading}>TRANSFERRING TO {redirectingTo.toUpperCase()}...</div>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFill} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -325,14 +384,23 @@ const Watch = () => {
               <SmartImage src={anime.anime.poster} aria-hidden="true" className={styles.playerGlow} />
               <div ref={playerWrapperRef} className={styles.videoWrapper}>
                 {videoUrl ? (
-                  <iframe
-                    key={`${id}-${activeSource}-${activeServer}`}
-                    src={videoUrl}
-                    className={styles.iframe}
-                    allowFullScreen
-                    scrolling="no"
-                    allow="autoplay; encrypted-media"
-                  />
+                  isDirectStreamUrl(videoUrl) ? (
+                    <DirectPlayer
+                      key={`direct-${id}-${currentEp}-${activeSource}-${activeServer}`}
+                      url={videoUrl}
+                      poster={anime?.anime.poster}
+                      className={styles.iframe}
+                    />
+                  ) : (
+                    <iframe
+                      key={`${id}-${activeSource}-${activeServer}`}
+                      src={videoUrl}
+                      className={styles.iframe}
+                      allowFullScreen
+                      scrolling="no"
+                      allow="autoplay; encrypted-media"
+                    />
+                  )
                 ) : (
                   <div className={styles.playerPlaceholder}>
                     {fetchingSource ? 'LOCATING STREAMS...' : 'NO SOURCE FOUND'}
@@ -536,7 +604,7 @@ const Watch = () => {
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
                 >
-                  <Link to={`/anime/${rec.id}`} className={styles.cardLink}>
+                  <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${rec.id}`} className={styles.cardLink}>
                     <div className={styles.posterPlaceholder}>
                       <SmartImage src={rec.poster} aria-hidden="true" className={styles.recPosterGlow} draggable={false} />
                       <SmartImage src={rec.poster} alt={rec.name} className={styles.recPosterImg} draggable={false} />

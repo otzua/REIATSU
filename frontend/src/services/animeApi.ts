@@ -55,6 +55,7 @@ async function apiFetch<T>(path: string): Promise<T> {
 }
 
 export interface AnimeDetail {
+  provider?: string;
   anime: {
     id: string;
     name: string;

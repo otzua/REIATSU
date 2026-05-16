@@ -2,33 +2,27 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { handle } from '@hono/node-server/vercel';
-import { getProvider, getProviderWithFallback } from '../core/providerManager.js';
-import { cacheStats, cacheDel } from '../utils/cache.js';
+import { getProvider, getProviderWithFallback, getProviderOrder, listProviders } from '../core/providerManager.js';
+import { cacheStats, cacheDel, withCache, TTL } from '../utils/cache.js';
 import { findClosestMatch } from '../utils/string.js';
 import { POPULAR_TITLES } from '../constants/popular.js';
 import beyond from './beyond.js';
 
 
+import { logger } from 'hono/logger';
+
 const app = new Hono();
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',') 
-  : '*';
+app.use('*', cors());
 
-app.use('*', cors({
-  origin: (origin) => {
-    if (allowedOrigins === '*') return '*';
-    if (allowedOrigins.includes(origin)) return origin;
-    return allowedOrigins[0]; // Fallback or reject
-  }
-}));
+app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 app.get('/', (c) => c.json({
   status: 'ok',
   message: 'Anime API',
-  providers: ['anikai', 'anikoto'],
-  defaultProvider: 'anikai',
+  providers: ['anikoto', 'animekai', 'miruro'],
+  defaultProvider: 'anikoto',
   docs: 'See README.md for endpoint documentation',
   endpoints: {
     anime: '/api/v2/{provider}/anime/{id}',
@@ -62,6 +56,39 @@ function err(c, message, status = 500) {
   return c.json({ success: false, error: message }, status);
 }
 
+async function fetchWithFallback(c, fetcher, requestedProvider = null) {
+  const providerName = requestedProvider || c.req.query('provider');
+  
+  // Create an order: requested first, then the rest.
+  const order = providerName 
+    ? [providerName, ...listProviders().filter(p => p !== providerName)]
+    : getProviderOrder();
+
+  const errors = [];
+
+  for (const name of order) {
+    try {
+      const p = await getProvider(name);
+      const result = await fetcher(p, name);
+      
+      if (result) {
+        // Basic validation to ensure we have meaningful data
+        if (result.anime && !result.anime.name) continue;
+        if (result.episodes && !Array.isArray(result.episodes)) continue;
+        if (result.animes && !Array.isArray(result.animes)) continue;
+        
+        return ok(c, { provider: name, ...result });
+      }
+    } catch (e) {
+      console.warn(`[FALLBACK] Provider "${name}" failed: ${e.message}`);
+      errors.push({ provider: name, error: e.message });
+      continue;
+    }
+  }
+
+  return err(c, `All providers failed. Last error: ${errors[0]?.error || 'Unknown error'}`);
+}
+
 // ─── Cache stats (debug) ──────────────────────────────────────────────────────
 app.get('/cache/stats', (c) => {
   const authHeader = c.req.header('X-Admin-Secret');
@@ -74,24 +101,20 @@ app.get('/cache/stats', (c) => {
 
 // ─── Home ─────────────────────────────────────────────────────────────────────
 app.get('/api/v2/:provider/home', async (c) => {
-  try {
-    const p = await getProvider(c.req.param('provider'));
-    const data = await p.anime.getHome();
-    return ok(c, data);
-  } catch (e) {
-    return err(c, e.message);
-  }
+  const provider = c.req.param('provider');
+  return fetchWithFallback(c, (p, name) => 
+    withCache(`${name}:home`, TTL.HOME, () => p.anime.getHome()), 
+    provider
+  );
 });
 
 // ─── Index / landing page ─────────────────────────────────────────────────────
 app.get('/api/v2/:provider/index', async (c) => {
-  try {
-    const p = await getProvider(c.req.param('provider'));
-    const data = await p.anime.getIndex();
-    return ok(c, data);
-  } catch (e) {
-    return err(c, e.message);
-  }
+  const provider = c.req.param('provider');
+  return fetchWithFallback(c, (p, name) => 
+    withCache(`${name}:index`, TTL.HOME, () => p.anime.getIndex()),
+    provider
+  );
 });
 
 // ─── Anime detail ─────────────────────────────────────────────────────────────
@@ -104,6 +127,7 @@ app.get('/api/v2/:provider/anime/:animeId', async (c) => {
     return err(c, e.message);
   }
 });
+
 
 // ─── Episode list ─────────────────────────────────────────────────────────────
 app.get('/api/v2/:provider/anime/:animeId/episodes', async (c) => {
@@ -268,11 +292,14 @@ app.get('/api/v2/:provider/category/:name', async (c) => {
 // ─── Type ──────────────────────────────────────────────────────────────────────
 app.get('/api/v2/:provider/type/:name', async (c) => {
   try {
-    const p = await getProvider(c.req.param('provider'));
+    const providerName = c.req.param('provider');
+    const p = await getProvider(providerName);
     const name = c.req.param('name');
     const page = parseInt(c.req.query('page') || '1', 10);
     const sort = c.req.query('sort') || null;
-    const data = await p.anime.getType(name, page, sort);
+    
+    const cacheKey = `${providerName}:type:${name}:${page}:${sort || 'default'}`;
+    const data = await withCache(cacheKey, TTL.LIST, () => p.anime.getType(name, page, sort));
     return ok(c, { 
       type: data.title || name, 
       animes: data.animes, 
@@ -299,34 +326,22 @@ app.get('/api/v2/:provider/nav', async (c) => {
 
 // ─── Shorthand routes (no provider prefix → uses defaultProvider) ────────────
 app.get('/api/home', async (c) => {
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
-  try {
-    return ok(c, { provider: name, ...(await p.anime.getHome()) });
-  } catch (e) {
-    return err(c, e.message);
-  }
+  return fetchWithFallback(c, (p) => p.anime.getHome());
 });
 
 app.get('/api/index', async (c) => {
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
-  try {
-    return ok(c, { provider: name, ...(await p.anime.getIndex()) });
-  } catch (e) {
-    return err(c, e.message);
-  }
+  return fetchWithFallback(c, (p) => p.anime.getIndex());
 });
 
 app.get('/api/search', async (c) => {
   const q = c.req.query('q');
   if (!q) return err(c, 'Missing q', 400);
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
   const page = parseInt(c.req.query('page') || '1', 10);
-  try {
+
+  return fetchWithFallback(c, async (p) => {
     const data = await p.search.query(q, page);
-    
     let suggestion = null;
 
-    // --- RELEVANCE FILTERING ---
     if (data.animes && data.animes.length > 0) {
       const queryLower = q.toLowerCase();
       data.animes = data.animes
@@ -345,28 +360,20 @@ app.get('/api/search', async (c) => {
         .map(({ _score, ...rest }) => rest);
     }
 
-    // If no results on first page, look for a suggestion
     if (page === 1 && (!data.animes || data.animes.length === 0)) {
       suggestion = findClosestMatch(q, POPULAR_TITLES);
     }
 
-    return ok(c, { provider: name, ...data, suggestion });
-  } catch (e) {
-    return err(c, e.message);
-  }
+    return { ...data, suggestion };
+  });
 });
 
 app.get('/api/browse', async (c) => {
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
   const page = parseInt(c.req.query('page') || '1', 10);
   const { page: _p, provider: _pr, ...filters } = Object.fromEntries(
     Object.entries(c.req.query()).filter(([k]) => !['page', 'provider'].includes(k))
   );
-  try {
-    return ok(c, { provider: name, ...(await p.search.browse(filters, page)) });
-  } catch (e) {
-    return err(c, e.message);
-  }
+  return fetchWithFallback(c, (p) => p.search.browse(filters, page));
 });
 
 app.get('/api/schedule', async (c) => {
@@ -384,30 +391,15 @@ app.get('/api/schedule', async (c) => {
 });
 
 app.get('/api/anime/:id', async (c) => {
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
-  try {
-    return ok(c, { provider: name, ...(await p.anime.getById(c.req.param('id'))) });
-  } catch (e) {
-    return err(c, e.message);
-  }
+  return fetchWithFallback(c, (p) => p.anime.getById(c.req.param('id')));
 });
 
 app.get('/api/anime/:id/episodes', async (c) => {
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
-  try {
-    return ok(c, { provider: name, ...(await p.anime.getEpisodes(c.req.param('id'))) });
-  } catch (e) {
-    return err(c, e.message);
-  }
+  return fetchWithFallback(c, (p) => p.anime.getEpisodes(c.req.param('id')));
 });
 
 app.get('/api/anime/:id/ep/:number', async (c) => {
-  const { name, provider: p } = await getProviderWithFallback(c.req.query('provider'));
-  try {
-    return ok(c, { provider: name, ...(await p.anime.getEpisode(c.req.param('id'), c.req.param('number'))) });
-  } catch (e) {
-    return err(c, e.message);
-  }
+  return fetchWithFallback(c, (p) => p.anime.getEpisode(c.req.param('id'), c.req.param('number')));
 });
 
 app.get('/api/genre/:name', async (c) => {

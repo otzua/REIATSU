@@ -8,21 +8,21 @@ import TopAnime from '../components/TopAnime';
 import AnimeFacts from '../components/AnimeFacts';
 import styles from './Home.module.css';
 
-const MiruroHome = () => {
+const AnimeKaiHome = () => {
   return (
     <div className={styles.homeContainer}>
       <HalftoneWave />
       <div className={styles.content}>
-        <Hero provider="miruro" />
-        <ContinueWatching provider="miruro" />
-        <AiringAnime provider="miruro" />
-        <UpcomingAnime provider="miruro" />
-        <TopMovies provider="miruro" />
-        <TopAnime provider="miruro" />
+        <Hero provider="animekai" />
+        <ContinueWatching />
+        <AiringAnime provider="animekai" />
+        <UpcomingAnime provider="animekai" />
+        <TopMovies provider="animekai" />
+        <TopAnime provider="animekai" />
         <AnimeFacts />
       </div>
     </div>
   );
 };
 
-export default MiruroHome;
+export default AnimeKaiHome;

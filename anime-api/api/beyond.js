@@ -49,8 +49,8 @@ beyond.get('/', async (c) => {
       page_number: 1
     });
 
-    const hits = typeof response.data.hits === 'string' 
-      ? JSON.parse(response.data.hits) 
+    const hits = typeof response.data.hits === 'string'
+      ? JSON.parse(response.data.hits)
       : response.data.hits;
 
     const items = hits.map(hit => ({
@@ -92,7 +92,7 @@ beyond.get('/details', async (c) => {
   if (slug.startsWith('wh:')) {
     try {
       let targetSlug = slug.replace('wh:', '');
-      
+
       // If it's a series from search, get the series details and grab the first episode!
       if (targetSlug.startsWith('series:')) {
         const seriesSlug = targetSlug.replace('series:', '');
@@ -187,7 +187,7 @@ beyond.get('/details', async (c) => {
           const seriesSlug = targetUrl.split('/series/')[1]?.replace(/\//g, '');
           const seriesRes = await axios.get(`${WATCHHENTAI_API}/series/${seriesSlug}`);
           const episodes = seriesRes.data?.data?.episodes || [];
-          
+
           const epMatch = slug.match(/\d+$/);
           const epNum = epMatch ? parseInt(epMatch[0], 10) : 1;
 
@@ -303,8 +303,8 @@ beyond.get('/search', async (c) => {
       page_number: 1
     });
 
-    const hits = typeof response.data.hits === 'string' 
-      ? JSON.parse(response.data.hits) 
+    const hits = typeof response.data.hits === 'string'
+      ? JSON.parse(response.data.hits)
       : response.data.hits;
 
     const items = hits.map(hit => ({
@@ -358,7 +358,7 @@ beyond.get('/proxy-m3u8', async (c) => {
     const response = await axios.get(url, {
       headers: { 'Referer': 'https://hanime.tv/' }
     });
-    
+
     let manifest = response.data;
     const baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
 
@@ -399,6 +399,50 @@ beyond.get('/proxy-segment', async (c) => {
   } catch (error) {
     console.error('[Proxy Segment Error]', error.message, url);
     return c.text('Failed to proxy segment', 500);
+  }
+});
+
+/**
+ * GET /api/beyond/proxy-video
+ * Proxies direct MP4/video files with support for Range requests (seeking)
+ */
+beyond.get('/proxy-video', async (c) => {
+  const url = c.req.query('url');
+  if (!url) return c.text('Missing url', 400);
+
+  const range = c.req.header('Range');
+  
+  // Dynamic Referer based on the target URL
+  let referer = 'https://hanime.tv/';
+  if (url.includes('hstorage.xyz') || url.includes('watchhentai')) {
+    referer = 'https://watchhentai.net/';
+  }
+
+  const headers = {
+    'Referer': referer,
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+  };
+  if (range) headers['Range'] = range;
+
+  try {
+    const response = await axios.get(url, {
+      headers,
+      responseType: 'stream',
+      timeout: 30000
+    });
+
+    c.header('Content-Type', response.headers['content-type'] || 'video/mp4');
+    if (response.headers['content-length']) c.header('Content-Length', response.headers['content-length']);
+    if (response.headers['content-range']) c.header('Content-Range', response.headers['content-range']);
+    if (response.headers['accept-ranges']) c.header('Accept-Ranges', response.headers['accept-ranges']);
+    
+    c.status(response.status);
+    c.header('Access-Control-Allow-Origin', '*');
+    
+    return c.body(response.data);
+  } catch (error) {
+    console.error('[Proxy Video Error]', error.message, url);
+    return c.text('Failed to proxy video', 500);
   }
 });
 

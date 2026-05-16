@@ -22,7 +22,7 @@ const decodeEntities = (text: string) => {
   return textarea.value;
 };
 
-const ContinueWatching = () => {
+const ContinueWatching = ({ provider }: { provider?: string }) => {
   const [history, setHistory] = useState<AnimeCWData[]>([]);
 
   useEffect(() => {
@@ -30,27 +30,28 @@ const ContinueWatching = () => {
     if (data) {
       try {
         const parsed = JSON.parse(data);
+        let items: AnimeCWData[] = [];
+        
         if (Array.isArray(parsed)) {
-          setHistory(parsed);
+          items = parsed;
         } else if (parsed && typeof parsed === 'object' && parsed.animeId) {
-          // Gracefully convert legacy single-item structure to modern array format
-          const legacyItem: AnimeCWData = {
-            animeId: parsed.animeId,
-            animeName: parsed.animeName,
-            animePoster: parsed.animePoster,
-            episodeNumber: parsed.episodeNumber,
-            episodeTitle: parsed.episodeTitle,
-            timestamp: parsed.timestamp || Date.now()
-          };
-          setHistory([legacyItem]);
-          // Upgrade localStorage legacy key to array
-          localStorage.setItem('reiatsu_continue_watching', JSON.stringify([legacyItem]));
+          items = [parsed as AnimeCWData];
         }
+
+        if (provider) {
+          if (provider === 'miruro' || provider === 'beyond') {
+            items = items.filter(item => item.provider === 'miruro' || item.provider === 'beyond');
+          } else {
+            items = items.filter(item => item.provider === provider);
+          }
+        }
+        
+        setHistory(items);
       } catch (e) {
         // ignore
       }
     }
-  }, []);
+  }, [provider]);
 
   if (history.length === 0) return null;
 

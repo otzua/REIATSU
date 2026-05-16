@@ -56,8 +56,11 @@ export function cachePrune() {
   }
 }
 
+const inFlight = new Map();
+
 /**
  * Convenience: return cached result or call fn(), cache it, then return it.
+ * Also deduplicates simultaneous requests.
  *
  * @param {string}   key
  * @param {number}   ttl
@@ -66,10 +69,23 @@ export function cachePrune() {
 export async function withCache(key, ttl, fn) {
   const hit = cacheGet(key);
   if (hit !== undefined) return hit;
-  const value = await fn();
-  cacheSet(key, value, ttl);
-  cachePrune();            // opportunistic cleanup
-  return value;
+  
+  if (inFlight.has(key)) {
+    return inFlight.get(key);
+  }
+  
+  const promise = fn().then(value => {
+    cacheSet(key, value, ttl);
+    cachePrune();
+    inFlight.delete(key);
+    return value;
+  }).catch(err => {
+    inFlight.delete(key);
+    throw err;
+  });
+  
+  inFlight.set(key, promise);
+  return promise;
 }
 
 /**

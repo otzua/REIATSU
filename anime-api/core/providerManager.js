@@ -1,11 +1,11 @@
-import * as anikai from '../providers/anikai/index.js';
 import * as anikoto from '../providers/anikoto/index.js';
 import * as miruro from '../providers/miruro/index.js';
+import * as animekai from '../providers/animekai/index.js';
 import { config } from './config.js';
 
 const providers = {
-  anikai,
   anikoto,
+  animekai,
   miruro,
 };
 
@@ -39,6 +39,12 @@ export async function getProviderWithFallback(name) {
     }
   }
   throw new Error('No providers available');
+}
+
+export function getProviderOrder(name) {
+  return name
+    ? [name]
+    : [config.defaultProvider, ...Object.keys(providers).filter(p => p !== config.defaultProvider)];
 }
 
 export function listProviders() {

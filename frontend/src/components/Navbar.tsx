@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -21,10 +21,13 @@ const Navbar = () => {
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
   const isMiruroGlobally = location.pathname.startsWith('/miruro') || searchParams.get('provider') === 'miruro';
+  const routeProvider = searchParams.get('provider');
+  const isAnimeKaiGlobally = location.pathname.startsWith('/animekai') || routeProvider === 'animekai';
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [providerMenuOpen, setProviderMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [animeResults, setAnimeResults] = useState<any[]>([]);
   const [cinemaResults, setCinemaResults] = useState<any[]>([]);
@@ -48,7 +51,9 @@ const Navbar = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
     if (isBeyond) return '/beyond';
-    if (isMiruroGlobally) return '/miruro';
+    if (routeProvider) return `/${routeProvider}`;
+    if (isMiruroGlobally) return '/miruro'; // fallback
+    if (isAnimeKaiGlobally) return '/animekai';
     return '/anime';
   };
 
@@ -404,12 +409,41 @@ const Navbar = () => {
               <button 
                 className={`${styles.switchBtn} ${(!isCinema && !isMusic && !isBeyond) ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/'); setSwitchOpen(false); }}
+                onMouseEnter={() => setProviderMenuOpen(true)}
+                onMouseLeave={() => setProviderMenuOpen(false)}
+                style={{ position: 'relative' }}
               >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
                   <p>{(!isCinema && !isMusic && !isBeyond) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
+                
+                <AnimatePresence>
+                  {providerMenuOpen && (
+                    <motion.div 
+                      className={styles.providerSubmenu}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className={styles.providerTitle}>SELECT PROVIDER</div>
+                      <button 
+                        className={`${styles.providerBtn} ${!isMiruroGlobally ? styles.activeProvider : ''}`}
+                        onClick={(e) => { e.stopPropagation(); navigate('/'); setSwitchOpen(false); setProviderMenuOpen(false); }}
+                      >
+                        ANIKOTO
+                      </button>
+                      <button 
+                        className={`${styles.providerBtn} ${isMiruroGlobally ? styles.activeProvider : ''}`}
+                        onClick={(e) => { e.stopPropagation(); navigate('/miruro'); setSwitchOpen(false); setProviderMenuOpen(false); }}
+                      >
+                        MIRURO
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </button>
               <button 
                 className={`${styles.switchBtn} ${isCinema ? styles.activeInterface : ''}`} 
@@ -608,11 +642,10 @@ const Navbar = () => {
                       <div className={styles.searchSection}>
                         <div className={styles.sectionLabel}>Anime Results</div>
                         {animeResults.map((item) => {
-                          const isMiruro = location.pathname.startsWith('/miruro');
                           return (
                             <Link 
-                              key={item.id + 'anime'} 
-                              to={isMiruro ? `/miruro/anime/${item.id}` : `/anime/${item.id}`} 
+                              key={`anime-${item.id}`} 
+                              to={routeProvider ? `/${routeProvider}/anime/${item.id}` : `/anime/${item.id}`}
                               className={styles.resultItem}
                               onClick={closeSearch}
                             >

@@ -907,3 +907,24 @@
     border-radius: 20px;
   }
 }
+
+.progressBar {
+  width: 240px;
+  height: 4px;
+  background: rgba(220, 201, 169, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  width: 0;
+  animation: fillProgress 1.5s linear forwards;
+}
+
+@keyframes fillProgress {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
