@@ -40,7 +40,7 @@ Reiatsu is built on the **Neo-Vintage Digital** aesthetic. We combine 90s brutal
 ## 🛠️ Tech Stack | 技術スタック
 
 - **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js (Deployed live on Vercel)
-- **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, WatchHentai stream resolution, AlphaAPIs extraction, and HLS proxying (Deployed live on Vercel Serverless Functions).
+- **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, WatchHentai stream resolution, AlphaAPIs extraction, Miruro provider integration with Hanime fallback, and HLS proxying (Deployed live on Vercel Serverless Functions).
 - **Cinema API (Next.js)**: A robust backend utilizing Drizzle ORM and Neon DB for movie management.
 - **Music API (FastAPI)**: A powerful Python backend utilizing `ytmusicapi`, `yt-dlp`, and the custom `SpotiFLAC` lossless downloading engine.
 - **Design**: Vanilla CSS Modules with a focus on typography and motion.
@@ -50,7 +50,7 @@ Reiatsu is built on the **Neo-Vintage Digital** aesthetic. We combine 90s brutal
 ```text
 REIATSU/
 ├── frontend/           # The core React + Vite application
-├── anime-api/          # API for Anime & Beyond extraction + HLS Proxy
+├── anime-api/          # API for Anime & Beyond extraction, Miruro provider + HLS Proxy
 ├── cinema-api/         # Scalable backend for movies & series
 ├── music-api/          # FastAPI backend for music, artist/album lookup, and streaming proxy
 ├── SpotiFLAC-Module-Version-main/ # Lossless background FLAC downloader integration
