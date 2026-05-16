@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { Play, ChevronLeft, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { animeApi } from '../services/animeApi';
@@ -10,18 +10,23 @@ import NextEpisodeTimer from '../components/NextEpisodeTimer';
 import styles from './Watch.module.css';
 
 const Watch = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, provider: pathProvider } = useParams<{ id: string, provider?: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const epParam = searchParams.get('ep');
-  const provider = searchParams.get('provider') || undefined;
+  const location = useLocation();
+  // Use route provider, fallback to miruro if path starts with /miruro, else default provider
+  let provider = (pathProvider && pathProvider !== 'anime') ? pathProvider : (searchParams.get('provider') || undefined);
+  if (!provider && location.pathname.startsWith('/miruro')) {
+    provider = 'miruro';
+  }
   
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [anime, setAnime] = useState<AnimeDetail | null>(null);
   const [episodeData, setEpisodeData] = useState<EpisodeData | null>(null);
   const [currentEp, setCurrentEp] = useState(epParam ? parseInt(epParam, 10) : 1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | false>(false);
   const [activeSource, setActiveSource] = useState<'sub' | 'dub'>('sub');
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedRange, setSelectedRange] = useState<[number, number] | null>(null);
@@ -72,6 +77,13 @@ const Watch = () => {
     ])
       .then(([info, eps]) => {
         if (!isSubscribed) return;
+
+        if (eps.totalEpisodes === 0 && provider) {
+          console.warn(`[REIATSU] ${provider} returned 0 episodes, falling back to default provider.`);
+          navigate(`/watch/${id}${epParam ? `?ep=${epParam}` : ''}`, { replace: true });
+          return;
+        }
+
         setAnime(info);
         setEpisodeData(eps);
         setCurrentEp(epParam ? parseInt(epParam, 10) : 1);
@@ -93,7 +105,7 @@ const Watch = () => {
         if (!isSubscribed) return;
         console.error('REIATSU ERROR:', err);
         setLoading(false);
-        setError(true);
+        setError(err.message || String(err));
       });
 
     return () => {
@@ -282,7 +294,7 @@ const Watch = () => {
         <HalftoneWave />
         <div className={styles.content}>
           <div className={styles.errorBox}>
-            <h2>FAILED TO LOAD DATA</h2>
+            <h2>FAILED TO LOAD DATA: ERROR: {error}, ANIME:{anime ? 'true' : 'false'}, EPS:{episodeData ? 'true' : 'false'} {episodeData?.episodes?.length}</h2>
             <button onClick={() => { setLoading(true); setError(false); setRefreshKey(k => k + 1); }}>RETRY</button>
           </div>
         </div>
@@ -301,7 +313,7 @@ const Watch = () => {
             <span>BACK</span>
           </button>
           <div className={styles.breadcrumb}>
-            <Link to={`/anime/${anime.anime.id}`} className={styles.animeNameLink}>{anime.anime.name}</Link>
+            <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${anime.anime.id}`} className={styles.animeNameLink}>{anime.anime.name}</Link>
             <span className={styles.sep}>/</span>
             <span className={styles.activeEpName}>EPISODE {currentEp}</span>
           </div>

@@ -95,7 +95,7 @@ const TopAnime = ({ provider }: { provider?: string }) => {
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -10, scale: 1.05, transition: { duration: 0.15, ease: "easeOut" } }}
             >
-              <Link to={`/anime/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.cardLink}>
+              <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
                   <div className={styles.rankBadge}>
                     {index + 1}

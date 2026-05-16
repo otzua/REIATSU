@@ -43,7 +43,7 @@ const TopMovies = ({ provider }: { provider?: string }) => {
               transition={{ delay: index * 0.04 }}
               whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
             >
-              <Link to={`/anime/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.cardLink}>
+              <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
                   <div className={styles.badge}>MOVIE</div>
                   <div className={styles.cardBadges} style={{ left: 'unset', right: '1rem' }}>

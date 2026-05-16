@@ -20,6 +20,7 @@ const Navbar = () => {
   const isCinema = location.pathname.startsWith('/cinema') || (location.pathname === '/schedule' && searchParams.get('type') === 'cinema');
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
+  const isMiruroGlobally = location.pathname.startsWith('/miruro') || searchParams.get('provider') === 'miruro';
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
@@ -47,7 +48,8 @@ const Navbar = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
     if (isBeyond) return '/beyond';
-    return '/';
+    if (isMiruroGlobally) return '/miruro';
+    return '/anime';
   };
 
   const getLogoKanji = () => {
@@ -198,8 +200,8 @@ const Navbar = () => {
           const data = await cinemaApi.search(query).catch(() => []);
           topName = (data as any[])[0]?.title || '';
         } else {
-          const isMiruro = location.pathname === '/miruro';
-          const data = await animeApi.search(query, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] }));
+          const isMiruro = location.pathname.startsWith('/miruro');
+          const data = await animeApi.search(query, 1, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] }));
           topName = (data as { animes: AnimeCard[] }).animes?.[0]?.name || '';
         }
         // Only show suggestion if the top result starts with the user's query (case-insensitive)
@@ -248,9 +250,9 @@ const Navbar = () => {
           promises.push(Promise.resolve([]));
           promises.push(cinemaApi.search(query).catch(() => []));
         } else {
-          const isMiruro = location.pathname === '/miruro';
+          const isMiruro = location.pathname.startsWith('/miruro');
           promises.push(Promise.resolve([]));
-          promises.push(animeApi.search(query, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] })));
+          promises.push(animeApi.search(query, 1, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] })));
           promises.push(Promise.resolve([]));
           promises.push(cinemaApi.search(query).catch(() => []));
         }
@@ -489,7 +491,7 @@ const Navbar = () => {
                       return;
                     }
                     if (e.key === 'Enter' && query.trim()) {
-                      const isMiruro = location.pathname === '/miruro';
+                      const isMiruro = location.pathname.startsWith('/miruro');
                       navigate(`/search?q=${encodeURIComponent(query.trim())}${isMiruro ? '&provider=miruro' : ''}`);
                       closeSearch();
                     }
@@ -606,11 +608,11 @@ const Navbar = () => {
                       <div className={styles.searchSection}>
                         <div className={styles.sectionLabel}>Anime Results</div>
                         {animeResults.map((item) => {
-                          const isMiruro = location.pathname === '/miruro';
+                          const isMiruro = location.pathname.startsWith('/miruro');
                           return (
                             <Link 
                               key={item.id + 'anime'} 
-                              to={`/anime/${item.id}${isMiruro ? '?provider=miruro' : ''}`} 
+                              to={isMiruro ? `/miruro/anime/${item.id}` : `/anime/${item.id}`} 
                               className={styles.resultItem}
                               onClick={closeSearch}
                             >

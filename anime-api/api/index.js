@@ -457,7 +457,7 @@ app.get('/api/azlist/:sort', async (c) => {
 });
 
 app.get('/api/nav', async (c) => {
-  const providerName = c.req.query('provider') || 'anikoto';
+  const providerName = c.req.query('provider') || 'miruro';
   try {
     const p = await getProvider(providerName);
     return ok(c, { provider: providerName, header: await p.anime.getNavMenu(providerName) });

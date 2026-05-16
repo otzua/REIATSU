@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useSearchParams, useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -8,9 +9,9 @@ import SmartImage from '../components/SmartImage';
 import styles from './AnimeDetails.module.css';
 
 const AnimeDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, provider: pathProvider } = useParams<{ id: string, provider?: string }>();
   const [searchParams] = useSearchParams();
-  const provider = searchParams.get('provider') || undefined;
+  const provider = (pathProvider && pathProvider !== 'anime') ? pathProvider : (searchParams.get('provider') || undefined);
   const navigate = useNavigate();
   const [animeInfo, setAnimeInfo] = useState<AnimeDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -154,7 +155,7 @@ const AnimeDetails = () => {
                 </div>
 
                 <div className={styles.actionsDesktop}>
-                  <Link to={`/watch/${anime.id}${provider ? `?provider=${provider}` : ''}`} className={styles.watchBtn}>
+                  <Link to={`/${provider || 'anime'}/watch/${anime.id}`} className={styles.watchBtn}>
                     <Play fill="currentColor" size={20} />
                     <span>WATCH NOW</span>
                   </Link>
@@ -186,7 +187,7 @@ const AnimeDetails = () => {
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
                     >
-                    <Link to={`/anime/${rel.id}${provider ? `?provider=${provider}` : ''}`} className={styles.cardLink}>
+                    <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${rel.id}`} className={styles.cardLink}>
                       <div className={styles.posterPlaceholder}>
                         {rel.poster && (
                           <SmartImage src={rel.poster} alt={rel.name} className={styles.recPosterImg} draggable={false} />
@@ -230,7 +231,7 @@ const AnimeDetails = () => {
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
                     >
-                    <Link to={`/anime/${rec.id}${provider ? `?provider=${provider}` : ''}`} className={styles.cardLink}>
+                    <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${rec.id}`} className={styles.cardLink}>
                       <div className={styles.posterPlaceholder}>
                         {rec.poster && (
                           <>

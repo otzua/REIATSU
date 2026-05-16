@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Cinema from './pages/Cinema';
 import CinemaDetails from './pages/CinemaDetails';
@@ -27,15 +27,20 @@ function App() {
     <div className="app">
       <Layout>
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Navigate to="/anime" replace />} />
+          <Route path="/anime" element={<Home />} />
           <Route path="/miruro" element={<MiruroHome />} />
+          
           <Route path="/anime/history" element={<AnimeHistory />} />
+          <Route path="/:provider/anime/:id" element={<AnimeDetails />} />
+          <Route path="/anime/:id" element={<AnimeDetails />} />
+          <Route path="/:provider/watch/:id" element={<Watch />} />
+          <Route path="/anime/watch/:id" element={<Watch />} />
+          <Route path="/watch/:id" element={<Watch />} />
           <Route path="/cinema" element={<Cinema />} />
           <Route path="/cinema/history" element={<CinemaHistory />} />
           <Route path="/cinema/details/:id" element={<CinemaDetails />} />
           <Route path="/cinema/watch/:id" element={<CinemaWatch />} />
-          <Route path="/anime/:id" element={<AnimeDetails />} />
-          <Route path="/watch/:id" element={<Watch />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/music" element={<Music />} />
           <Route path="/music/history" element={<MusicHistory />} />

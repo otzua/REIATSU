@@ -1,11 +1,14 @@
 import asyncio, base64, json, gzip, httpx, os
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from cachetools import TTLCache
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()
+
+from hanime import get_hanime_episodes, get_hanime_sources
 
 # ─── Mount under /api/v2/miruro ──────────────────────────────────────────────
 app = FastAPI(title="Miruro API", version="2.0")
@@ -229,6 +232,7 @@ async def _anilist_query(query: str, variables: dict = None):
     async with httpx.AsyncClient(timeout=15.0) as client:
         res = await client.post(ANILIST_URL, json=body)
         if res.status_code != 200:
+            print(f"AniList Query Failed: {res.status_code} - {res.text}")
             raise HTTPException(status_code=500, detail="AniList query failed")
         return res.json().get("data", {})
 
@@ -269,12 +273,12 @@ async def _fetch_raw_episodes(anilist_id: int) -> dict:
     headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     
     # Try with HTTP/1.1 first as it's more stable for some proxies/firewalls
-    async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, http2=False) as client:
+    async with httpx.AsyncClient(timeout=5.0, follow_redirects=True, http2=False) as client:
         try:
             res = await client.get(f"{MIRURO_PIPE_URL}?e={encoded_req}", headers=headers)
             if res.status_code != 200:
                 # Fallback to HTTP/2 if 1.1 fails or is rejected
-                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, http2=True) as client2:
+                async with httpx.AsyncClient(timeout=5.0, follow_redirects=True, http2=True) as client2:
                     res = await client2.get(f"{MIRURO_PIPE_URL}?e={encoded_req}", headers=headers)
             
             if res.status_code == 200:
@@ -433,8 +437,15 @@ async def root():
 #           top10Animes { today (trending), week (popularity), month (favourites) }
 # All fired in parallel via asyncio.gather for speed.
 
+import time
+_HOME_CACHE = {"time": 0, "data": None}
+
 @app.get("/home")
 async def get_home():
+    global _HOME_CACHE
+    if time.time() - _HOME_CACHE["time"] < 300 and _HOME_CACHE["data"] is not None:
+        return _HOME_CACHE["data"]
+
     spotlight_gql = f"""
     query {{ Page(page:1,perPage:10) {{ media(sort:[TRENDING_DESC,POPULARITY_DESC],type:ANIME) {{ {MEDIA_LIST_FIELDS} }} }} }}
     """
@@ -496,7 +507,10 @@ async def get_home():
             "month": [_to_top10_card(m, i+1) for i, m in enumerate(t10_month.get("Page", {}).get("media", []))],
         },
     })
-
+    _HOME_CACHE["data"] = response
+    _HOME_CACHE["time"] = time.time()
+    
+    return response
 
 # ─── INDEX / LANDING PAGE ────────────────────────────────────────────────────
 
@@ -824,8 +838,15 @@ async def get_schedule(page: int = Query(1, ge=1), per_page: int = Query(20, ge=
 
 # ─── Anime Details ────────────────────────────────────────────────────────────
 
+# Simple in-memory cache for anime info and episodes (10 minutes TTL)
+INFO_CACHE = TTLCache(maxsize=1000, ttl=600)
+EPISODES_CACHE = TTLCache(maxsize=1000, ttl=600)
+
 @app.get("/info/{anilist_id}")
 async def get_anime_info(anilist_id: int):
+    if anilist_id in INFO_CACHE:
+        return ok(INFO_CACHE[anilist_id])
+
     gql = f"""
     query ($id: Int) {{ Media(id: $id, type: ANIME) {{ {MEDIA_FULL_FIELDS} }} }}
     """
@@ -833,6 +854,8 @@ async def get_anime_info(anilist_id: int):
     media = data.get("Media")
     if not media:
         return err_response("Anime not found", 404)
+    
+    INFO_CACHE[anilist_id] = media
     return ok(media)
 
 
@@ -955,8 +978,40 @@ async def get_anime_recommendations(
 
 @app.get("/episodes/{anilist_id}")
 async def get_episodes(anilist_id: int):
+    if anilist_id in EPISODES_CACHE:
+        return ok(EPISODES_CACHE[anilist_id])
+        
     data = await _fetch_raw_episodes(anilist_id)
-    return ok(_inject_source_slugs(data, anilist_id))
+    
+    # If Miruro has no providers, try Hanime fallback
+    if not data.get("providers"):
+        info_data = INFO_CACHE.get(anilist_id)
+        if not info_data:
+            gql = f"""
+            query ($id: Int) {{ Media(id: $id, type: ANIME) {{ {MEDIA_FULL_FIELDS} }} }}
+            """
+            try:
+                anilist_res = await _anilist_query(gql, {"id": anilist_id})
+                info_data = anilist_res.get("Media")
+            except:
+                info_data = None
+        
+        if info_data:
+            title = info_data.get("title", {}).get("romaji") or info_data.get("title", {}).get("english")
+            if title:
+                hanime_eps = await get_hanime_episodes(anilist_id, title)
+                if hanime_eps:
+                    data["providers"] = {
+                        "hanime": {
+                            "episodes": {
+                                "sub": hanime_eps
+                            }
+                        }
+                    }
+
+    result = _inject_source_slugs(data, anilist_id)
+    EPISODES_CACHE[anilist_id] = result
+    return ok(result)
 
 
 @app.get("/sources")
@@ -967,6 +1022,17 @@ async def get_sources(
     category: str = Query("sub"),
 ):
     enc_id = base64.urlsafe_b64encode(episodeId.encode()).decode().rstrip('=')
+    if provider == "hanime":
+        real_id = episodeId
+        if episodeId.startswith("watch/hanime/"):
+            parts = episodeId.split("/")
+            if len(parts) >= 5:
+                real_id = parts[4]
+        sources = await get_hanime_sources(real_id)
+        if sources:
+            return ok(sources)
+        return err_response("Hanime sources not found", 404)
+
     payload = {
         "path": "sources",
         "method": "GET",
@@ -994,18 +1060,44 @@ async def get_sources(
 
 @app.get("/watch/{provider}/{anilist_id}/{category}/{slug}")
 async def get_watch_sources(provider: str, anilist_id: int, category: str, slug: str):
-    data = await _fetch_raw_episodes(anilist_id)
-    prov_data = data.get("providers", {}).get(provider, {})
+    data = await get_episodes(anilist_id)
+    prov_data = data.get("data", {}).get("providers", {}).get(provider, {})
     ep_list = prov_data.get("episodes", {}).get(category, [])
 
     target_id = None
     for ep in ep_list:
-        orig_id = ep.get("id", "")
-        prefix = orig_id.split(":")[0] if ":" in orig_id else orig_id
-        generated = f"{prefix}-{ep.get('number')}"
-        if generated == slug:
-            target_id = orig_id
+        actual_id = ep.get("id", "")
+        # The URL we are looking at is e.g. /watch/hanime/196722/sub/hanime-1
+        # The 'actual_id' is 'watch/hanime/196722/sub/hanime-1'
+        # The 'slug' from the path param is 'hanime-1'
+        
+        if actual_id == slug or actual_id.endswith(f"/{slug}"):
+            # Check if this is a Hanime episode with a stored original ID
+            if provider == "hanime" and "hanime_slug" in ep:
+                target_id = ep["hanime_slug"]
+            elif actual_id.startswith("watch/hanime/"):
+                # Fallback extraction if slug is missing
+                parts = actual_id.split("/")
+                if len(parts) >= 5:
+                    target_id = parts[4]
+            else:
+                target_id = actual_id
             break
+
+    # If the above failed, try a more aggressive match
+    if not target_id:
+        for ep in ep_list:
+            aid = ep.get("id", "")
+            if slug in aid:
+                if provider == "hanime" and "hanime_slug" in ep:
+                    target_id = ep["hanime_slug"]
+                elif aid.startswith("watch/hanime/"):
+                    parts = aid.split("/")
+                    if len(parts) >= 5:
+                        target_id = parts[4]
+                else:
+                    target_id = aid
+                break
 
     if not target_id:
         return err_response(f"Episode slug '{slug}' not found for provider {provider}", 404)

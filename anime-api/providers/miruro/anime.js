@@ -150,3 +150,40 @@ export async function getGenre(name, page) {
     hasNextPage: data.hasNextPage
   };
 }
+
+export async function getAzList(sort = 'all', page = 1) {
+  // Miruro doesn't have a direct AZ list, so we fallback to a generic filter
+  const res = await api.get(`/filter?page=${page}&sort=TRENDING_DESC`);
+  const data = res.data.data;
+  return {
+    animes: data.results.map(m => ({
+      id: String(m.id),
+      name: m.title?.english || m.title?.romaji,
+      poster: m.coverImage?.large,
+      episodes: { sub: m.episodes, dub: null }
+    })),
+    currentPage: data.page,
+    hasNextPage: data.hasNextPage
+  };
+}
+
+export async function getCategory(name, page = 1, sort = null) {
+  // Map category to filter
+  const res = await api.get(`/filter?format=${name.toUpperCase()}&page=${page}${sort ? `&sort=${sort}` : ''}`);
+  const data = res.data.data;
+  return {
+    title: name,
+    animes: data.results.map(m => ({
+      id: String(m.id),
+      name: m.title?.english || m.title?.romaji,
+      poster: m.coverImage?.large,
+      episodes: { sub: m.episodes, dub: null }
+    })),
+    currentPage: data.page,
+    hasNextPage: data.hasNextPage
+  };
+}
+
+export async function getType(name, page = 1, sort = null) {
+  return getCategory(name, page, sort);
+}

@@ -79,7 +79,7 @@ const AnimeHistory = () => {
               marginTop: '1.5rem' 
             }}>
               {history.map((item, index) => {
-                const watchLink = `/watch/${item.animeId}?ep=${item.episodeNumber}${item.provider ? `&provider=${item.provider}` : ''}`;
+                const watchLink = `/${item.provider || 'anime'}/watch/${item.animeId}?ep=${item.episodeNumber}`;
 
                 return (
                   <motion.div 

@@ -65,7 +65,7 @@ const Hero = ({ provider }: { provider?: string }) => {
         <div className={styles.emblaContainer}>
           {slides.map((slide, index) => (
             <div key={`${slide.id}-${index}`} className={styles.emblaSlide}>
-              <Link to={`/anime/${slide.id}${provider ? `?provider=${provider}` : ''}`} className={styles.slideLink}>
+              <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${slide.id}`} className={styles.slideLink}>
                 <div className={styles.backdropWrapper}>
                   <SmartImage
                     src={slide.poster}
