@@ -12,9 +12,9 @@ import ArtistDetails from './pages/ArtistDetails';
 import Beyond from './pages/Beyond';
 import BeyondWatch from './pages/BeyondWatch';
 import SearchPage from './pages/SearchPage';
-import MiruroHome from './pages/MiruroHome';
 import AnimeKaiHome from './pages/AnimeKaiHome';
 import Layout from './components/Layout';
+
 
 import AnimeHistory from './pages/AnimeHistory';
 import CinemaHistory from './pages/CinemaHistory';
@@ -30,9 +30,7 @@ function App() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Navigate to="/anime" replace />} />
           <Route path="/anime" element={<Home />} />
-          <Route path="/miruro" element={<MiruroHome />} />
           <Route path="/animekai" element={<AnimeKaiHome />} />
-          
           <Route path="/anime/history" element={<AnimeHistory />} />
           <Route path="/:provider/anime/:id" element={<AnimeDetails />} />
           <Route path="/anime/:id" element={<AnimeDetails />} />

@@ -6,10 +6,11 @@ import re
 
 HANIME_SEARCH_API = "https://search.htv-services.com"
 HANIME_VIDEO_API = "https://hanime.tv/api/v8/video"
+WATCHHENTAI_API = "https://watchhentai-api-main.vercel.app/api"
 
 async def get_hanime_episodes(anilist_id: int, anime_title: str) -> List[Dict]:
     """
-    Search for a title on Hanime and return as episodes for Miruro integration.
+    Search for a title on Hanime and WatchHentai and return merged episodes for Miruro integration.
     """
     clean_title = re.sub(r'\b(OVA|TV|MOVIE|THE ANIMATION|ANIMATION|UNCENSORED|CENSORED)\b', '', anime_title, flags=re.IGNORECASE).strip()
     
@@ -30,85 +31,78 @@ async def get_hanime_episodes(anilist_id: int, anime_title: str) -> List[Dict]:
         "Origin": "https://hanime.tv",
     }
     
+    episodes = []
+    
     async with httpx.AsyncClient(timeout=10.0, headers=headers, http2=True) as client:
         try:
+            # 1. Search Hanime
             print(f"[Hanime] Searching for: '{clean_title}'")
             res = await client.post(HANIME_SEARCH_API, json=payload)
             print(f"[Hanime] Search status: {res.status_code}")
             
-            if res.status_code != 200:
-                print(f"[Hanime] Search failed with status {res.status_code}, trying WatchHentai...")
-            
-            data = res.json() if res.status_code == 200 else {"hits": []}
-            hits_raw = data.get("hits", "[]")
-            hits = json.loads(hits_raw) if isinstance(hits_raw, str) else hits_raw
-            print(f"[Hanime] Got {len(hits) if hits else 0} hits from Hanime")
-            
-            if not hits:
-                # Try WatchHentai fallback for search
-                print(f"[Hanime] Search returned no hits, trying WatchHentai fallback...")
-                wh_res = await client.get(f"{WATCHHENTAI_API}/search", params={"q": clean_title})
-                if wh_res.status_code == 200:
-                    wh_data = wh_res.json().get("data", {}).get("results", [])
-                    if wh_data:
-                        # Normalize WatchHentai results to Hanime format for the UI
-                        episodes = []
-                        for hit in wh_data:
-                            hit_url = hit.get("url", "")
-                            if "/series/" in hit_url:
-                                series_slug = hit_url.split('/')[-2]
-                                print(f"[Hanime] Fetching series episodes for: {series_slug}")
-                                s_res = await client.get(f"{WATCHHENTAI_API}/series/{series_slug}")
-                                if s_res.status_code == 200:
-                                    s_data = s_res.json().get("data", {}).get("episodes", [])
-                                    for ep in s_data:
-                                        ep_url = ep.get("url", "")
-                                        ep_slug = ep_url.split('/')[-2]
-                                        episodes.append({
-                                            "id": f"wh:{ep_slug}",
-                                            "hanime_slug": f"wh:{ep_slug}",
-                                            "number": float(ep.get("number", 0)),
-                                            "title": ep.get("title") or f"Episode {ep.get('number')}",
-                                            "url": ep_url
-                                        })
-                            elif "/videos/" in hit_url:
-                                ep_slug = hit_url.split('/')[-2]
+            if res.status_code == 200:
+                data = res.json()
+                hits_raw = data.get("hits", "[]")
+                hits = json.loads(hits_raw) if isinstance(hits_raw, str) else hits_raw
+                print(f"[Hanime] Got {len(hits) if hits else 0} hits from Hanime")
+                
+                for i, hit in enumerate(reversed(hits)):
+                    ep_num = i + 1
+                    name = hit.get("name", "")
+                    num_match = re.search(r'(\d+)$', name)
+                    if num_match:
+                        ep_num = int(num_match.group(1))
+                    
+                    episodes.append({
+                        "id": f"hanime:{hit['slug']}",
+                        "hanime_slug": hit['slug'],
+                        "number": ep_num,
+                        "title": f"[HN] {name}",
+                        "url": f"https://hanime.tv/videos/hentai/{hit['slug']}"
+                    })
+
+            # 2. Search WatchHentai
+            print(f"[Hanime] Also searching WatchHentai for: '{clean_title}'")
+            wh_res = await client.get(f"{WATCHHENTAI_API}/search", params={"q": clean_title})
+            if wh_res.status_code == 200:
+                wh_data = wh_res.json().get("data", {}).get("results", [])
+                print(f"[Hanime] Got {len(wh_data) if wh_data else 0} hits from WatchHentai")
+                
+                for hit in wh_data:
+                    hit_url = hit.get("url", "")
+                    if "/series/" in hit_url:
+                        series_slug = hit_url.split('/')[-2]
+                        print(f"[Hanime] Fetching series episodes for: {series_slug}")
+                        s_res = await client.get(f"{WATCHHENTAI_API}/series/{series_slug}")
+                        if s_res.status_code == 200:
+                            s_data = s_res.json().get("data", {}).get("episodes", [])
+                            for ep in s_data:
+                                ep_url = ep.get("url", "")
+                                ep_slug = ep_url.split('/')[-2]
                                 episodes.append({
                                     "id": f"wh:{ep_slug}",
                                     "hanime_slug": f"wh:{ep_slug}",
-                                    "number": 1.0,
-                                    "title": hit.get("title", ""),
-                                    "url": hit_url
+                                    "number": float(ep.get("number", 0)),
+                                    "title": f"[WH] {ep.get('title') or f'Episode {ep.get('number')}'}",
+                                    "url": ep_url
                                 })
-                        
-                        if episodes:
-                            episodes.sort(key=lambda x: x["number"])
-                            return episodes
-                return []
-                
-            episodes = []
-            for i, hit in enumerate(reversed(hits)):
-                ep_num = i + 1
-                name = hit.get("name", "")
-                num_match = re.search(r'(\d+)$', name)
-                if num_match:
-                    ep_num = int(num_match.group(1))
-                
-                episodes.append({
-                    "id": f"hanime:{hit['slug']}",
-                    "hanime_slug": hit['slug'], # Store the real slug for get_sources
-                    "number": ep_num,
-                    "title": name,
-                    "url": f"https://hanime.tv/videos/hentai/{hit['slug']}"
-                })
+                    elif "/videos/" in hit_url:
+                        ep_slug = hit_url.split('/')[-2]
+                        episodes.append({
+                            "id": f"wh:{ep_slug}",
+                            "hanime_slug": f"wh:{ep_slug}",
+                            "number": 1.0,
+                            "title": f"[WH] {hit.get('title', '')}",
+                            "url": hit_url
+                        })
             
-            episodes.sort(key=lambda x: x["number"])
+            # Sort by number and then by title to keep it organized
+            episodes.sort(key=lambda x: (x["number"], x["title"]))
             return episodes
+            
         except Exception as e:
             print(f"[Hanime] Search failed: {str(e)}")
-            return []
-
-WATCHHENTAI_API = "https://watchhentai-api-main.vercel.app/api"
+            return episodes if episodes else []
 
 async def get_hanime_sources(slug: str) -> Optional[Dict]:
     """

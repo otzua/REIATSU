@@ -20,7 +20,6 @@ const Navbar = () => {
   const isCinema = location.pathname.startsWith('/cinema') || (location.pathname === '/schedule' && searchParams.get('type') === 'cinema');
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
-  const isToon = location.pathname.startsWith('/toon');
 
   const routeProvider = searchParams.get('provider');
   const isAnimeKaiGlobally = location.pathname.startsWith('/animekai') || routeProvider === 'animekai';
@@ -52,7 +51,6 @@ const Navbar = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
     if (isBeyond) return '/beyond';
-    if (isToon) return '/toon';
     if (routeProvider) return `/${routeProvider}`;
 
     if (isAnimeKaiGlobally) return '/animekai';
@@ -63,7 +61,6 @@ const Navbar = () => {
     if (isCinema) return '映';
     if (isMusic) return '音';
     if (isBeyond) return '過';
-    if (isToon) return '画';
     return '霊';
   };
 
@@ -435,16 +432,6 @@ const Navbar = () => {
                 <div className={styles.interfaceInfo}>
                   <h4>HIFI MUSIC</h4>
                   <p>{isMusic ? 'Current Interface' : 'Switch to Music'}</p>
-                </div>
-              </button>
-              <button 
-                className={`${styles.switchBtn} ${isToon ? styles.activeInterface : ''}`} 
-                onClick={() => { navigate('/toon'); setSwitchOpen(false); }}
-              >
-                <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #ff725e, #b83a2d)' }}>画</div>
-                <div className={styles.interfaceInfo}>
-                  <h4>TOONS</h4>
-                  <p>{isToon ? 'Current Interface' : 'Switch to Toons'}</p>
                 </div>
               </button>
 

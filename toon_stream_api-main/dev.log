@@ -1,0 +1,3 @@
+WARNING! `--port` is deprecated, please use `--listen` instead
+Error: `vercel dev` must not recursively invoke itself. Check the Development Command in the Project Settings or the `dev` script in `package.json`
+Error: Learn More: https://vercel.link/recursive-invocation-of-commands
