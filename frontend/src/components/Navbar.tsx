@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download, ChevronRight } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -20,14 +20,15 @@ const Navbar = () => {
   const isCinema = location.pathname.startsWith('/cinema') || (location.pathname === '/schedule' && searchParams.get('type') === 'cinema');
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
-  const isMiruroGlobally = location.pathname.startsWith('/miruro') || searchParams.get('provider') === 'miruro';
+  const isToon = location.pathname.startsWith('/toon');
+
   const routeProvider = searchParams.get('provider');
   const isAnimeKaiGlobally = location.pathname.startsWith('/animekai') || routeProvider === 'animekai';
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
-  const [providerMenuOpen, setProviderMenuOpen] = useState(false);
+
   const [query, setQuery] = useState('');
   const [animeResults, setAnimeResults] = useState<any[]>([]);
   const [cinemaResults, setCinemaResults] = useState<any[]>([]);
@@ -51,8 +52,9 @@ const Navbar = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
     if (isBeyond) return '/beyond';
+    if (isToon) return '/toon';
     if (routeProvider) return `/${routeProvider}`;
-    if (isMiruroGlobally) return '/miruro'; // fallback
+
     if (isAnimeKaiGlobally) return '/animekai';
     return '/anime';
   };
@@ -61,6 +63,7 @@ const Navbar = () => {
     if (isCinema) return '映';
     if (isMusic) return '音';
     if (isBeyond) return '過';
+    if (isToon) return '画';
     return '霊';
   };
 
@@ -205,8 +208,7 @@ const Navbar = () => {
           const data = await cinemaApi.search(query).catch(() => []);
           topName = (data as any[])[0]?.title || '';
         } else {
-          const isMiruro = location.pathname.startsWith('/miruro');
-          const data = await animeApi.search(query, 1, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] }));
+          const data = await animeApi.search(query, 1).catch(() => ({ animes: [] }));
           topName = (data as { animes: AnimeCard[] }).animes?.[0]?.name || '';
         }
         // Only show suggestion if the top result starts with the user's query (case-insensitive)
@@ -255,9 +257,8 @@ const Navbar = () => {
           promises.push(Promise.resolve([]));
           promises.push(cinemaApi.search(query).catch(() => []));
         } else {
-          const isMiruro = location.pathname.startsWith('/miruro');
           promises.push(Promise.resolve([]));
-          promises.push(animeApi.search(query, 1, isMiruro ? 'miruro' : undefined).catch(() => ({ animes: [] })));
+          promises.push(animeApi.search(query, 1).catch(() => ({ animes: [] })));
           promises.push(Promise.resolve([]));
           promises.push(cinemaApi.search(query).catch(() => []));
         }
@@ -409,41 +410,12 @@ const Navbar = () => {
               <button 
                 className={`${styles.switchBtn} ${(!isCinema && !isMusic && !isBeyond) ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/'); setSwitchOpen(false); }}
-                onMouseEnter={() => setProviderMenuOpen(true)}
-                onMouseLeave={() => setProviderMenuOpen(false)}
-                style={{ position: 'relative' }}
               >
                 <div className={styles.interfaceIcon}>霊</div>
                 <div className={styles.interfaceInfo}>
                   <h4>ANIME REIATSU</h4>
                   <p>{(!isCinema && !isMusic && !isBeyond) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
-                
-                <AnimatePresence>
-                  {providerMenuOpen && (
-                    <motion.div 
-                      className={styles.providerSubmenu}
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className={styles.providerTitle}>SELECT PROVIDER</div>
-                      <button 
-                        className={`${styles.providerBtn} ${!isMiruroGlobally ? styles.activeProvider : ''}`}
-                        onClick={(e) => { e.stopPropagation(); navigate('/'); setSwitchOpen(false); setProviderMenuOpen(false); }}
-                      >
-                        ANIKOTO
-                      </button>
-                      <button 
-                        className={`${styles.providerBtn} ${isMiruroGlobally ? styles.activeProvider : ''}`}
-                        onClick={(e) => { e.stopPropagation(); navigate('/miruro'); setSwitchOpen(false); setProviderMenuOpen(false); }}
-                      >
-                        MIRURO
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </button>
               <button 
                 className={`${styles.switchBtn} ${isCinema ? styles.activeInterface : ''}`} 
@@ -463,6 +435,16 @@ const Navbar = () => {
                 <div className={styles.interfaceInfo}>
                   <h4>HIFI MUSIC</h4>
                   <p>{isMusic ? 'Current Interface' : 'Switch to Music'}</p>
+                </div>
+              </button>
+              <button 
+                className={`${styles.switchBtn} ${isToon ? styles.activeInterface : ''}`} 
+                onClick={() => { navigate('/toon'); setSwitchOpen(false); }}
+              >
+                <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #ff725e, #b83a2d)' }}>画</div>
+                <div className={styles.interfaceInfo}>
+                  <h4>TOONS</h4>
+                  <p>{isToon ? 'Current Interface' : 'Switch to Toons'}</p>
                 </div>
               </button>
 
@@ -525,8 +507,7 @@ const Navbar = () => {
                       return;
                     }
                     if (e.key === 'Enter' && query.trim()) {
-                      const isMiruro = location.pathname.startsWith('/miruro');
-                      navigate(`/search?q=${encodeURIComponent(query.trim())}${isMiruro ? '&provider=miruro' : ''}`);
+                      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
                       closeSearch();
                     }
                   }}

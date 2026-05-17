@@ -20,6 +20,11 @@ export default defineConfig({
         target: 'http://localhost:4001',
         changeOrigin: true,
       },
+      '/toon-api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/toon-api/, '')
+      },
       '/tmdb-api': {
         target: 'https://twilight-cake-defb.hunternisha55.workers.dev/3',
         changeOrigin: true,
