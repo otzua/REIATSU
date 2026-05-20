@@ -60,3 +60,20 @@ venv/
 .mcp.json
 .cursor/mcp.json
 .gemini/settings.json
+
+# Claude Code / Workspace exclusions
+AnimeKAI-API-main/
+Antra/
+Antra-main/
+Miruro-API-main/
+SpotiFLAC-Module-Version-main/
+anime-api-backup/
+hanime-master/
+music-api-downloads-backup/
+music-api-venv-backup/
+watchhentai-api-main/
+toon_stream_api-main/
+downloads/
+antra.log
+temp_toon.html
+
