@@ -34,9 +34,14 @@ const CinemaHero = () => {
 
   useEffect(() => {
     if (!emblaApi) return;
-    onSelect();
+    const timer = setTimeout(() => {
+      onSelect();
+    }, 0);
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [emblaApi, onSelect]);
 
   useEffect(() => {

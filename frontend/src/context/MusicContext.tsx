@@ -82,6 +82,15 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return updated;
     });
 
+    // Reset audio source to completely prevent overlapping stream playback and race conditions
+    try {
+      audioRef.current.pause();
+      audioRef.current.removeAttribute('src');
+      audioRef.current.load();
+    } catch (e) {
+      console.warn('REIATSU: Error resetting audio before playback:', e);
+    }
+
     console.log(`REIATSU: Attempting to play track: ${track.artist} - ${track.name}`);
 
     try {
@@ -108,9 +117,10 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           throw proxyErr;
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('REIATSU: Stream error:', err);
-      const errorMsg = err.response?.data?.detail || err.message || 'Failed to load stream';
+      const axiosErr = err as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMsg = axiosErr.response?.data?.detail || axiosErr.message || 'Failed to load stream';
       setStreamError(`Failed to load stream: ${errorMsg}. YouTube might be blocking the request.`);
       setIsPlaying(false);
       
@@ -234,6 +244,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMusic = () => {
   const context = useContext(MusicContext);
   if (context === undefined) {

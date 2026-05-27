@@ -3,10 +3,10 @@ import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Downlo
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
-import { cinemaApi } from '../services/cinemaApi';
-import { beyondApi } from '../services/beyondApi';
-import { musicApi } from '../services/musicApi';
-import type { AnimeCard } from '../services/animeApi';
+import { cinemaApi, type CinemaMovie } from '../services/cinemaApi';
+import { beyondApi, type BeyondVideo } from '../services/beyondApi';
+import { musicApi, type Track } from '../services/musicApi';
+import type { AnimeCard, SearchResult } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './Navbar.module.css';
 import { useMusic } from '../context/MusicContext';
@@ -29,10 +29,10 @@ const Navbar = () => {
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
   const [query, setQuery] = useState('');
-  const [animeResults, setAnimeResults] = useState<any[]>([]);
-  const [cinemaResults, setCinemaResults] = useState<any[]>([]);
-  const [beyondResults, setBeyondResults] = useState<any[]>([]);
-  const [musicResults, setMusicResults] = useState<any[]>([]);
+  const [animeResults, setAnimeResults] = useState<AnimeCard[]>([]);
+  const [cinemaResults, setCinemaResults] = useState<CinemaMovie[]>([]);
+  const [beyondResults, setBeyondResults] = useState<BeyondVideo[]>([]);
+  const [musicResults, setMusicResults] = useState<Track[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchFilter, setSearchFilter] = useState<'all' | 'anime' | 'cinema'>('all');
   const [suggestion, setSuggestion] = useState('');
@@ -185,117 +185,139 @@ const Navbar = () => {
 
   // Fast suggestion typeahead (150ms) — fetches first result for ghost text
   useEffect(() => {
+    let active = true;
+    let localTimer: ReturnType<typeof setTimeout> | null = null;
+    
     if (suggestionDebounceRef.current) clearTimeout(suggestionDebounceRef.current);
 
     if (!query.trim() || query.length < 2) {
-      setSuggestion('');
-      return;
+      localTimer = setTimeout(() => {
+        if (active) setSuggestion('');
+      }, 0);
+    } else {
+      suggestionDebounceRef.current = setTimeout(async () => {
+        try {
+          let topName = '';
+          if (isMusic) {
+            const data = await musicApi.search(query).catch(() => []);
+            topName = data[0]?.name || '';
+          } else if (isBeyond) {
+            const data = await beyondApi.search(query).catch(() => []);
+            topName = data[0]?.title || '';
+          } else if (isCinema) {
+            const data = await cinemaApi.search(query).catch(() => []);
+            topName = data[0]?.title || '';
+          } else {
+            const data = await animeApi.search(query, 1).catch(() => ({ animes: [] }));
+            topName = data.animes?.[0]?.name || '';
+          }
+          if (!active) return;
+          // Only show suggestion if the top result starts with the user's query (case-insensitive)
+          if (topName && topName.toLowerCase().startsWith(query.toLowerCase())) {
+            setSuggestion(topName);
+          } else {
+            setSuggestion('');
+          }
+        } catch {
+          if (active) setSuggestion('');
+        }
+      }, 150);
     }
 
-    suggestionDebounceRef.current = setTimeout(async () => {
-      try {
-        let topName = '';
-        if (isMusic) {
-          const data = await musicApi.search(query).catch(() => []);
-          topName = (data as any[])[0]?.name || '';
-        } else if (isBeyond) {
-          const data = await beyondApi.search(query).catch(() => []);
-          topName = (data as any[])[0]?.title || '';
-        } else if (isCinema) {
-          const data = await cinemaApi.search(query).catch(() => []);
-          topName = (data as any[])[0]?.title || '';
-        } else {
-          const data = await animeApi.search(query, 1).catch(() => ({ animes: [] }));
-          topName = (data as { animes: AnimeCard[] }).animes?.[0]?.name || '';
-        }
-        // Only show suggestion if the top result starts with the user's query (case-insensitive)
-        if (topName && topName.toLowerCase().startsWith(query.toLowerCase())) {
-          setSuggestion(topName);
-        } else {
-          setSuggestion('');
-        }
-      } catch {
-        setSuggestion('');
-      }
-    }, 150);
+    return () => {
+      active = false;
+      if (localTimer) clearTimeout(localTimer);
+    };
   }, [query, isMusic, isBeyond, isCinema]);
 
   // Full results fetch (400ms debounce)
   useEffect(() => {
+    let active = true;
+    let localTimer: ReturnType<typeof setTimeout> | null = null;
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
     
     if (!query.trim()) {
-      setAnimeResults([]);
-      setCinemaResults([]);
-      setBeyondResults([]);
-      setSuggestion('');
-      return;
+      localTimer = setTimeout(() => {
+        if (active) {
+          setAnimeResults([]);
+          setCinemaResults([]);
+          setBeyondResults([]);
+          setSuggestion('');
+        }
+      }, 0);
+    } else {
+      debounceRef.current = setTimeout(async () => {
+        if (active) setSearching(true);
+        try {
+          const promises: Promise<Track[] | SearchResult | BeyondVideo[] | CinemaMovie[]>[] = [];
+          
+          // Context-aware API calls
+          if (isMusic) {
+            promises.push(musicApi.search(query).catch(() => []));
+            promises.push(Promise.resolve({ animes: [], totalPages: 0, currentPage: 1 }));
+            promises.push(Promise.resolve([]));
+            promises.push(Promise.resolve([]));
+          } else if (isBeyond) {
+            promises.push(Promise.resolve([]));
+            promises.push(Promise.resolve({ animes: [], totalPages: 0, currentPage: 1 }));
+            promises.push(beyondApi.search(query).catch(() => []));
+            promises.push(Promise.resolve([]));
+          } else if (isCinema) {
+            promises.push(Promise.resolve([]));
+            promises.push(Promise.resolve({ animes: [], totalPages: 0, currentPage: 1 }));
+            promises.push(Promise.resolve([]));
+            promises.push(cinemaApi.search(query).catch(() => []));
+          } else {
+            promises.push(Promise.resolve([]));
+            promises.push(animeApi.search(query, 1).catch(() => ({ animes: [], totalPages: 0, currentPage: 1 })));
+            promises.push(Promise.resolve([]));
+            promises.push(cinemaApi.search(query).catch(() => []));
+          }
+
+          const [musicData, animeData, beyondData, cinemaData] = await Promise.all(promises);
+          if (!active) return;
+
+          const queryLower = query.toLowerCase();
+          const aData = animeData as SearchResult & { suggestion?: string };
+          
+          // Handle "Did you mean?" from API
+          setDidYouMean(aData?.suggestion || '');
+          
+          // Final sanity filter on frontend to catch any backend leaks
+          setAnimeResults(aData.animes?.slice(0, 4) ?? []);
+          
+          // Cinema results often contain noise (trending) if search is broad, filter it strictly
+          setCinemaResults(
+            (cinemaData as CinemaMovie[])
+              .filter(item => (item.title || '').toLowerCase().includes(queryLower))
+              .slice(0, 4)
+          );
+          
+          setBeyondResults(
+            (beyondData as BeyondVideo[])
+              .filter(item => (item.title || '').toLowerCase().includes(queryLower))
+              .slice(0, 4)
+          );
+          
+          setMusicResults(
+            (musicData as Track[])
+              .filter(item => (item.name || '').toLowerCase().includes(queryLower))
+              .slice(0, 6)
+          );
+        } catch (err) {
+          console.error('Search error:', err);
+        } finally {
+          if (active) setSearching(false);
+        }
+      }, 400);
     }
 
-    debounceRef.current = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const promises: Promise<any>[] = [];
-        
-        // Context-aware API calls
-        if (isMusic) {
-          promises.push(musicApi.search(query).catch(() => []));
-          promises.push(Promise.resolve({ animes: [] }));
-          promises.push(Promise.resolve([]));
-          promises.push(Promise.resolve([]));
-        } else if (isBeyond) {
-          promises.push(Promise.resolve([]));
-          promises.push(Promise.resolve({ animes: [] }));
-          promises.push(beyondApi.search(query).catch(() => []));
-          promises.push(Promise.resolve([]));
-        } else if (isCinema) {
-          promises.push(Promise.resolve([]));
-          promises.push(Promise.resolve({ animes: [] }));
-          promises.push(Promise.resolve([]));
-          promises.push(cinemaApi.search(query).catch(() => []));
-        } else {
-          promises.push(Promise.resolve([]));
-          promises.push(animeApi.search(query, 1).catch(() => ({ animes: [] })));
-          promises.push(Promise.resolve([]));
-          promises.push(cinemaApi.search(query).catch(() => []));
-        }
-
-        const [musicData, animeData, beyondData, cinemaData] = await Promise.all(promises);
-
-        const queryLower = query.toLowerCase();
-        const aData = animeData as any;
-        
-        // Handle "Did you mean?" from API
-        setDidYouMean(aData?.suggestion || '');
-        
-        // Final sanity filter on frontend to catch any backend leaks
-        setAnimeResults(aData.animes?.slice(0, 4) ?? []);
-        
-        // Cinema results often contain noise (trending) if search is broad, filter it strictly
-        setCinemaResults(
-          (cinemaData as any[])
-            .filter(item => (item.title || '').toLowerCase().includes(queryLower))
-            .slice(0, 4)
-        );
-        
-        setBeyondResults(
-          (beyondData as any[])
-            .filter(item => (item.title || item.name || '').toLowerCase().includes(queryLower))
-            .slice(0, 4)
-        );
-        
-        setMusicResults(
-          (musicData as any[])
-            .filter(item => (item.name || '').toLowerCase().includes(queryLower))
-            .slice(0, 6)
-        );
-      } catch (err) {
-        console.error('Search error:', err);
-      } finally {
-        setSearching(false);
-      }
-    }, 400);
-  }, [query, beyondUnlocked]);
+    return () => {
+      active = false;
+      if (localTimer) clearTimeout(localTimer);
+    };
+  }, [query, beyondUnlocked, isBeyond, isCinema, isMusic]);
 
   return (
     <>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Play, Pause, ChevronLeft, Disc, Clock, Plus, Download, Check, AlertCircle } from 'lucide-react';
 import { useMusic } from '../context/MusicContext';
-import { musicApi, type Album, type Track } from '../services/musicApi';
+import { musicApi, type Album, type Track, type DownloadResult } from '../services/musicApi';
 import SmartImage from '../components/SmartImage';
 import styles from './AlbumDetails.module.css';
 
@@ -27,7 +27,7 @@ const AlbumDetails: React.FC = () => {
         setError(null);
         const data = await musicApi.getAlbum(id);
         setAlbum(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Failed to fetch album details:', err);
         setError('Failed to fetch album details. Please check your internet connection and try again.');
       } finally {
@@ -92,7 +92,7 @@ const AlbumDetails: React.FC = () => {
 
     try {
       setDownloadingIds(prev => ({ ...prev, [track.id]: true }));
-      const response: any = await musicApi.download(track);
+      const response = await musicApi.download(track) as DownloadResult & { data?: unknown };
 
       if (response && response.downloadUrl) {
         // Case 1: Backend returns a direct URL to the file
@@ -104,7 +104,7 @@ const AlbumDetails: React.FC = () => {
         link.remove();
       } else {
         // Case 2: Backend returns the file Blob or binary data
-        const blob = response instanceof Blob ? response : new Blob([response.data || response]);
+        const blob = response instanceof Blob ? response : new Blob([(response.data || response) as BlobPart]);
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -218,7 +218,7 @@ const AlbumDetails: React.FC = () => {
                     {isThisTrackPlaying && isPlaying ? (
                       <Pause size={14} fill="currentColor" />
                     ) : (
-                      <Play size={14} fill="currentColor" style={{ marginLeft: '2px' }} />
+                      <Play size={14} fill="currentColor" className={styles.playIconOffset} />
                     )}
                   </button>
                 </div>

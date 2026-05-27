@@ -24,12 +24,12 @@ const MusicGrid: React.FC<MusicGridProps> = ({ title, data, isCircular, onPlay, 
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+        <div className={styles.headerLeft}>
           <div className={styles.accentBox} />
           <h2 className={styles.title}>{title}</h2>
         </div>
         {historyLink && (
-          <Link to={historyLink} style={{ fontSize: '0.8rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.05rem', fontWeight: 600 }}>
+          <Link to={historyLink} className={styles.historyLink}>
             VIEW FULL HISTORY
           </Link>
         )}
@@ -38,7 +38,7 @@ const MusicGrid: React.FC<MusicGridProps> = ({ title, data, isCircular, onPlay, 
       <div className={styles.grid}>
         {data.map((item, index) => {
           const isActive = currentTrackId === item.id;
-          
+
           const handleCardClick = () => {
             if (isCircular) {
               navigate(`/music/artist/${item.id}`);
@@ -50,21 +50,19 @@ const MusicGrid: React.FC<MusicGridProps> = ({ title, data, isCircular, onPlay, 
           return (
             <motion.div
               key={`${item.id}-${index}`}
-              className={`${styles.card} ${isActive ? styles.activeCard : ''}`}
+              className={`${styles.card} ${isActive ? styles.activeCard : ''} ${isCircular ? styles.circularCard : ''}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.03 }}
               onClick={isCircular ? handleCardClick : undefined}
-              style={{ cursor: isCircular ? 'pointer' : 'default' }}
             >
-              <div 
-                className={styles.artworkWrapper} 
+              <div
+                className={`${styles.artworkWrapper} ${isCircular ? styles.circularArtwork : ''}`}
                 onClick={!isCircular ? handleCardClick : undefined}
-                style={{ borderRadius: isCircular ? '50%' : '12px' }}
               >
                 <SmartImage src={item.poster} alt={item.name} className={styles.artworkImg} />
-                
+
                 {!isCircular && (
                   <>
                     <div className={styles.overlay}>
@@ -93,7 +91,7 @@ const MusicGrid: React.FC<MusicGridProps> = ({ title, data, isCircular, onPlay, 
                 )}
               </div>
 
-              <div className={styles.info} style={{ textAlign: isCircular ? 'center' : 'left' }}>
+              <div className={`${styles.info} ${isCircular ? styles.circularInfo : ''}`}>
                 <h3 className={styles.cardTitle}>{item.name}</h3>
                 {!isCircular && <p className={styles.cardArtist}>{item.artist}</p>}
               </div>

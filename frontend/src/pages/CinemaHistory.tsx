@@ -18,21 +18,23 @@ interface CinemaCWData {
 }
 
 const CinemaHistory = () => {
-  const [history, setHistory] = useState<CinemaCWData[]>([]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const [history] = useState<CinemaCWData[]>(() => {
     const data = localStorage.getItem('reiatsu_cinema_continue_watching');
     if (data) {
       try {
         const parsed = JSON.parse(data);
         if (Array.isArray(parsed)) {
-          setHistory(parsed);
+          return parsed;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
+    return [];
+  });
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (

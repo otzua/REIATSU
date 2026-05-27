@@ -8,6 +8,22 @@ import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
 import styles from './Watch.module.css'; // Reusing Watch styles
 
+interface CinemaSeason {
+  season_number: number;
+  episode_count: number;
+  name?: string;
+}
+
+interface CinemaCWData {
+  id: string;
+  title: string;
+  poster: string;
+  mediaType: 'movie' | 'tv';
+  season?: number;
+  episode?: number;
+  timestamp: number;
+}
+
 const CinemaWatch = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -20,11 +36,21 @@ const CinemaWatch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   
+  const [prevId, setPrevId] = useState(id);
+  const [prevMediaType, setPrevMediaType] = useState(mediaTypeParam);
+
+  if (id !== prevId || mediaTypeParam !== prevMediaType) {
+    setPrevId(id);
+    setPrevMediaType(mediaTypeParam);
+    setLoading(true);
+    setMovie(null);
+  }
+  
   // Embed state
   const [activeServer, setActiveServer] = useState<'videasy' | 'vidsrcicu' | 'vidlink' | 'vidfast'>('videasy');
   
   // TV Show State
-  const [seasons, setSeasons] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<CinemaSeason[]>([]);
   const [activeSeason, setActiveSeason] = useState<number>(1);
   const [activeEpisode, setActiveEpisode] = useState<number>(1);
   
@@ -80,12 +106,9 @@ const CinemaWatch = () => {
   useEffect(() => {
     console.log('CinemaWatch Mounted, ID:', id, 'MediaType:', mediaTypeParam);
     if (!id) {
-      setLoading(false);
-      setError(true);
       return;
     }
     
-    setLoading(true);
     Promise.all([
       cinemaApi.getMovieDetails(id, mediaTypeParam),
       cinemaApi.getRecommendations(id, mediaTypeParam)
@@ -97,7 +120,7 @@ const CinemaWatch = () => {
         
         if (data.mediaType === 'tv' && data.seasons) {
           // Filter out season 0 (specials) unless it's the only season
-          const validSeasons = data.seasons.filter((s: any) => s.season_number > 0);
+          const validSeasons = data.seasons.filter((s) => s.season_number > 0);
           const finalSeasons = validSeasons.length > 0 ? validSeasons : data.seasons;
           setSeasons(finalSeasons);
           setActiveSeason(finalSeasons[0].season_number);
@@ -105,7 +128,7 @@ const CinemaWatch = () => {
         }
         
         // Save to Continue Watching
-        const cwItem = {
+        const cwItem: CinemaCWData = {
           id: data.id,
           title: data.title,
           poster: data.imageUrl,
@@ -116,16 +139,18 @@ const CinemaWatch = () => {
         };
         
         const existingRaw = localStorage.getItem('reiatsu_cinema_continue_watching');
-        let history = [];
+        let cwHistory: CinemaCWData[];
         try {
-          history = existingRaw ? JSON.parse(existingRaw) : [];
-          if (!Array.isArray(history)) history = [];
-        } catch { history = []; }
+          const parsed = existingRaw ? JSON.parse(existingRaw) : [];
+          cwHistory = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          cwHistory = [];
+        }
 
         // Remove if exists and add to front
-        history = history.filter((item: any) => item.id !== data.id);
-        history.unshift(cwItem);
-        localStorage.setItem('reiatsu_cinema_continue_watching', JSON.stringify(history.slice(0, 15)));
+        cwHistory = cwHistory.filter((item) => item.id !== data.id);
+        cwHistory.unshift(cwItem);
+        localStorage.setItem('reiatsu_cinema_continue_watching', JSON.stringify(cwHistory.slice(0, 15)));
         
         setLoading(false);
       })
@@ -140,23 +165,23 @@ const CinemaWatch = () => {
     if (movie && movie.mediaType === 'tv') {
       const existingRaw = localStorage.getItem('reiatsu_cinema_continue_watching');
       try {
-        let history = existingRaw ? JSON.parse(existingRaw) : [];
-        if (!Array.isArray(history)) history = [];
+        const parsed = existingRaw ? JSON.parse(existingRaw) : [];
+        const cwHistory: CinemaCWData[] = Array.isArray(parsed) ? parsed : [];
         
-        const index = history.findIndex((item: any) => item.id === movie.id);
+        const index = cwHistory.findIndex((item) => item.id === movie.id);
         if (index !== -1) {
-          history[index].season = activeSeason;
-          history[index].episode = activeEpisode;
-          history[index].timestamp = Date.now();
+          cwHistory[index].season = activeSeason;
+          cwHistory[index].episode = activeEpisode;
+          cwHistory[index].timestamp = Date.now();
           
           // Move to front
-          const [updatedItem] = history.splice(index, 1);
-          history.unshift(updatedItem);
+          const [updatedItem] = cwHistory.splice(index, 1);
+          cwHistory.unshift(updatedItem);
           
-          localStorage.setItem('reiatsu_cinema_continue_watching', JSON.stringify(history));
+          localStorage.setItem('reiatsu_cinema_continue_watching', JSON.stringify(cwHistory));
         }
-      } catch (e) {
-        console.error('History update error:', e);
+      } catch {
+        console.error('History update error');
       }
     }
   }, [activeSeason, activeEpisode, movie]);

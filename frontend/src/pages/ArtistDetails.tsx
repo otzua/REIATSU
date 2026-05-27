@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, type Variants } from 'framer-motion';
 import { Play, Pause, ChevronLeft, Disc, Clock, Plus, Download, Check, AlertCircle, Users, Heart, Share2 } from 'lucide-react';
 import { useMusic } from '../context/MusicContext';
-import { musicApi, type Artist, type Track } from '../services/musicApi';
+import { musicApi, type Artist, type Track, type DownloadResult } from '../services/musicApi';
 import SmartImage from '../components/SmartImage';
 import styles from './ArtistDetails.module.css';
 
@@ -27,7 +27,7 @@ const ArtistDetails: React.FC = () => {
         setError(null);
         const data = await musicApi.getArtist(id);
         setArtist(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Failed to fetch artist details:', err);
         setError('Failed to load artist profile. Please make sure the music API is running.');
       } finally {
@@ -90,7 +90,7 @@ const ArtistDetails: React.FC = () => {
 
     try {
       setDownloadingIds(prev => ({ ...prev, [track.id]: true }));
-      const response: any = await musicApi.download(track);
+      const response = await musicApi.download(track) as DownloadResult & { data?: unknown };
 
       if (response && response.downloadUrl) {
         // Case 1: Backend returns a direct URL to the file
@@ -102,7 +102,7 @@ const ArtistDetails: React.FC = () => {
         link.remove();
       } else {
         // Case 2: Backend returns the file Blob or binary data
-        const blob = response instanceof Blob ? response : new Blob([response.data || response]);
+        const blob = response instanceof Blob ? response : new Blob([(response.data || response) as BlobPart]);
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -205,7 +205,7 @@ const ArtistDetails: React.FC = () => {
 
           <motion.div className={styles.artistRow} variants={itemVariants}>
             <span className={styles.artistName}>
-              <Users size={18} style={{ marginRight: '8px' }} />
+              <Users size={18} />
               {artist.followers} Monthly Listeners
             </span>
             <span className={styles.dot}>•</span>

@@ -6,24 +6,24 @@ import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './TopAnime.module.css';
 
+const LEGENDARY_IDS = [
+  'one-piece-odmau',
+  'naruto-shippuden-c8gov',
+  'fullmetal-alchemist-brotherhood-9s0fl',
+  'hunter-x-hunter-tjlki',
+  'death-note-fc8mq',
+  'attack-on-titan-final-season-part-2-bures',
+  'code-geass-lelouch-of-the-rebellion-mtskz',
+  'cowboy-bebop-kb7hu',
+  'demon-slayer-kimetsu-no-yaiba-rzepv',
+  'neon-genesis-evangelion-d0uqe',
+  'dragon-ball-z-3gzan',
+  'chainsaw-man-efeig'
+];
+
 const TopAnime = ({ provider }: { provider?: string }) => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const LEGENDARY_IDS = [
-    'one-piece-odmau',
-    'naruto-shippuden-c8gov',
-    'fullmetal-alchemist-brotherhood-9s0fl',
-    'hunter-x-hunter-tjlki',
-    'death-note-fc8mq',
-    'attack-on-titan-final-season-part-2-bures',
-    'code-geass-lelouch-of-the-rebellion-mtskz',
-    'cowboy-bebop-kb7hu',
-    'demon-slayer-kimetsu-no-yaiba-rzepv',
-    'neon-genesis-evangelion-d0uqe',
-    'dragon-ball-z-3gzan',
-    'chainsaw-man-efeig'
-  ];
 
   useEffect(() => {
     let mounted = true;
@@ -83,7 +83,7 @@ const TopAnime = ({ provider }: { provider?: string }) => {
       <div className={styles.grid}>
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '350px' }} />
+              <div key={i} className={`${styles.animeCard} ${styles.skeleton} ${styles.skeletonCard}`} />
             ))
           : animes.map((anime, index) => (
             <motion.div

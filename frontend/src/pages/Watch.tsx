@@ -10,7 +10,10 @@ import NextEpisodeTimer from '../components/NextEpisodeTimer';
 import DirectPlayer from '../components/DirectPlayer';
 import styles from './Watch.module.css';
 
-/** Returns true if the URL is a direct stream file (m3u8 / mp4 / cdn link), not an embed HTML page */
+/** Returns true if the URL is a direct stream file (m3u8 / mp4), not an embed HTML page.
+ * IMPORTANT: Keep this conservative. A false-positive sends an HTML embed URL into HLS.js
+ * which produces a black screen. Only match unambiguously machine-readable stream formats.
+ */
 function isDirectStreamUrl(url: string): boolean {
   if (!url) return false;
   const lower = url.toLowerCase();
@@ -20,10 +23,21 @@ function isDirectStreamUrl(url: string): boolean {
     lower.includes('fast4speed') ||
     lower.includes('allmanga') ||
     lower.includes('proxy-m3u8') ||
-    lower.includes('cdn.') ||
-    // Fallback: URLs that are clearly not embed HTML pages
+    // Fallback: URL paths that look like media segments and don't end in .html
     (/\/media[0-9]?\//.test(lower) && !lower.includes('.html'))
+    // NOTE: 'cdn.' removed — too broad; many iframe embed players are served from CDN
+    // subdomains (e.g. cdn.jwplayer.com) and would be incorrectly treated as direct streams.
   );
+}
+
+interface AnimeCWData {
+  animeId: string;
+  animeName: string;
+  animePoster: string;
+  episodeNumber: number;
+  episodeTitle: string;
+  provider?: string;
+  timestamp: number;
 }
 
 const Watch = () => {
@@ -40,6 +54,12 @@ const Watch = () => {
   }
   
   const playerWrapperRef = useRef<HTMLDivElement>(null);
+  // Ref for the episode list container — used to auto-scroll the active episode into view
+  const episodeGridRef = useRef<HTMLDivElement>(null);
+  // Mutable ref that always reflects the latest episode navigation state.
+  // Needed so the keyboard handler (registered once) can call the latest version
+  // of handleNextEp/handlePrevEp without a stale closure.
+  const epNavRef = useRef({ currentEp: 1, totalEps: 0, goNext: () => {}, goPrev: () => {} });
   const [anime, setAnime] = useState<AnimeDetail | null>(null);
   const [episodeData, setEpisodeData] = useState<EpisodeData | null>(null);
   const [currentEp, setCurrentEp] = useState(epParam ? parseInt(epParam, 10) : 1);
@@ -54,32 +74,56 @@ const Watch = () => {
   const [individualSource, setIndividualSource] = useState<{ ep: number; sources: Record<string, string> } | null>(null);
   const [sourceFetchFailedEp, setSourceFetchFailedEp] = useState<number | null>(null);
   const [redirectingTo, setRedirectingTo] = useState<string | null>(null);
-  
 
-  // Keyboard Shortcuts
+  const syncRangeForEpisode = (nextEp: number) => {
+    if (!episodeData || episodeData.totalEpisodes <= 28) return;
+    if (selectedRange && nextEp >= selectedRange[0] && nextEp <= selectedRange[1]) return;
+
+    const rangeSize = 100;
+    const start = Math.floor((nextEp - 1) / rangeSize) * rangeSize + 1;
+    const end = Math.min(start + rangeSize - 1, episodeData.totalEpisodes);
+    setSelectedRange([start, end]);
+  };
+
+  // Keep epNavRef up-to-date in useEffect so we do not mutate the ref during render
+  useEffect(() => {
+    epNavRef.current = {
+      currentEp,
+      totalEps: episodeData?.totalEpisodes ?? 0,
+      goNext: () => {
+        if (episodeData && currentEp < episodeData.totalEpisodes) {
+          const next = currentEp + 1;
+          setCurrentEp(next);
+          syncRangeForEpisode(next);
+        }
+      },
+      goPrev: () => {
+        if (currentEp > 1) {
+          const prev = currentEp - 1;
+          setCurrentEp(prev);
+          syncRangeForEpisode(prev);
+        }
+      },
+    };
+  });
+
+  // Keyboard shortcuts — registered once, reads latest state via epNavRef
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (e.key.toLowerCase() === 'f') {
         if (!document.fullscreenElement) {
           playerWrapperRef.current?.requestFullscreen().catch(err => {
-            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            console.error(`Fullscreen error: ${err.message}`);
           });
         } else {
           document.exitFullscreen();
         }
       }
 
-      if (e.key.toLowerCase() === 'n') {
-        handleNextEp();
-      }
-
-      if (e.key.toLowerCase() === 'p') {
-        handlePrevEp();
-      }
+      if (e.key.toLowerCase() === 'n') epNavRef.current.goNext();
+      if (e.key.toLowerCase() === 'p') epNavRef.current.goPrev();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -129,13 +173,14 @@ const Watch = () => {
         
         setAnime(info);
         setEpisodeData(eps);
-        setCurrentEp(epParam ? parseInt(epParam, 10) : 1);
+        const startingEp = epParam ? parseInt(epParam, 10) : 1;
+        setCurrentEp(startingEp);
         setIndividualSource(null);
         setSourceFetchFailedEp(null);
         
         // Initialize range if many episodes (> 28)
         if (eps.totalEpisodes > 28) {
-          const start = Math.floor((currentEp - 1) / 100) * 100 + 1;
+          const start = Math.floor((startingEp - 1) / 100) * 100 + 1;
           setSelectedRange([start, Math.min(start + 99, eps.totalEpisodes)]);
         } else {
           setSelectedRange(null);
@@ -154,7 +199,7 @@ const Watch = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [id, refreshKey, provider]);
+  }, [id, refreshKey, provider, epParam, navigate]);
 
   const decodeEntities = (text: string) => {
     if (!text) return '';
@@ -198,7 +243,7 @@ const Watch = () => {
   useEffect(() => {
     if (!anime || !episodeData) return;
 
-    const cwItem = {
+    const cwItem: AnimeCWData = {
       animeId: anime.anime.id,
       animeName: anime.anime.name,
       animePoster: anime.anime.poster,
@@ -210,24 +255,24 @@ const Watch = () => {
 
     try {
       const existingRaw = localStorage.getItem('reiatsu_continue_watching');
-      let history = [];
+      let history: AnimeCWData[] = [];
       if (existingRaw) {
         const parsed = JSON.parse(existingRaw);
         history = Array.isArray(parsed) ? parsed : [];
       }
 
       // Filter out previous record of the same anime
-      history = history.filter((item: any) => item.animeId !== anime.anime.id);
+      history = history.filter((item) => item.animeId !== anime.anime.id);
       
       // Put new item at the beginning
       history.unshift(cwItem);
       
       // Store top 15 items
       localStorage.setItem('reiatsu_continue_watching', JSON.stringify(history.slice(0, 15)));
-    } catch (e) {
-      console.error('Failed to save to Continue Watching history:', e);
+    } catch {
+      console.error('Failed to save to Continue Watching history');
     }
-  }, [anime, episodeData, currentEp, currentEpisode]);
+  }, [anime, episodeData, currentEp, currentEpisode, provider]);
 
   const fetchingSource = useMemo(() => {
     if (!currentEpisode) return false;
@@ -261,16 +306,6 @@ const Watch = () => {
       return src[activeSource] || src.sub || src[aniKeyCamel] || src[aniKeySnake] || null;
     }
   }, [currentEpisode, individualSource, activeSource, activeServer, currentEp]);
-
-  const syncRangeForEpisode = (nextEp: number) => {
-    if (!episodeData || episodeData.totalEpisodes <= 28) return;
-    if (selectedRange && nextEp >= selectedRange[0] && nextEp <= selectedRange[1]) return;
-
-    const rangeSize = 100;
-    const start = Math.floor((nextEp - 1) / rangeSize) * rangeSize + 1;
-    const end = Math.min(start + rangeSize - 1, episodeData.totalEpisodes);
-    setSelectedRange([start, end]);
-  };
 
   const handleNextEp = () => {
     if (episodeData && currentEp < episodeData.totalEpisodes) {
@@ -316,6 +351,20 @@ const Watch = () => {
     
     return items;
   }, [episodeData, selectedRange, searchQuery]);
+
+  // Auto-scroll the active episode into view whenever currentEp or the filtered list changes
+  useEffect(() => {
+    const grid = episodeGridRef.current;
+    if (!grid) return;
+    // Small delay so Framer Motion has time to render the new active item
+    const raf = requestAnimationFrame(() => {
+      const activeBtn = grid.querySelector('[data-active="true"]') as HTMLElement | null;
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [currentEp, filteredEpisodes]);
 
 
   if (redirectingTo) {
@@ -545,12 +594,13 @@ const Watch = () => {
               </div>
             )}
 
-            <div className={styles.episodeGrid}>
+            <div ref={episodeGridRef} className={styles.episodeGrid}>
               <AnimatePresence mode="popLayout">
                 {filteredEpisodes.map((ep) => (
                   <motion.button
                     key={ep.number}
                     layout
+                    data-active={currentEp === ep.number ? 'true' : undefined}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}

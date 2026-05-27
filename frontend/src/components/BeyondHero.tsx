@@ -27,9 +27,14 @@ const BeyondHero = ({ videos, onVideoSelect }: BeyondHeroProps) => {
 
   useEffect(() => {
     if (!emblaApi) return;
-    onSelect();
+    const timer = setTimeout(() => {
+      onSelect();
+    }, 0);
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [emblaApi, onSelect]);
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);

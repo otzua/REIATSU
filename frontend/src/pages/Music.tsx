@@ -6,7 +6,7 @@ import MusicGrid from '../components/MusicGrid';
 import AlbumGrid from '../components/AlbumGrid';
 import { useMusic } from '../context/MusicContext';
 import { musicApi, type Track, type Album } from '../services/musicApi';
-import styles from './Home.module.css';
+import homeStyles from './Home.module.css';
 
 const CACHE_KEY = 'reiatsu_music_cache_v3';
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
@@ -23,12 +23,12 @@ const Music = () => {
   const [latest, setLatest] = useState<Track[]>([]);
   const [artists, setArtists] = useState<Track[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     const loadData = async () => {
-      // 1. Try to load from sessionStorage first for "Instant" feel
+      // 1. Try to load from sessionStorage first for instant feel
       const cached = sessionStorage.getItem(CACHE_KEY);
       if (cached) {
         try {
@@ -38,10 +38,11 @@ const Music = () => {
             setLatest(latest || []);
             setArtists(artists || []);
             setAlbums(albums || []);
+            setIsLoading(false);
             return;
           }
         } catch (e) {
-          console.error("Cache parse error", e);
+          console.error('Cache parse error', e);
         }
       }
 
@@ -69,7 +70,9 @@ const Music = () => {
         }));
       } catch (err) {
         console.error('Failed to fetch music data:', err);
-        setError('Failed to load music sections. Is the music API online?');
+        setError('Failed to load music. Is the music API online?');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -80,12 +83,14 @@ const Music = () => {
   const bollywoodAlbums = albums.filter(a => a.category === 'Bollywood');
 
   return (
-    <div className={styles.homeContainer}>
+    <div className={homeStyles.homeContainer}>
       <HalftoneWave />
 
-      <div className={styles.content}>
-        {error && trending.length === 0 ? (
-          <div style={{ padding: '4rem 5%', textAlign: 'center', color: 'var(--accent)' }}>
+      <div className={homeStyles.content}>
+        {isLoading ? (
+          <div className={homeStyles.loading}>LOADING</div>
+        ) : error && trending.length === 0 ? (
+          <div className={homeStyles.error}>
             <p>{error}</p>
           </div>
         ) : (
@@ -95,56 +100,56 @@ const Music = () => {
             transition={{ duration: 0.5 }}
           >
             <MusicHero slides={trending.slice(0, 3)} onPlay={playTrack} />
-            
-            <div className={styles.gridsWrapper}>
+
+            <div className={homeStyles.gridsWrapper}>
               {recentlyPlayed.length > 0 && (
-                <MusicGrid 
-                  title="RECENTLY PLAYED" 
-                  data={recentlyPlayed} 
-                  onPlay={playTrack} 
-                  currentTrackId={currentTrack?.id} 
-                  isPlaying={isPlaying} 
+                <MusicGrid
+                  title="RECENTLY PLAYED"
+                  data={recentlyPlayed}
+                  onPlay={playTrack}
+                  currentTrackId={currentTrack?.id}
+                  isPlaying={isPlaying}
                   historyLink="/music/history"
                 />
               )}
 
-              <MusicGrid 
-                title="TRENDING NOW" 
-                data={trending} 
-                onPlay={playTrack} 
-                currentTrackId={currentTrack?.id} 
-                isPlaying={isPlaying} 
+              <MusicGrid
+                title="TRENDING NOW"
+                data={trending}
+                onPlay={playTrack}
+                currentTrackId={currentTrack?.id}
+                isPlaying={isPlaying}
               />
 
               {hollywoodAlbums.length > 0 && (
-                <AlbumGrid 
-                  title="TOP ALBUMS (HOLLYWOOD)" 
-                  data={hollywoodAlbums} 
+                <AlbumGrid
+                  title="TOP ALBUMS (HOLLYWOOD)"
+                  data={hollywoodAlbums}
                 />
               )}
 
               {bollywoodAlbums.length > 0 && (
-                <AlbumGrid 
-                  title="TOP ALBUMS (BOLLYWOOD)" 
-                  data={bollywoodAlbums} 
+                <AlbumGrid
+                  title="TOP ALBUMS (BOLLYWOOD)"
+                  data={bollywoodAlbums}
                 />
               )}
 
-              <MusicGrid 
-                title="LATEST RELEASES" 
-                data={latest} 
-                onPlay={playTrack} 
-                currentTrackId={currentTrack?.id} 
-                isPlaying={isPlaying} 
+              <MusicGrid
+                title="LATEST RELEASES"
+                data={latest}
+                onPlay={playTrack}
+                currentTrackId={currentTrack?.id}
+                isPlaying={isPlaying}
               />
 
-              <MusicGrid 
-                title="POPULAR ARTISTS" 
-                data={artists} 
-                isCircular 
-                onPlay={playTrack} 
-                currentTrackId={currentTrack?.id} 
-                isPlaying={isPlaying} 
+              <MusicGrid
+                title="POPULAR ARTISTS"
+                data={artists}
+                isCircular
+                onPlay={playTrack}
+                currentTrackId={currentTrack?.id}
+                isPlaying={isPlaying}
               />
             </div>
           </motion.div>

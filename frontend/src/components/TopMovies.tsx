@@ -31,7 +31,7 @@ const TopMovies = ({ provider }: { provider?: string }) => {
       <div className={styles.grid}>
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '300px' }} />
+              <div key={i} className={`${styles.animeCard} ${styles.skeleton} ${styles.skeletonCard}`} />
             ))
           : animes.map((anime, index) => (
             <motion.div
@@ -41,12 +41,12 @@ const TopMovies = ({ provider }: { provider?: string }) => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.04 }}
-              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
+              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: 'easeOut' } }}
             >
               <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
                   <div className={styles.badge}>MOVIE</div>
-                  <div className={styles.cardBadges} style={{ left: 'unset', right: '1rem' }}>
+                  <div className={styles.cardBadgesRight}>
                     {anime.episodes?.sub != null && <span className={styles.subBadge}>SUB {anime.episodes.sub}</span>}
                     {anime.episodes?.dub != null && <span className={styles.dubBadge}>DUB {anime.episodes.dub}</span>}
                   </div>

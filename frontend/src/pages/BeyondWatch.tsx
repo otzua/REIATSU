@@ -6,12 +6,12 @@ import { beyondApi, MUSIC_API_BASE } from '../services/beyondApi';
 import type { BeyondVideo, BeyondDetails } from '../services/beyondApi';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
-import styles from './Watch.module.css'; // Reusing premium Watch styles
+import styles from './Watch.module.css';
 
 const BeyondWatch = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -21,14 +21,14 @@ const BeyondWatch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Keyboard Shortcuts for Fullscreen, Play/Pause, and Seeking
+  // Keyboard shortcuts: fullscreen, play/pause, seek, mute
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (['input', 'textarea', 'select'].includes(target.tagName.toLowerCase())) return;
-      
+
       const key = e.key.toLowerCase();
-      
+
       if (key === 'f') {
         e.preventDefault();
         if (!document.fullscreenElement) {
@@ -64,23 +64,26 @@ const BeyondWatch = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // HLS logic
+  // HLS setup / teardown
   useEffect(() => {
     if (!activeStream || !videoRef.current) return;
 
     const videoElement = videoRef.current;
-
     let finalUrl = activeStream;
+
     if (activeStream.includes('.m3u8')) {
-      // Only use our backend proxy for raw Hanime manifest links that require a Referer header.
-      // AlphaAPIs extracted stream links are pre-signed CDN links that stream directly with zero buffering.
+      // Proxy only raw Hanime manifest links that require a Referer header.
+      // AlphaAPIs extracted stream links are pre-signed CDN links that stream directly.
       if (activeStream.includes('weeb.hanime.tv') || activeStream.includes('proxy-required')) {
         finalUrl = `${MUSIC_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
       }
-      
+
       if (Hls.isSupported()) {
+        // Destroy previous instance BEFORE creating the new one to prevent two
+        // HLS pipelines fighting the same <video> element during quality switches.
         if (hlsRef.current) {
           hlsRef.current.destroy();
+          hlsRef.current = null;
         }
         const hls = new Hls({
           enableWorker: true,
@@ -90,7 +93,7 @@ const BeyondWatch = () => {
             xhr.withCredentials = false;
           }
         });
-        
+
         hls.on(Hls.Events.ERROR, (_, data) => {
           console.error('HLS Error:', data);
           if (data.fatal) {
@@ -111,6 +114,9 @@ const BeyondWatch = () => {
           }
         });
 
+        // loadSource + attachMedia only — do NOT set videoElement.src as well.
+        // Setting src alongside HLS.js causes a double-load race that produces
+        // "media source error" on Chrome and Firefox.
         hls.loadSource(finalUrl);
         hls.attachMedia(videoElement);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -118,10 +124,14 @@ const BeyondWatch = () => {
         });
         hlsRef.current = hls;
       } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS on Safari — crossOrigin needed here for CORS-protected manifests
+        videoElement.crossOrigin = 'anonymous';
         videoElement.src = finalUrl;
       }
     } else {
-      // Standard MP4 or direct link
+      // Standard MP4 or direct link — no crossOrigin to avoid blocking CDN streams
+      // that don't send Access-Control-Allow-Origin headers.
+      videoElement.removeAttribute('crossorigin');
       if (videoElement.src !== activeStream) {
         videoElement.src = activeStream;
         videoElement.load();
@@ -137,46 +147,45 @@ const BeyondWatch = () => {
     };
   }, [activeStream]);
 
+  // Fetch video details
   useEffect(() => {
     if (!id) {
-      setError(true);
-      setLoading(false);
-      return;
+      const timer = setTimeout(() => {
+        setError(true);
+        setLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
-    setLoading(true);
+    const loadTimer = setTimeout(() => {
+      setLoading(true);
+    }, 0);
+
     beyondApi.getDetails(id)
       .then(async (data) => {
         if (data.info && data.info[0]) {
           const info = data.info[0];
-          const videoObj = {
+          const videoObj: BeyondVideo = {
             id: info.urlname,
             title: info.videoname,
             embedUrl: `https://hanime.tv/videos/hentai/${info.urlname}`,
             thumbnail: info.coverimg,
             description: info.description,
-            pubDate: info.releasedate
+            pubDate: info.releasedate,
           };
           setVideo(videoObj);
           setDetails(data);
           setActiveStream(info.best_stream || info.streams?.[0]?.url || null);
           setLoading(false);
 
-
-
           // Update history
           const saved = localStorage.getItem('beyond_history');
           let history: BeyondVideo[] = [];
           if (saved) {
-            try {
-              history = JSON.parse(saved);
-            } catch (e) {
-              console.error('Failed to parse history', e);
-            }
+            try { history = JSON.parse(saved); } catch (e) { console.error('Failed to parse history', e); }
           }
           const filtered = history.filter((v) => v.id !== videoObj.id);
-          const updated = [videoObj, ...filtered].slice(0, 10);
-          localStorage.setItem('beyond_history', JSON.stringify(updated));
+          localStorage.setItem('beyond_history', JSON.stringify([videoObj, ...filtered].slice(0, 10)));
         }
       })
       .catch((err) => {
@@ -184,45 +193,49 @@ const BeyondWatch = () => {
         setError(true);
         setLoading(false);
       });
+
+    return () => {
+      clearTimeout(loadTimer);
+    };
   }, [id]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '';
     try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     } catch {
       return dateStr;
     }
   };
 
+  /* ─── Loading ─── */
   if (loading) {
     return (
       <div className={styles.container}>
         <HalftoneWave />
         <div className={styles.content}>
           <div className={styles.loadingWrapper}>
-            <div className={styles.loading} style={{ letterSpacing: '0.3em' }}>BYPASSING FIREWALL...</div>
-            <div style={{ marginTop: '1rem', color: 'var(--accent)', fontSize: '0.7rem', opacity: 0.6 }}>INITIALIZING ALPHA EXTRACTION PROTOCOL</div>
+            <div className={styles.loading}>BYPASSING FIREWALL...</div>
+            <div className={styles.loadingSubtext}>INITIALIZING ALPHA EXTRACTION PROTOCOL</div>
           </div>
         </div>
       </div>
     );
   }
 
+  /* ─── Error ─── */
   if (error || !video) {
     return (
       <div className={styles.container}>
         <HalftoneWave />
         <div className={styles.content}>
           <div className={styles.errorBox}>
-            <h2 style={{ letterSpacing: '0.2em' }}>PORTAL ERROR</h2>
-            <p style={{ color: 'var(--color-cream)', opacity: 0.5, marginBottom: '2rem', maxWidth: '400px', marginInline: 'auto' }}>
-              The requested content could not be located in the Beyond sector. It may have been moved or redacted.
+            <h2>PORTAL ERROR</h2>
+            <p className={styles.errorMsg}>
+              The requested content could not be located in the Beyond sector.
+              It may have been moved or redacted.
             </p>
-            <button onClick={() => navigate('/beyond')} className={styles.backBtn} style={{ background: 'var(--accent)', color: 'white', padding: '0.8rem 2rem' }}>
-              RETURN TO HUB
-            </button>
+            <button onClick={() => navigate('/beyond')}>RETURN TO HUB</button>
           </div>
         </div>
       </div>
@@ -236,6 +249,7 @@ const BeyondWatch = () => {
       <HalftoneWave />
 
       <div className={styles.content}>
+        {/* Top nav */}
         <div className={styles.topNav}>
           <button onClick={() => navigate('/beyond')} className={styles.backBtn}>
             <ChevronLeft size={18} />
@@ -247,30 +261,29 @@ const BeyondWatch = () => {
         </div>
 
         <div className={styles.mainGrid}>
+          {/* Player column */}
           <div className={styles.playerSection}>
             <div className={styles.videoWrapperContainer}>
               <SmartImage src={video.thumbnail} aria-hidden="true" className={styles.playerGlow} />
               <div ref={playerWrapperRef} className={styles.videoWrapper}>
                 {activeStream ? (
-                    <video
-                      ref={videoRef}
-                      className={styles.iframe}
-                      controls
-                      autoPlay
-                      playsInline
-                      preload="auto"
-                      poster={video.thumbnail}
-                      src={activeStream}
-                      crossOrigin={activeStream?.includes('.m3u8') ? 'anonymous' : undefined}
-                    />
+                  <video
+                    ref={videoRef}
+                    className={styles.iframe}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="auto"
+                    poster={video.thumbnail}
+                    // src and crossOrigin are NOT set here — managed programmatically
+                    // in the HLS useEffect. Setting src on the element while HLS.js is
+                    // attached causes a double-load race and media source errors.
+                  />
                 ) : (
-                  <div className={styles.iframe} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', gap: '1rem' }}>
-                    <Flame size={48} className={styles.pulse} style={{ color: 'var(--accent)' }} />
-                    <p style={{ color: 'var(--accent)', fontWeight: 800 }}>EXTRACTION FAILED</p>
-                    <button 
-                      onClick={() => window.location.reload()}
-                      style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 800 }}
-                    >
+                  <div className={styles.extractionFailed}>
+                    <Flame size={48} className={`${styles.pulse} ${styles.accentIcon}`} />
+                    <p className={styles.qualityLabel}>EXTRACTION FAILED</p>
+                    <button className={styles.retryBtn} onClick={() => window.location.reload()}>
                       RETRY EXTRACTION
                     </button>
                   </div>
@@ -278,11 +291,12 @@ const BeyondWatch = () => {
               </div>
             </div>
 
+            {/* Controls bar */}
             <div className={styles.playerControls}>
               <div className={styles.playerControlsInner}>
                 <div className={styles.epMeta}>
-                  <span className={styles.epCount} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Flame size={12} style={{ color: 'var(--accent)' }} />
+                  <span className={`${styles.epCount} ${styles.epCountRow}`}>
+                    <Flame size={12} className={styles.accentIcon} />
                     ALPHA EXTRACTION • {activeStream ? 'SECURE' : 'UNSTABLE'}
                   </span>
                   <h1 className={styles.epTitle}>{video.title}</h1>
@@ -291,10 +305,10 @@ const BeyondWatch = () => {
                 {currentInfo?.streams && currentInfo.streams.length > 0 && (
                   <div className={styles.playerActions}>
                     <div className={styles.controlsGroup}>
-                      <span style={{ fontSize: '0.75rem', color: 'rgba(220, 201, 169, 0.4)', fontWeight: 800, letterSpacing: '0.05em' }}>QUALITY:</span>
+                      <span className={styles.qualityLabel}>QUALITY:</span>
                       <div className={styles.serverToggle}>
                         {currentInfo.streams.map((s, idx) => (
-                          <button 
+                          <button
                             key={idx}
                             className={`${styles.serverBtn} ${activeStream === s.url ? styles.active : ''}`}
                             onClick={() => setActiveStream(s.url)}
@@ -309,6 +323,7 @@ const BeyondWatch = () => {
               </div>
             </div>
 
+            {/* Anime detail panel */}
             <div className={styles.animeDetails}>
               <div className={styles.animeMainInfo}>
                 <div className={styles.miniPosterWrapper}>
@@ -323,26 +338,26 @@ const BeyondWatch = () => {
                     <span className={styles.badge}>1080P HD</span>
                     {video.pubDate && <span className={styles.badge}>{new Date(video.pubDate).getFullYear()}</span>}
                   </div>
-                  
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <h3 style={{ color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+
+                  {/* Synopsis */}
+                  <div className={styles.detailSection}>
+                    <h3 className={styles.detailSectionTitle}>
                       <Info size={14} /> SYNOPSIS
                     </h3>
                     <p className={styles.description}>
-                      {video.description || "Step into the depth of this title. Discover a high-quality streaming experience in the Beyond sector."}
+                      {video.description || 'Step into the depth of this title. Discover a high-quality streaming experience in the Beyond sector.'}
                     </p>
                   </div>
 
+                  {/* Genre tags */}
                   {details?.genres && details.genres.length > 0 && (
-                    <div style={{ marginTop: '1.5rem' }}>
-                      <h3 style={{ color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className={styles.detailSection}>
+                      <h3 className={styles.detailSectionTitle}>
                         <Tag size={14} /> TAGS
                       </h3>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div className={styles.tagsWrap}>
                         {details.genres.map((g, i) => (
-                          <span key={i} style={{ fontSize: '0.7rem', color: 'rgba(220, 201, 169, 0.6)', background: 'rgba(255, 255, 255, 0.03)', padding: '0.2rem 0.6rem', borderRadius: '4px', border: '1px solid rgba(220, 201, 169, 0.1)' }}>
-                            {g.genre}
-                          </span>
+                          <span key={i} className={styles.tagPill}>{g.genre}</span>
                         ))}
                       </div>
                     </div>
@@ -352,32 +367,33 @@ const BeyondWatch = () => {
             </div>
           </div>
 
+          {/* Sidebar — metadata panel */}
           <div className={styles.sidebar}>
-            <div className={styles.header} style={{ padding: '1.5rem', borderBottom: '1px solid rgba(220, 201, 169, 0.1)' }}>
-              <h3 style={{ color: 'var(--accent)', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className={styles.sidebarHeader}>
+              <h3 className={styles.sidebarTitle}>
                 <Calendar size={18} /> METADATA
               </h3>
             </div>
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className={styles.sidebarBody}>
               <div>
-                <span style={{ color: 'var(--accent)', fontWeight: 800, display: 'block', fontSize: '0.7rem', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>RELEASE DATE</span>
-                <span style={{ color: 'var(--color-cream)', opacity: 0.8, fontSize: '0.9rem' }}>{formatDate(video.pubDate)}</span>
+                <span className={styles.metaLabel}>RELEASE DATE</span>
+                <span className={styles.metaValue}>{formatDate(video.pubDate)}</span>
               </div>
               <div>
-                <span style={{ color: 'var(--accent)', fontWeight: 800, display: 'block', fontSize: '0.7rem', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>STUDIO</span>
-                <span style={{ color: 'var(--color-cream)', opacity: 0.8, fontSize: '0.9rem' }}>{currentInfo?.series || 'N/A'}</span>
+                <span className={styles.metaLabel}>STUDIO</span>
+                <span className={styles.metaValue}>{currentInfo?.series || 'N/A'}</span>
               </div>
               <div>
-                <span style={{ color: 'var(--accent)', fontWeight: 800, display: 'block', fontSize: '0.7rem', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>VIEWS</span>
-                <span style={{ color: 'var(--color-cream)', opacity: 0.8, fontSize: '0.9rem' }}>{currentInfo?.views?.toLocaleString() || '0'}</span>
+                <span className={styles.metaLabel}>VIEWS</span>
+                <span className={styles.metaValue}>{currentInfo?.views?.toLocaleString() || '0'}</span>
               </div>
               <div>
-                <span style={{ color: 'var(--accent)', fontWeight: 800, display: 'block', fontSize: '0.7rem', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>RATING</span>
-                <span style={{ color: 'var(--color-cream)', opacity: 0.8, fontSize: '0.9rem' }}>{currentInfo?.rating || 'N/A'}</span>
+                <span className={styles.metaLabel}>RATING</span>
+                <span className={styles.metaValue}>{currentInfo?.rating || 'N/A'}</span>
               </div>
               <div>
-                <span style={{ color: 'var(--accent)', fontWeight: 800, display: 'block', fontSize: '0.7rem', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>AVAILABILITY</span>
-                <span style={{ color: 'var(--color-cream)', opacity: 0.8, fontSize: '0.9rem' }}>{activeStream ? 'High Fidelity Stream' : 'Proxy Limited'}</span>
+                <span className={styles.metaLabel}>AVAILABILITY</span>
+                <span className={styles.metaValue}>{activeStream ? 'High Fidelity Stream' : 'Proxy Limited'}</span>
               </div>
             </div>
           </div>

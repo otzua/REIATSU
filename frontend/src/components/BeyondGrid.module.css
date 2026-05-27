@@ -1,0 +1,28 @@
+/* BeyondGrid-specific overrides on top of TopMovies shared styles */
+
+/* Title row — makes the h2 a flex container for the flame icon */
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.titleIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* episodesMeta modifier — space-between layout for the year + watch pill row */
+.episodesMeta {
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* WATCH badge — accent colour + flex icon alignment */
+.watchBadge {
+  border-color: rgba(220, 201, 169, 0.2);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

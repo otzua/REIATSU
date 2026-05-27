@@ -78,8 +78,8 @@ export const beyondApi = {
   /**
    * Extract video streams directly from the client.
    */
-  extractStream: async (url: string): Promise<any> => {
-    const res = await axios.get('https://www.alphaapis.org/api/v1/extract', {
+  extractStream: async (url: string): Promise<unknown> => {
+    const res = await axios.get<unknown>('https://www.alphaapis.org/api/v1/extract', {
       params: { url }
     });
     return res.data;

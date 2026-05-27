@@ -150,6 +150,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: opacity 0.2s ease;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.playIconOffset {
+  margin-left: 4px;
 }
 
 .info h2:hover {
@@ -335,6 +341,15 @@
 .iconButton:hover {
   opacity: 1;
   transform: translateY(-2px);
+}
+
+.spinnerIcon {
+  animation: spinAnim 1s linear infinite;
+}
+
+@keyframes spinAnim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ──────── HEIGHT-BASED RESPONSIVENESS (Ensures perfect screen fit) ──────── */

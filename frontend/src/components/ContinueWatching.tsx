@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Play, Tv, Clock } from 'lucide-react';
@@ -23,42 +23,41 @@ const decodeEntities = (text: string) => {
 };
 
 const ContinueWatching = ({ provider }: { provider?: string }) => {
-  const [history, setHistory] = useState<AnimeCWData[]>([]);
-
-  useEffect(() => {
+  const [history] = useState<AnimeCWData[]>(() => {
     const data = localStorage.getItem('reiatsu_continue_watching');
     if (data) {
       try {
         const parsed = JSON.parse(data);
-        let items: AnimeCWData[] = [];
-        
         if (Array.isArray(parsed)) {
-          items = parsed;
+          return parsed;
         } else if (parsed && typeof parsed === 'object' && parsed.animeId) {
-          items = [parsed as AnimeCWData];
+          return [parsed as AnimeCWData];
         }
-
-        if (provider) {
-          if (provider === 'miruro' || provider === 'beyond') {
-            items = items.filter(item => item.provider === 'miruro' || item.provider === 'beyond');
-          } else {
-            items = items.filter(item => item.provider === provider);
-          }
-        }
-        
-        setHistory(items);
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
-  }, [provider]);
+    return [];
+  });
 
-  if (history.length === 0) return null;
+  const filteredHistory = useMemo(() => {
+    let items = history;
+    if (provider) {
+      if (provider === 'miruro' || provider === 'beyond') {
+        items = items.filter(item => item.provider === 'miruro' || item.provider === 'beyond');
+      } else {
+        items = items.filter(item => item.provider === provider);
+      }
+    }
+    return items;
+  }, [history, provider]);
+
+  if (filteredHistory.length === 0) return null;
 
   return (
-    <section className={styles.section} style={{ marginBottom: '4rem' }}>
+    <section className={`${styles.section} ${styles.sectionSpaced}`}>
       <div className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1 }}>
+        <div className={styles.titleGroup}>
           <div className={styles.accentBox}></div>
           <h2 className={styles.title}>CONTINUE WATCHING</h2>
         </div>
@@ -67,49 +66,43 @@ const ContinueWatching = ({ provider }: { provider?: string }) => {
         </Link>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: '1.5rem',
-        marginTop: '1.5rem' 
-      }}>
-        {history.slice(0, 8).map((item, index) => {
+      <div className={styles.cwGrid}>
+        {filteredHistory.slice(0, 8).map((item, index) => {
           const watchLink = `/${item.provider || 'anime'}/watch/${item.animeId}?ep=${item.episodeNumber}`;
 
           return (
-            <motion.div 
+            <motion.div
               key={item.animeId + (item.timestamp || index)}
-              className={styles.card}
+              className={`${styles.card} ${styles.cardFull}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.05 }}
-              whileHover={{ y: -5, scale: 1.01, transition: { duration: 0.15, ease: "easeOut" } }}
-              style={{ width: '100%', maxWidth: 'none' }} // Override max-width to let grid items expand nicely
+              whileHover={{ y: -5, scale: 1.01, transition: { duration: 0.15, ease: 'easeOut' } }}
             >
               <Link to={watchLink} className={styles.cardLink}>
                 <div className={styles.posterWrapper}>
-                   <SmartImage src={item.animePoster} className={styles.poster} />
-                   <div className={styles.overlay}>
-                     <div className={styles.playBtn}>
-                       <Play size={24} fill="currentColor" />
-                     </div>
-                   </div>
+                  <SmartImage src={item.animePoster} className={styles.poster} />
+                  <div className={styles.overlay}>
+                    <div className={styles.playBtn}>
+                      <Play size={24} fill="currentColor" />
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.info} style={{ flex: 1, minWidth: 0 }}>
+                <div className={styles.info}>
                   <p className={styles.epInfo}>
-                    <Tv size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    <Tv size={12} className={styles.tvIcon} />
                     EPISODE {item.episodeNumber}
                   </p>
-                  <h3 className={styles.animeName} title={decodeEntities(item.animeName)} style={{ maxWidth: '100%' }}>
+                  <h3 className={styles.animeName} title={decodeEntities(item.animeName)}>
                     {decodeEntities(item.animeName)}
                   </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', marginTop: '0.1rem' }}>
-                    <p className={styles.epTitle} title={decodeEntities(item.episodeTitle)} style={{ maxWidth: '100%' }}>
+                  <div className={styles.metaStack}>
+                    <p className={styles.epTitle} title={decodeEntities(item.episodeTitle)}>
                       {decodeEntities(item.episodeTitle)}
                     </p>
                     {item.timestamp && (
-                      <span style={{ fontSize: '0.65rem', color: 'rgba(220, 201, 169, 0.3)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '0.2rem' }}>
+                      <span className={styles.timestamp}>
                         <Clock size={10} /> {new Date(item.timestamp).toLocaleDateString()}
                       </span>
                     )}

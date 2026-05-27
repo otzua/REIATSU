@@ -31,7 +31,7 @@ const AiringAnime = ({ provider }: { provider?: string }) => {
       <div className={styles.grid}>
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '300px' }} />
+              <div key={i} className={`${styles.animeCard} ${styles.skeleton} ${styles.skeletonCard}`} />
             ))
           : animes.map((anime, index) => (
             <motion.div

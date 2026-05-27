@@ -70,7 +70,7 @@ export const musicApi = {
     const isYoutubeId = track.id && /^[a-zA-Z0-9_-]{11}$/.test(track.id);
     const q = isYoutubeId ? track.id : `${track.artist} - ${track.name}`;
     
-    const res = await axios.get<any>(`${MUSIC_API_BASE}/stream`, {
+    const res = await axios.get<StreamResult>(`${MUSIC_API_BASE}/stream`, {
       params: { q },
     });
 

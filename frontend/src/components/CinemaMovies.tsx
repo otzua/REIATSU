@@ -11,22 +11,37 @@ const CinemaMovies = () => {
   const [movies, setMovies] = useState<CinemaMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'movie' | 'tv'>('movie');
-  
-  const loadTrending = () => {
+  const [prevActiveTab, setPrevActiveTab] = useState(activeTab);
+
+  if (activeTab !== prevActiveTab) {
+    setPrevActiveTab(activeTab);
     setLoading(true);
+  }
+
+  // Fetch trending movies or TV on mount or tab change
+  useEffect(() => {
+    let isCancelled = false;
     const fetchPromise = activeTab === 'movie' 
       ? cinemaApi.getTrendingMovies() 
       : cinemaApi.getTrendingTV();
 
     fetchPromise
-      .then(setMovies)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
+      .then((data) => {
+        if (!isCancelled) {
+          setMovies(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!isCancelled) {
+          console.error(err);
+          setLoading(false);
+        }
+      });
 
-  // Fetch trending movies or TV on mount or tab change
-  useEffect(() => {
-    loadTrending();
+    return () => {
+      isCancelled = true;
+    };
   }, [activeTab]);
 
   return (

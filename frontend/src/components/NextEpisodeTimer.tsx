@@ -25,7 +25,7 @@ const calculateTimeLeft = (broadcastDay: string, broadcastTime: string) => {
   // Calculate the broadcast time in JST for the current week
   const jstNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
   
-  let targetJst = new Date(jstNow);
+  const targetJst = new Date(jstNow);
   targetJst.setHours(hours, minutes, 0, 0);
   
   const currentDay = jstNow.getDay();
@@ -43,7 +43,7 @@ const calculateTimeLeft = (broadcastDay: string, broadcastTime: string) => {
   
   if (difference <= 0) return null;
 
-  let timeLeft = {
+  const timeLeft = {
     days: Math.floor(difference / (1000 * 60 * 60 * 24)),
     hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
     minutes: Math.floor((difference / 1000 / 60) % 60),
@@ -100,10 +100,15 @@ const NextEpisodeTimer = ({ animeName }: NextEpisodeTimerProps) => {
       setTimeLeft(remaining);
     }, 1000);
     
-    // Initial call
-    setTimeLeft(calculateTimeLeft(broadcast.day, broadcast.time));
+    // Defer initial call to prevent synchronous setState warning
+    const initialTimer = setTimeout(() => {
+      setTimeLeft(calculateTimeLeft(broadcast.day, broadcast.time));
+    }, 0);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(initialTimer);
+    };
   }, [broadcast]);
 
   if (loading) return null; // Don't show anything while loading

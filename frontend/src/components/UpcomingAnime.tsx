@@ -6,6 +6,7 @@ import { animeApi } from '../services/animeApi';
 import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './TopMovies.module.css';
+import upStyles from './UpcomingAnime.module.css';
 
 const UpcomingAnime = ({ provider }: { provider?: string }) => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
@@ -25,9 +26,9 @@ const UpcomingAnime = ({ provider }: { provider?: string }) => {
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-        <div className={styles.accentBox} style={{ background: '#a855f7' }}></div>
-        <h2 className={styles.title} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <Calendar size={24} style={{ color: '#a855f7' }} />
+        <div className={`${styles.accentBox} ${upStyles.accentBox}`}></div>
+        <h2 className={`${styles.title} ${upStyles.titleRow}`}>
+          <Calendar size={24} className={upStyles.calendarIcon} />
           UPCOMING ANIME
         </h2>
       </div>
@@ -35,7 +36,7 @@ const UpcomingAnime = ({ provider }: { provider?: string }) => {
       <div className={styles.grid}>
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className={`${styles.animeCard} ${styles.skeleton}`} style={{ height: '300px' }} />
+              <div key={i} className={`${styles.animeCard} ${styles.skeleton} ${upStyles.skeletonCard}`} />
             ))
           : animes.map((anime, index) => (
             <motion.div
@@ -45,12 +46,12 @@ const UpcomingAnime = ({ provider }: { provider?: string }) => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.04 }}
-              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: "easeOut" } }}
+              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: 'easeOut' } }}
             >
               <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${anime.id}`} className={styles.cardLink}>
                 <div className={styles.posterPlaceholder}>
-                  <div className={styles.badge} style={{ background: '#a855f7' }}>SOON</div>
-                  <div className={styles.cardBadges} style={{ left: 'unset', right: '1rem' }}>
+                  <div className={`${styles.badge} ${upStyles.soonBadge}`}>SOON</div>
+                  <div className={styles.cardBadgesRight}>
                     {anime.episodes?.sub != null && <span className={styles.subBadge}>SUB {anime.episodes.sub}</span>}
                     {anime.episodes?.dub != null && <span className={styles.dubBadge}>DUB {anime.episodes.dub}</span>}
                   </div>
@@ -64,7 +65,7 @@ const UpcomingAnime = ({ provider }: { provider?: string }) => {
                 <div className={styles.info}>
                   <h3 className={styles.animeTitle}>{anime.name}</h3>
                   <div className={styles.episodesMeta}>
-                    <span className={styles.type} style={{ borderColor: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}>
+                    <span className={`${styles.type} ${upStyles.comingSoon}`}>
                       COMING SOON
                     </span>
                     <span className={styles.type}>{anime.type || 'TV'}</span>

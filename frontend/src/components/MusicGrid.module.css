@@ -7,8 +7,32 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1.5rem;
   margin-bottom: 3rem;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.historyLink {
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.05rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.historyLink:hover {
+  opacity: 0.75;
 }
 
 .accentBox {
@@ -37,8 +61,13 @@
 
 .card {
   position: relative;
-  cursor: pointer;
+  cursor: default;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Circular (artist) cards: entire card is clickable */
+.circularCard {
+  cursor: pointer;
 }
 
 .artworkWrapper {
@@ -50,6 +79,12 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   border: 2px solid transparent;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+/* Fully circular artwork for artist cards */
+.circularArtwork {
+  border-radius: 50%;
 }
 
 .card:hover .artworkWrapper {
@@ -88,7 +123,8 @@
   transform: translateZ(0);
 }
 
-.card:hover .overlay, .activeCard .overlay {
+.card:hover .overlay,
+.activeCard .overlay {
   opacity: 1;
 }
 
@@ -139,6 +175,11 @@
 .info {
   margin-top: 1.2rem;
   transition: transform 0.3s ease;
+  text-align: left;
+}
+
+.circularInfo {
+  text-align: center;
 }
 
 .cardTitle {
@@ -202,22 +243,28 @@
   .section {
     padding: 1.5rem 0 1.5rem 1.5rem;
   }
+
   .header {
     gap: 0.75rem;
     margin-bottom: 1.5rem;
   }
+
   .title {
     font-size: 1.8rem;
   }
+
   .grid {
     gap: var(--grid-gap);
   }
+
   .card {
     flex: 0 0 140px;
   }
+
   .cardTitle {
     font-size: 0.8rem;
   }
+
   .info {
     margin-top: 0.8rem;
   }

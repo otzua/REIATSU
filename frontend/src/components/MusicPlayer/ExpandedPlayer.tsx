@@ -35,7 +35,9 @@ const ExpandedPlayer: React.FC = () => {
 
   useEffect(() => {
     if (!currentTrack) return;
-    setResolvedArtistId(null);
+    const timer = setTimeout(() => {
+      setResolvedArtistId(null);
+    }, 0);
     musicApi.resolveArtistId(currentTrack.artist)
       .then(res => {
         if (res && res.id) {
@@ -43,6 +45,7 @@ const ExpandedPlayer: React.FC = () => {
         }
       })
       .catch(err => console.error("Error background resolving artist", err));
+    return () => clearTimeout(timer);
   }, [currentTrack]);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -122,7 +125,6 @@ const ExpandedPlayer: React.FC = () => {
                       console.error("Failed to navigate to artist profile", err);
                     }
                   }}
-                  style={{ cursor: 'pointer', display: 'inline-block' }}
                   title={`View ${currentTrack.artist} Profile`}
                 >
                   {currentTrack.artist}
@@ -183,11 +185,11 @@ const ExpandedPlayer: React.FC = () => {
 
                 <button className={styles.playButton} onClick={togglePlay} disabled={loadingStream}>
                   {loadingStream ? (
-                    <Loader2 className="animate-spin" size={32} />
+                    <Loader2 className={styles.spinnerIcon} size={32} />
                   ) : isPlaying ? (
                     <Pause size={40} fill="currentColor" />
                   ) : (
-                    <Play size={40} fill="currentColor" style={{ marginLeft: '4px' }} />
+                    <Play size={40} fill="currentColor" className={styles.playIconOffset} />
                   )}
                 </button>
 

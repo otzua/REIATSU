@@ -1,0 +1,173 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+/Users/otzua/CODE/REIATSU/frontend/src/components/Navbar.tsx
+   32:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   35:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  203:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  206:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  209:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  282:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  292:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  298:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  304:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/context/MusicContext.tsx
+  120:19  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  246:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/AlbumDetails.tsx
+  30:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  95:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/ArtistDetails.tsx
+  30:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  93:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/CinemaWatch.tsx
+  169:13  error  'cwHistory' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/Schedule.tsx
+  110:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/Schedule.tsx:110:5
+  108 |   useEffect(() => {
+  109 |     if (isCinema) return;
+> 110 |     setLoading(true);
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  111 |     setAnimes([]);
+  112 |     animeApi.getSchedule(selectedDay.apiFilter)
+  113 |       .then((data) => {                                  react-hooks/set-state-in-effect
+  114:39  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  115:24  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  115:32  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  125:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/Schedule.tsx:125:5
+  123 |   useEffect(() => {
+  124 |     if (!isCinema) return;
+> 125 |     setLoading(true);
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  126 |     setMovies([]);
+  127 |     const year = new Date().getFullYear();
+  128 |     cinemaApi.getReleasesByMonth(year, selectedMonth.index)  react-hooks/set-state-in-effect
+  308:60  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/SearchPage.tsx
+   17:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+   20:93  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+   24:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/SearchPage.tsx:24:7
+  22 |   useEffect(() => {
+  23 |     if (typeParam && (typeParam === 'anime' || typeParam === 'cinema' || typeParam === 'all')) {
+> 24 |       setActiveFilter(typeParam as any);
+     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |     }
+  26 |   }, [typeParam]);
+  27 |  react-hooks/set-state-in-effect
+   24:36  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+   40:36  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+   57:44  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+   70:6   warning  React Hook useEffect has a missing dependency: 'provider'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+  121:63  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/Watch.tsx
+   78:11  error    Error: Cannot access variable before it is declared
+
+`syncRangeForEpisode` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/Watch.tsx:78:11
+  76 |           const next = currentEp + 1;
+  77 |           setCurrentEp(next);
+> 78 |           syncRangeForEpisode(next);
+     |           ^^^^^^^^^^^^^^^^^^^ `syncRangeForEpisode` accessed before it is declared
+  79 |         }
+  80 |       },
+  81 |       goPrev: () => {
+
+/Users/otzua/CODE/REIATSU/frontend/src/pages/Watch.tsx:291:3
+  289 |   }, [currentEpisode, individualSource, activeSource, activeServer, currentEp]);
+  290 |
+> 291 |   const syncRangeForEpisode = (nextEp: number) => {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 292 |     if (!episodeData || episodeData.totalEpisodes <= 28) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 293 |     if (selectedRange && nextEp >= selectedRange[0] && nextEp <= selectedRange[1]) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 294 |
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 295 |     const rangeSize = 100;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 296 |     const start = Math.floor((nextEp - 1) / rangeSize) * rangeSize + 1;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 297 |     const end = Math.min(start + rangeSize - 1, episodeData.totalEpisodes);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 298 |     setSelectedRange([start, end]);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 299 |   };
+      | ^^^^^ `syncRangeForEpisode` is declared here
+  300 |
+  301 |   const handleNextEp = () => {
+  302 |     if (episodeData && currentEp < episodeData.totalEpisodes) {  react-hooks/immutability
+  246:39  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  256:6   warning  React Hook useEffect has a missing dependency: 'provider'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+
+/Users/otzua/CODE/REIATSU/frontend/src/services/animeApi.ts
+   75:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/services/beyondApi.ts
+  81:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/services/cinemaApi.ts
+   52:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   84:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/otzua/CODE/REIATSU/frontend/src/services/musicApi.ts
+  73:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 60 problems (58 errors, 2 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

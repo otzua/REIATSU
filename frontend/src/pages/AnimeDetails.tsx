@@ -16,6 +16,13 @@ const AnimeDetails = () => {
   const [animeInfo, setAnimeInfo] = useState<AnimeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [prevId, setPrevId] = useState(id);
+
+  if (id !== prevId) {
+    setPrevId(id);
+    setLoading(true);
+    setAnimeInfo(null);
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -23,7 +30,6 @@ const AnimeDetails = () => {
     
     // Scroll to top when ID changes
     window.scrollTo(0, 0);
-    setLoading(true);
 
     animeApi.getAnime(id, provider)
       .then((info) => {
@@ -49,7 +55,7 @@ const AnimeDetails = () => {
     return () => {
       isCancelled = true;
     };
-  }, [id, provider]);
+  }, [id, provider, navigate]);
 
   if (loading) {
     return (

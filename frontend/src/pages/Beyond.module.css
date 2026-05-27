@@ -14,6 +14,7 @@
 .miniSection {
   margin-top: 4rem;
   margin-bottom: 2rem;
+  padding: 0 var(--space-xl);
 }
 
 .miniHeader {
@@ -26,6 +27,11 @@
   color: var(--color-cream);
   letter-spacing: 0.1em;
   margin-bottom: 1.5rem;
+}
+
+.historyIcon {
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .miniGrid {
@@ -544,6 +550,21 @@
   max-width: 1600px;
   margin: 0 auto 2rem;
   padding: 0 4rem;
+}
+
+/* Left side of portalControls: label + toggle */
+.providerRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.providerLabel {
+  font-size: 0.75rem;
+  color: rgba(220, 201, 169, 0.4);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-family: var(--font-heading);
 }
 
 .serverToggle {

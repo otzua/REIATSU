@@ -82,7 +82,9 @@ const MusicPlayer: React.FC = () => {
 
   useEffect(() => {
     if (!currentTrack) return;
-    setResolvedArtistId(null);
+    const timer = setTimeout(() => {
+      setResolvedArtistId(null);
+    }, 0);
     musicApi.resolveArtistId(currentTrack.artist)
       .then(res => {
         if (res && res.id) {
@@ -90,6 +92,7 @@ const MusicPlayer: React.FC = () => {
         }
       })
       .catch(err => console.error("Error background resolving artist", err));
+    return () => clearTimeout(timer);
   }, [currentTrack]);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -118,13 +121,12 @@ const MusicPlayer: React.FC = () => {
         <div 
           className={styles.trackInfo} 
           onClick={() => setIsExpanded(true)}
-          style={{ cursor: 'pointer' }}
         >
           <div className={styles.thumbnail}>
             {currentTrack.poster ? (
-              <SmartImage src={currentTrack.poster} alt={currentTrack.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <SmartImage src={currentTrack.poster} alt={currentTrack.name} className={styles.thumbnailImg} />
             ) : (
-              <div style={{ background: '#333', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className={styles.fallbackThumbnail}>
                 <ListMusic size={24} opacity={0.3} />
               </div>
             )}
@@ -148,7 +150,6 @@ const MusicPlayer: React.FC = () => {
                   console.error("Failed to navigate to artist profile", err);
                 }
               }}
-              style={{ cursor: 'pointer', pointerEvents: 'auto' }}
               title={`View ${currentTrack.artist} Profile`}
             >
               {currentTrack.artist}
@@ -172,11 +173,11 @@ const MusicPlayer: React.FC = () => {
 
           <button className={styles.playPauseButton} onClick={togglePlay} disabled={loadingStream}>
             {loadingStream ? (
-              <Loader2 className="animate-spin" size={22} />
+              <Loader2 className={styles.spinnerIcon} size={22} />
             ) : isPlaying ? (
               <Pause size={22} fill="currentColor" />
             ) : (
-              <Play size={22} fill="currentColor" style={{ marginLeft: '3px' }} />
+              <Play size={22} fill="currentColor" className={styles.playIconOffset} />
             )}
           </button>
 
@@ -251,11 +252,7 @@ const MusicPlayer: React.FC = () => {
         </button>
       </div>
 
-      <style>{`
-        .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
-    </motion.div>
+      </motion.div>
 
     <AnimatePresence>
       {streamError && (

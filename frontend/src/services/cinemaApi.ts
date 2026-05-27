@@ -33,9 +33,46 @@ export interface CinemaMovieDetail {
   status?: string;
 }
 
+export interface TMDBRecord {
+  id: number;
+  title?: string;
+  name?: string;
+  original_title?: string;
+  original_name?: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  release_date?: string;
+  first_air_date?: string;
+  vote_average?: number;
+  overview?: string;
+  media_type?: string;
+}
+
+export interface TMDBResponse {
+  results?: TMDBRecord[];
+}
+
+export interface TMDBDetailResponse {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  overview?: string;
+  release_date?: string;
+  first_air_date?: string;
+  vote_average?: number;
+  genres?: { name: string }[];
+  seasons?: {
+    season_number: number;
+    episode_count: number;
+    name?: string;
+  }[];
+}
+
 async function tmdbFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
   if (!API_KEY) {
-    return { results: [] } as T;
+    return { results: [] } as unknown as T;
   }
   const queryParams = new URLSearchParams({ api_key: API_KEY, ...params });
   // Using the /tmdb-api proxy defined in vite.config.ts and vercel.json.
@@ -49,8 +86,8 @@ async function tmdbFetch<T>(path: string, params: Record<string, string> = {}): 
 export const cinemaApi = {
   // Get trending movies for the week
   getTrendingMovies: async (): Promise<CinemaMovie[]> => {
-    const data = await tmdbFetch<any>('/trending/movie/week');
-    return (data.results || []).map((m: any) => ({
+    const data = await tmdbFetch<TMDBResponse>('/trending/movie/week');
+    return (data.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.title || m.original_title || 'Untitled Movie',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
@@ -64,8 +101,8 @@ export const cinemaApi = {
 
   // Get trending TV shows for the week
   getTrendingTV: async (): Promise<CinemaMovie[]> => {
-    const data = await tmdbFetch<any>('/trending/tv/week');
-    return (data.results || []).map((m: any) => ({
+    const data = await tmdbFetch<TMDBResponse>('/trending/tv/week');
+    return (data.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.name || m.original_name || 'Untitled Show',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
@@ -79,15 +116,15 @@ export const cinemaApi = {
 
   // Search across movies and TV series
   search: async (query: string): Promise<CinemaMovie[]> => {
-    const data = await tmdbFetch<any>('/search/multi', { query });
+    const data = await tmdbFetch<TMDBResponse>('/search/multi', { query });
     return (data.results || [])
-      .filter((m: any) => m.media_type === 'movie' || m.media_type === 'tv')
-      .map((m: any) => ({
+      .filter((m: TMDBRecord) => m.media_type === 'movie' || m.media_type === 'tv')
+      .map((m: TMDBRecord) => ({
         id: m.id.toString(),
         title: m.title || m.name || m.original_title || 'Untitled',
         imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
         backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
-        mediaType: m.media_type as 'movie' | 'tv',
+        mediaType: (m.media_type || 'movie') as 'movie' | 'tv',
         releaseDate: m.release_date || m.first_air_date || '',
         rating: m.vote_average || 0,
         overview: m.overview || '',
@@ -97,7 +134,7 @@ export const cinemaApi = {
   // Get detailed information of a movie or TV show
   getMovieDetails: async (id: string, mediaType: 'movie' | 'tv'): Promise<CinemaMovieDetail> => {
     const path = `/${mediaType}/${id}`;
-    const data = await tmdbFetch<any>(path);
+    const data = await tmdbFetch<TMDBDetailResponse>(path);
     return {
       id: data.id.toString(),
       title: data.title || data.name || 'Untitled',
@@ -107,8 +144,8 @@ export const cinemaApi = {
       mediaType,
       releaseDate: data.release_date || data.first_air_date || '',
       rating: data.vote_average || 0,
-      genres: (data.genres || []).map((g: any) => g.name),
-      seasons: data.seasons ? data.seasons.map((s: any) => ({
+      genres: (data.genres || []).map((g: { name: string }) => g.name),
+      seasons: data.seasons ? data.seasons.map((s: { season_number: number; episode_count: number; name?: string }) => ({
         season_number: s.season_number,
         episode_count: s.episode_count,
         name: s.name,
@@ -118,8 +155,8 @@ export const cinemaApi = {
 
   // Get recommended titles for a movie or TV show
   getRecommendations: async (id: string, mediaType: 'movie' | 'tv'): Promise<CinemaMovie[]> => {
-    const data = await tmdbFetch<any>(`/${mediaType}/${id}/recommendations`);
-    return (data.results || []).map((m: any) => ({
+    const data = await tmdbFetch<TMDBResponse>(`/${mediaType}/${id}/recommendations`);
+    return (data.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.title || m.name || 'Untitled',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
@@ -133,8 +170,8 @@ export const cinemaApi = {
 
   // Get top rated movies
   getTopRated: async (): Promise<CinemaMovie[]> => {
-    const data = await tmdbFetch<any>('/movie/top_rated');
-    return (data.results || []).map((m: any) => ({
+    const data = await tmdbFetch<TMDBResponse>('/movie/top_rated');
+    return (data.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.title || m.original_title || 'Untitled Movie',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
@@ -148,8 +185,8 @@ export const cinemaApi = {
 
   // Get upcoming movies
   getUpcoming: async (): Promise<CinemaMovie[]> => {
-    const data = await tmdbFetch<any>('/movie/upcoming');
-    return (data.results || []).map((m: any) => ({
+    const data = await tmdbFetch<TMDBResponse>('/movie/upcoming');
+    return (data.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.title || m.original_title || 'Untitled Movie',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
@@ -169,19 +206,19 @@ export const cinemaApi = {
     
     // We fetch both movies and TV for a complete schedule
     const [movieData, tvData] = await Promise.all([
-      tmdbFetch<any>('/discover/movie', {
+      tmdbFetch<TMDBResponse>('/discover/movie', {
         'primary_release_date.gte': startDate,
         'primary_release_date.lte': endDate,
         'sort_by': 'popularity.desc'
       }),
-      tmdbFetch<any>('/discover/tv', {
+      tmdbFetch<TMDBResponse>('/discover/tv', {
         'first_air_date.gte': startDate,
         'first_air_date.lte': endDate,
         'sort_by': 'popularity.desc'
       })
     ]);
 
-    const movies = (movieData.results || []).map((m: any) => ({
+    const movies = (movieData.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.title || m.original_title || 'Untitled Movie',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
@@ -192,7 +229,7 @@ export const cinemaApi = {
       overview: m.overview || '',
     }));
 
-    const tv = (tvData.results || []).map((m: any) => ({
+    const tv = (tvData.results || []).map((m: TMDBRecord) => ({
       id: m.id.toString(),
       title: m.name || m.original_name || 'Untitled Show',
       imageUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',

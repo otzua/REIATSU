@@ -1,0 +1,11 @@
+/* AnimeHistory page-specific overrides */
+
+.contentPadding {
+  padding-top: 2rem;
+}
+
+.emptyMessage {
+  color: rgba(220, 201, 169, 0.6);
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}

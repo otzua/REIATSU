@@ -985,3 +985,161 @@
   0% { width: 0; }
   100% { width: 100%; }
 }
+
+/* ─────────────────────────────────────────
+   Beyond Watch — scoped additions
+   (all other styles reuse the base Watch classes)
+───────────────────────────────────────── */
+
+/* Sub-label beneath loading text */
+.loadingSubtext {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: var(--accent);
+  opacity: 0.6;
+  letter-spacing: 0.3em;
+  margin-top: 1rem;
+}
+
+/* Error screen paragraph */
+.errorMsg {
+  color: var(--color-cream);
+  opacity: 0.5;
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-inline: auto;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* No-stream "Extraction Failed" placeholder inside .videoWrapper */
+.extractionFailed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+}
+
+.accentIcon {
+  color: var(--accent);
+}
+
+.retryBtn {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.retryBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+
+/* epCount row variant — flex for Flame icon + text */
+.epCountRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* "QUALITY:" label in player controls */
+.qualityLabel {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: rgba(220, 201, 169, 0.4);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Detail section block (synopsis, tags) inside .textInfo */
+.detailSection {
+  margin-top: 1.5rem;
+}
+
+/* Section sub-heading (Info / Tag icons + label) */
+.detailSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+/* Flex wrap container for tag pills */
+.tagsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Individual genre / tag chip */
+.tagPill {
+  font-size: 0.7rem;
+  color: rgba(220, 201, 169, 0.6);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(220, 201, 169, 0.1);
+}
+
+/* Sidebar header section */
+.sidebarHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(220, 201, 169, 0.1);
+}
+
+/* Sidebar header h3 */
+.sidebarTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+/* Sidebar body wrapper */
+.sidebarBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Metadata label (RELEASE DATE, STUDIO…) */
+.metaLabel {
+  display: block;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+/* Metadata value */
+.metaValue {
+  color: var(--color-cream);
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+

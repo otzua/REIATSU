@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Film, Play, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { animeApi, type AnimeCard } from '../services/animeApi';
-import { cinemaApi } from '../services/cinemaApi';
+import { animeApi, type AnimeCard, type SearchResult } from '../services/animeApi';
+import { cinemaApi, type CinemaMovie } from '../services/cinemaApi';
 import SmartImage from '../components/SmartImage';
 import styles from './SearchPage.module.css';
 
@@ -14,16 +14,20 @@ const SearchPage = () => {
   const provider = searchParams.get('provider') || undefined;
   
   const [animeResults, setAnimeResults] = useState<AnimeCard[]>([]);
-  const [cinemaResults, setCinemaResults] = useState<any[]>([]);
+  const [cinemaResults, setCinemaResults] = useState<CinemaMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [didYouMean, setDidYouMean] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'all' | 'anime' | 'cinema'>(typeParam as any);
+  
+  const initialFilter = (typeParam === 'anime' || typeParam === 'cinema' || typeParam === 'all') ? typeParam : 'all';
+  const [activeFilter, setActiveFilter] = useState<'all' | 'anime' | 'cinema'>(initialFilter);
+  const [prevTypeParam, setPrevTypeParam] = useState(typeParam);
 
-  useEffect(() => {
-    if (typeParam && (typeParam === 'anime' || typeParam === 'cinema' || typeParam === 'all')) {
-      setActiveFilter(typeParam as any);
+  if (typeParam !== prevTypeParam) {
+    setPrevTypeParam(typeParam);
+    if (typeParam === 'anime' || typeParam === 'cinema' || typeParam === 'all') {
+      setActiveFilter(typeParam);
     }
-  }, [typeParam]);
+  }
 
   useEffect(() => {
     if (!query) return;
@@ -37,7 +41,7 @@ const SearchPage = () => {
         ]);
 
         const queryLower = query.toLowerCase();
-        const aData = animeData as any;
+        const aData = animeData as SearchResult & { suggestion?: string };
         
         // Handle "Did you mean?" from API
         setDidYouMean(aData?.suggestion || '');
@@ -54,7 +58,7 @@ const SearchPage = () => {
         
         // Strict filter for Cinema results to ensure relevance
         setCinemaResults(
-          (cinemaData || []).filter((item: any) => 
+          (cinemaData || []).filter((item) => 
             (item.title || '').toLowerCase().includes(queryLower) ||
             queryLower.includes((item.title || '').toLowerCase())
           )
@@ -67,7 +71,7 @@ const SearchPage = () => {
     };
 
     fetchResults();
-  }, [query]);
+  }, [query, provider]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -110,15 +114,15 @@ const SearchPage = () => {
 
           <div className={styles.filtersContainer}>
             <div className={styles.filters}>
-              {[
+              {([
                 { id: 'all', label: 'All Results', count: animeResults.length + cinemaResults.length },
                 { id: 'anime', label: 'Anime', count: animeResults.length },
                 { id: 'cinema', label: 'Cinema', count: cinemaResults.length }
-              ].map((filter) => (
+              ] as const).map((filter) => (
                 <button 
                   key={filter.id}
                   className={`${styles.filterBtn} ${activeFilter === filter.id ? styles.active : ''}`}
-                  onClick={() => setActiveFilter(filter.id as any)}
+                  onClick={() => setActiveFilter(filter.id)}
                 >
                   <span className={styles.btnText}>
                     {filter.label}

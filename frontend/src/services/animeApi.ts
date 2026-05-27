@@ -72,7 +72,7 @@ export interface AnimeDetail {
     malId?: string;
     alId?: string;
   };
-  seasons: any[];
+  seasons: unknown[];
   related: AnimeCard[];
   recommended: AnimeCard[];
 }
@@ -105,6 +105,15 @@ export interface EpisodeDetail {
 }
 
 
+export interface ScheduleAnime {
+  mal_id: number;
+  title: string;
+  images: { jpg: { large_image_url: string } };
+  broadcast: { time: string; string: string };
+  genres: { name: string }[];
+  synopsis: string;
+}
+
 export const animeApi = {
   getHome: (provider?: string) => 
     apiFetch<HomeData>(provider ? `${BASE}/v2/${provider}/home` : `${BASE}/home`),
@@ -133,5 +142,5 @@ export const animeApi = {
       : `${BASE}/type/${name}?page=${page}`),
 
   getSchedule: (day: string) =>
-    apiFetch<any[]>(`${BASE}/schedule?day=${day}`),
+    apiFetch<ScheduleAnime[]>(`${BASE}/schedule?day=${day}`),
 };

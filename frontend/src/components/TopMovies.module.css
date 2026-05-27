@@ -119,6 +119,11 @@
   animation: shimmer 1.5s infinite;
 }
 
+/* Fixed height for skeleton loading cards */
+.skeletonCard {
+  height: 300px;
+}
+
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -156,6 +161,18 @@
   position: absolute;
   top: 1rem;
   left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+/* Right-aligned variant (movies, upcoming) */
+.cardBadgesRight {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  left: unset;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

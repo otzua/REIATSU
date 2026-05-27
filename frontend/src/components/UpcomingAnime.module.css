@@ -1,0 +1,36 @@
+/* UpcomingAnime — purple theme overrides on top of TopMovies shared styles */
+
+/* Accent bar override: purple instead of red */
+.accentBox {
+  background: #a855f7;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+/* Title row — flex for the calendar icon */
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.calendarIcon {
+  color: #a855f7;
+  flex-shrink: 0;
+}
+
+/* SOON badge — purple background */
+.soonBadge {
+  background: #a855f7;
+  box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4);
+}
+
+/* "COMING SOON" type pill — purple border + text */
+.comingSoon {
+  border-color: rgba(168, 85, 247, 0.2) !important;
+  color: #a855f7 !important;
+}
+
+/* Skeleton card height */
+.skeletonCard {
+  height: 300px;
+}

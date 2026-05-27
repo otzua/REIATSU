@@ -18,6 +18,15 @@ const CinemaDetails = () => {
   const [recommended, setRecommended] = useState<CinemaMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [prevId, setPrevId] = useState(id);
+  const [prevMediaType, setPrevMediaType] = useState(mediaTypeParam);
+
+  if (id !== prevId || mediaTypeParam !== prevMediaType) {
+    setPrevId(id);
+    setPrevMediaType(mediaTypeParam);
+    setLoading(true);
+    setMovie(null);
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -25,7 +34,6 @@ const CinemaDetails = () => {
     // Scroll to top when ID changes
     window.scrollTo(0, 0);
 
-    setLoading(true);
     Promise.all([
       cinemaApi.getMovieDetails(id, mediaTypeParam),
       cinemaApi.getRecommendations(id, mediaTypeParam)

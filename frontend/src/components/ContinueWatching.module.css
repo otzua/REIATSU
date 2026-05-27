@@ -4,6 +4,11 @@
   margin-top: 1.5rem;
 }
 
+/* Section variant with extra bottom margin (home page usage) */
+.sectionSpaced {
+  margin-bottom: 4rem;
+}
+
 .header, .grid {
   max-width: 1400px;
   margin-left: auto;
@@ -16,6 +21,14 @@
   justify-content: space-between;
   margin-bottom: 2rem;
   padding: 0 0.5rem;
+}
+
+/* Left group inside header: accentBox + title */
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
 }
 
 .titleLink {
@@ -175,6 +188,30 @@
   flex-direction: column;
   justify-content: center;
   gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Column stack inside info (ep title + timestamp) */
+.metaStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: 0.1rem;
+}
+
+.timestamp {
+  font-size: 0.65rem;
+  color: rgba(220, 201, 169, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.2rem;
+}
+
+.tvIcon {
+  vertical-align: middle;
+  margin-right: 4px;
 }
 
 .epInfo {
@@ -220,6 +257,20 @@
   scrollbar-width: none;
   padding-bottom: 2rem;
   padding-right: var(--page-padding-x);
+}
+
+/* Responsive wrap grid variant used on the history full page */
+.cwGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* Card variant that expands to fill its grid cell (no max-width cap) */
+.cardFull {
+  max-width: none;
+  width: 100%;
 }
 
 .grid::-webkit-scrollbar {

@@ -186,13 +186,11 @@
 .seekBar::-webkit-slider-runnable-track {
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    to right,
-    #fff 0%,
-    #fff var(--progress),
-    rgba(255, 255, 255, 0.1) var(--progress),
-    rgba(255, 255, 255, 0.1) 100%
-  );
+  background: linear-gradient(to right,
+      #fff 0%,
+      #fff var(--progress),
+      rgba(255, 255, 255, 0.1) var(--progress),
+      rgba(255, 255, 255, 0.1) 100%);
   border-radius: 2px;
 }
 
@@ -256,9 +254,11 @@
     width: 35%;
     min-width: 180px;
   }
+
   .sideControls {
     width: 25%;
   }
+
   .volumeBar {
     width: 80px;
   }
@@ -288,7 +288,7 @@
     width: auto;
     gap: 0.5rem;
   }
-  
+
   .volumeBar {
     display: none;
   }
@@ -299,7 +299,7 @@
     padding: 0;
     flex: 1;
   }
-  
+
   .trackInfo:hover {
     background: none;
   }
@@ -314,7 +314,7 @@
   .mainControls {
     gap: 0.5rem;
   }
-  
+
   .controlButton {
     display: none;
   }
@@ -328,19 +328,33 @@
     height: 3px;
     gap: 0;
   }
-  
+
   .progressBar .time {
     display: none;
   }
-  
+
   .seekBar {
     height: 3px;
     border-radius: 0;
     margin: 0;
   }
-  
+
   .seekBar::-webkit-slider-runnable-track {
     border-radius: 0;
+  }
+}
+
+.spinnerIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
 

@@ -203,6 +203,11 @@
   animation: shimmer 1.5s infinite;
 }
 
+/* Fixed height for skeleton loading cards */
+.skeletonCard {
+  height: 350px;
+}
+
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

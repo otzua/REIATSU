@@ -107,30 +107,58 @@ const Schedule = () => {
   // Load Anime Schedule
   useEffect(() => {
     if (isCinema) return;
-    setLoading(true);
-    setAnimes([]);
+    
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        setLoading(true);
+        setAnimes([]);
+      }
+    });
+
     animeApi.getSchedule(selectedDay.apiFilter)
       .then((data) => {
-        const valid = data.filter((a: any) => a.broadcast?.time && a.broadcast.time !== 'Unknown');
-        valid.sort((a: any, b: any) => a.broadcast.time.localeCompare(b.broadcast.time));
+        if (!active) return;
+        const valid = (data as ScheduleAnime[]).filter((a) => a.broadcast?.time && a.broadcast.time !== 'Unknown');
+        valid.sort((a, b) => a.broadcast.time.localeCompare(b.broadcast.time));
         setAnimes(valid);
       })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [selectedDay.apiFilter, isCinema]);
 
   // Load Cinema Schedule
   useEffect(() => {
     if (!isCinema) return;
-    setLoading(true);
-    setMovies([]);
+
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        setLoading(true);
+        setMovies([]);
+      }
+    });
+
     const year = new Date().getFullYear();
     cinemaApi.getReleasesByMonth(year, selectedMonth.index)
       .then((data) => {
+        if (!active) return;
         setMovies(data);
       })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [selectedMonth.index, isCinema]);
 
   const handleAnimeClick = async (anime: ScheduleAnime) => {
@@ -305,7 +333,7 @@ const Schedule = () => {
                     <div className={styles.info}>
                       <h3 className={styles.animeTitle}>{anime.title}</h3>
                       <div className={styles.genres}>
-                        {anime.genres?.slice(0, 2).map((g: any) => (
+                        {anime.genres?.slice(0, 2).map((g) => (
                           <span key={g.name} className={styles.genreTag}>{g.name}</span>
                         ))}
                       </div>
