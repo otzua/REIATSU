@@ -81,16 +81,11 @@
 
 /* Mobile Responsiveness */
 @media (max-width: 1024px) {
-  .factsSection {
-    padding: var(--space-lg);
-  }
 }
 
 @media (max-width: 768px) {
   .factsSection {
-    padding: var(--space-md);
     margin-top: 2rem;
-    margin-bottom: 6rem; /* Space for the bottom navbar */
   }
 
   .title {

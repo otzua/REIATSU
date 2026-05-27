@@ -92,7 +92,29 @@ const AlbumDetails: React.FC = () => {
 
     try {
       setDownloadingIds(prev => ({ ...prev, [track.id]: true }));
-      await musicApi.download(track);
+      const response: any = await musicApi.download(track);
+
+      if (response && response.downloadUrl) {
+        // Case 1: Backend returns a direct URL to the file
+        const link = document.createElement('a');
+        link.href = response.downloadUrl;
+        link.setAttribute('download', `${track.artist} - ${track.name}.flac`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } else {
+        // Case 2: Backend returns the file Blob or binary data
+        const blob = response instanceof Blob ? response : new Blob([response.data || response]);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${track.artist} - ${track.name}.flac`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }
+
       setDownloadedIds(prev => ({ ...prev, [track.id]: true }));
     } catch (err) {
       console.error("Failed to download track", err);

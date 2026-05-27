@@ -123,7 +123,7 @@ const Hero = ({ provider }: { provider?: string }) => {
                       )}
                     </div>
                   </div>
-                  <div className={styles.ctaRow} style={{ marginTop: '2.5rem' }}>
+                  <div className={styles.ctaRow}>
                     <span className={styles.watchPill}>
                       <Play size={16} fill="currentColor" />
                       WATCH NOW

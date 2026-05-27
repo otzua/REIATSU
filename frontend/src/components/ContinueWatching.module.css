@@ -1,7 +1,13 @@
 .section {
   width: 100%;
-  padding: var(--space-xl);
-  margin-top: 2rem;
+  padding: var(--space-xl) var(--page-padding-x);
+  margin-top: 1.5rem;
+}
+
+.header, .grid {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .header {
@@ -100,6 +106,12 @@
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(20px);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(184, 58, 45, 0.3);
+  transform: translateY(-4px);
 }
 
 .cardLink {
@@ -198,9 +210,20 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-auto-flow: column;
+  grid-auto-columns: min(340px, 85vw);
+  gap: var(--grid-gap);
   margin-top: 1.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 2rem;
+  padding-right: var(--page-padding-x);
+}
+
+.grid::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -220,8 +243,9 @@
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 1.2rem;
+    gap: var(--grid-gap);
     padding-bottom: 1.5rem;
+    padding-right: var(--space-md);
     -webkit-overflow-scrolling: touch;
   }
 
@@ -232,6 +256,7 @@
   .card {
     flex: 0 0 280px;
     scroll-snap-align: start;
+    transform: none !important;
   }
 
   .cardLink:active {

@@ -1,7 +1,7 @@
 .searchPage {
   min-height: 100vh;
   background: var(--bg-main);
-  padding: 8rem 4rem 4rem 4rem;
+  padding: 8rem 4rem 6rem 4rem;
   color: var(--color-cream);
 }
 
@@ -104,6 +104,15 @@
   box-shadow: 0 8px 20px rgba(184, 58, 45, 0.3);
 }
 
+.activeIndicator {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: 12px;
+  z-index: 1;
+  box-shadow: 0 8px 20px rgba(184, 58, 45, 0.3);
+}
+
 .count {
   font-size: 0.7rem;
   background: rgba(0, 0, 0, 0.2);
@@ -144,8 +153,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width), 1fr));
+  gap: var(--grid-gap);
 }
 
 .card {
@@ -367,17 +376,69 @@
 
 @media (max-width: 1024px) {
   .searchPage {
-    padding: 8rem 2rem 4rem 2rem;
+    padding: 8rem 2rem 2rem 2rem;
   }
 }
 
 @media (max-width: 768px) {
-  .header h1 {
-    font-size: 2.5rem;
+  .searchPage {
+    padding: 5.5rem 1rem 2rem 1rem;
   }
-  
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .queryDisplay {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width), 1fr));
+    gap: var(--grid-gap);
+  }
+
+  .card:hover {
+    transform: none; /* Disable hover lift on touch */
+  }
+
+  .cardOverlay {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  }
+}
+
+@media (max-width: 480px) {
+  .searchPage {
+    padding: 5rem 0.75rem var(--mobile-bottom-area) 0.75rem;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+  }
+  .queryDisplay {
+    font-size: 0.9rem;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--grid-gap);
+  }
+  .filtersContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    width: 100%;
+    padding-bottom: 0.5rem;
+  }
+  .filters {
+    display: inline-flex;
+    width: max-content;
+  }
+  .filterBtn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.8rem;
+  }
+  .section {
+    margin-bottom: 3rem;
   }
 }

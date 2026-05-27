@@ -30,7 +30,7 @@ const CinemaMovies = () => {
   }, [activeTab]);
 
   return (
-    <section className={styles.section} style={{ marginTop: '1rem' }}>
+    <section className={styles.section}>
       {/* Tabs Selector */}
       <div style={{
         display: 'flex',

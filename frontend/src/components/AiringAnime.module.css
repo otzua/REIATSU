@@ -1,7 +1,7 @@
 .section {
   width: 100%;
   padding: var(--space-xl);
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   background: radial-gradient(circle at 50% -20%, rgba(78, 104, 81, 0.05) 0%, transparent 50%);
 }
 
@@ -31,8 +31,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width), 1fr));
+  gap: var(--grid-gap);
 }
 
 .animeCard {
@@ -42,6 +42,12 @@
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   position: relative;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animeCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(78, 104, 81, 0.3);
 }
 
 .cardLink {
@@ -98,6 +104,38 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.cardBadges {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.subBadge, .dubBadge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+
+.subBadge {
+  background: rgba(184, 58, 45, 0.85);
+  color: white;
+}
+
+.dubBadge {
+  background: rgba(220, 201, 169, 0.85);
+  color: #1a1a1a;
 }
 
 .dot {
@@ -195,16 +233,13 @@
 
 @media (max-width: 1024px) {
   .grid {
-    gap: 1.5rem;
+    gap: var(--grid-gap);
   }
 }
 
 @media (max-width: 768px) {
   .section {
-    padding: var(--space-md) 0 var(--space-md) var(--space-md);
-  }
-  .header {
-    padding-right: var(--space-md);
+    padding: var(--space-md) var(--page-padding-x);
   }
   .title {
     font-size: 2.2rem;
@@ -213,7 +248,7 @@
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 1.2rem;
+    gap: var(--grid-gap);
     padding-bottom: 1.5rem;
     -webkit-overflow-scrolling: touch;
   }
@@ -223,6 +258,7 @@
   .animeCard {
     flex: 0 0 180px;
     scroll-snap-align: start;
+    transform: none !important;
   }
   .cardLink:active {
     transform: scale(0.97);
@@ -238,7 +274,7 @@
     margin-bottom: 2rem;
   }
   .grid {
-    gap: 0.8rem;
+    gap: var(--grid-gap);
   }
   .animeCard {
     flex: 0 0 150px;

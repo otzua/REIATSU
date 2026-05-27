@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1, Volume2, VolumeX, ListMusic, Loader2, ChevronUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1, Volume2, VolumeX, ListMusic, Loader2, ChevronUp, AlertCircle, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMusic } from '../../context/MusicContext';
 import { musicApi } from '../../services/musicApi';
 import SmartImage from '../SmartImage';
@@ -14,6 +14,8 @@ const MusicPlayer: React.FC = () => {
     currentTrack,
     isPlaying,
     loadingStream,
+    streamError,
+    setStreamError,
     volume,
     muted,
     currentTime,
@@ -254,6 +256,29 @@ const MusicPlayer: React.FC = () => {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </motion.div>
+
+    <AnimatePresence>
+      {streamError && (
+        <motion.div
+          initial={{ opacity: 0, y: 50, scale: 0.95, x: '-50%' }}
+          animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+          exit={{ opacity: 0, y: 20, scale: 0.95, x: '-50%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className={styles.errorToast}
+        >
+          <div className={styles.errorIcon}>
+            <AlertCircle size={20} />
+          </div>
+          <div className={styles.errorContent}>
+            <div className={styles.errorTitle}>Playback Error</div>
+            <div className={styles.errorMessage}>{streamError}</div>
+          </div>
+          <button className={styles.errorClose} onClick={() => setStreamError(null)}>
+            <X size={16} />
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
     </>
   );
 };

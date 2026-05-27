@@ -129,7 +129,7 @@ const CinemaHero = () => {
                   </div>
                   <h1 className={styles.title}>{slide.title}</h1>
                   <p className={styles.description}>{slide.overview?.slice(0, 180)}...</p>
-                  <div className={styles.ctaRow} style={{ marginTop: '2.5rem' }}>
+                  <div className={styles.ctaRow}>
                     <span className={styles.watchPill}>
                       <Play size={16} fill="currentColor" />
                       WATCH NOW

@@ -33,12 +33,7 @@ const MusicHistory = () => {
               Your music history is empty.
             </div>
           ) : (
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-              gap: '1.5rem',
-              marginTop: '1.5rem' 
-            }}>
+            <div className={cwStyles.grid}>
               {recentlyPlayed.map((item, index) => {
                 const isActive = currentTrack?.id === item.id;
                 
@@ -52,8 +47,6 @@ const MusicHistory = () => {
                     transition={{ delay: (index % 10) * 0.05 }}
                     whileHover={{ y: -5, scale: 1.01, transition: { duration: 0.15, ease: "easeOut" } }}
                     style={{ 
-                      width: '100%', 
-                      maxWidth: 'none', 
                       cursor: 'pointer',
                       borderColor: isActive ? 'var(--accent)' : 'rgba(220, 201, 169, 0.1)'
                     }}

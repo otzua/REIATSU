@@ -401,20 +401,25 @@
   }
   
   .albumTitle {
-    font-size: 3rem;
+    font-size: clamp(2rem, 7vw, 3.5rem);
   }
   
   .posterWrapper {
-    width: 220px;
-    height: 220px;
+    width: clamp(160px, 40vw, 220px);
+    height: clamp(160px, 40vw, 220px);
   }
   
   .artistRow {
     justify-content: center;
   }
   
+  .actionRow {
+    justify-content: center;
+    width: 100%;
+  }
+  
   .mainPlayBtn {
-    margin: 30px auto 0;
+    margin: 30px 0 0;
   }
   
   .durationCol {
@@ -422,6 +427,64 @@
   }
   
   .tableHeader, .trackRow {
-    grid-template-columns: 40px 1fr 60px;
+    grid-template-columns: 40px 1fr 80px;
+    padding: 12px 10px;
+  }
+  
+  .actionsCol {
+    opacity: 1;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navBar {
+    padding: 1rem 5% 0.5rem;
+  }
+
+  .header {
+    padding-top: 60px;
+    gap: 1.5rem;
+  }
+
+  .albumTitle {
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+  }
+
+  .tracksSection {
+    padding: 0 4%;
+  }
+
+  .tableHeader, .trackRow {
+    grid-template-columns: 40px 1fr 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding-top: 40px;
+  }
+
+  .albumTitle {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .posterWrapper {
+    width: clamp(130px, 38vw, 180px);
+    height: clamp(130px, 38vw, 180px);
+  }
+
+  .mainPlayBtn {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  .tracksSection {
+    padding: 0 0.5rem;
+  }
+
+  .tableHeader, .trackRow {
+    grid-template-columns: 36px 1fr 60px;
+    padding: 10px 8px;
   }
 }

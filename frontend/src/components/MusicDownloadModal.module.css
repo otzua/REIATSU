@@ -10,6 +10,7 @@
   position: fixed;
   top: 20%;
   left: 50%;
+  transform: translateX(-50%);
   width: 90%;
   max-width: 480px;
   background: rgba(26, 26, 26, 0.8);
@@ -20,8 +21,18 @@
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 
               inset 0 0 40px rgba(220, 201, 169, 0.05);
   backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   font-family: var(--font-body);
 }
+
+@media (max-width: 480px) {
+  .modal {
+    top: 15%;
+    padding: 1.5rem;
+    border-radius: 24px;
+  }
+}
+
 
 .header {
   display: flex;

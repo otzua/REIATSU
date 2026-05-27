@@ -7,6 +7,7 @@ interface MusicContextType {
   isPlaying: boolean;
   loadingStream: boolean;
   streamError: string | null;
+  setStreamError: (error: string | null) => void;
   volume: number;
   muted: boolean;
   progress: number;
@@ -221,7 +222,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <MusicContext.Provider value={{
-      currentTrack, queue, isPlaying, loadingStream, streamError,
+      currentTrack, queue, isPlaying, loadingStream, streamError, setStreamError,
       volume, muted, progress, currentTime, duration, shuffle, repeat,
       isQueueOpen, setIsQueueOpen, isExpanded, setIsExpanded,
       playTrack, togglePlay, skipForward, skipBack, setVolume, setMuted, seek,

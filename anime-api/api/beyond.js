@@ -364,8 +364,10 @@ beyond.get('/proxy-m3u8', async (c) => {
 
     manifest = manifest.replace(/^(?!#)(.+)$/gm, (match) => {
       const segmentUrl = match.startsWith('http') ? match : baseUrl + match;
-      const encodedUrl = encodeURIComponent(segmentUrl);
-      return `/api/beyond/proxy-segment?url=${encodedUrl}`;
+      // OPTIMIZATION: Individual video segments (.ts files) are served from edge CDNs that do not enforce the Referer header.
+      // Returning the absolute segment CDN URL directly allows the browser to stream segments directly without proxying
+      // them through the serverless function, completely eliminating serverless timeouts and severe buffering.
+      return segmentUrl;
     });
 
     c.header('Content-Type', 'application/vnd.apple.mpegurl');

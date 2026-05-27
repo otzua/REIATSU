@@ -464,30 +464,76 @@
 
 @media (max-width: 768px) {
   .sectionsContainer, .searchBarWrapper {
-    padding: 0 1.5rem;
+    padding: 0 1rem;
   }
   .heroSkeleton {
-    height: 540px;
-    margin-top: 6rem;
+    height: 72vh;
+    min-height: 440px;
+    border-radius: 0;
+    /* nav is at the bottom on mobile — no top margin needed */
+    margin-top: 0;
+  }
+  .miniGrid {
+    /* Horizontal scroll on mobile for bigger cards */
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1rem;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+  .miniGrid::-webkit-scrollbar { display: none; }
+  .miniCard {
+    flex: 0 0 220px;
+    scroll-snap-align: start;
+  }
+  .miniCard:hover {
+    transform: none;
+  }
+  .miniPlayOverlay {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.4);
+  }
+  .searchBarWrapper {
+    margin: 1rem auto 2rem;
+  }
+  .portalControls {
+    padding: 0 1rem;
   }
 }
 
 @media (max-width: 600px) {
   .overlay {
-    padding: 1rem;
+    padding: 0;
+    align-items: flex-end;
   }
   .modal {
-    border-radius: 30px;
+    border-radius: 30px 30px 0 0;
+    max-height: 95vh;
   }
   .modalBody {
-    padding: 2rem;
+    padding: 1.5rem;
   }
   .modalTitleText {
     font-size: 1.1rem;
   }
-  .miniGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .sectionsContainer {
+    padding: 0 0.75rem;
+  }
+  .miniCard {
+    flex: 0 0 180px;
+  }
+  .modalTitleText {
+    font-size: 1rem;
+  }
+  .modalBody {
+    padding: 1.25rem;
+  }
+  .modalHeader {
+    padding: 1.25rem 1.25rem;
   }
 }
 

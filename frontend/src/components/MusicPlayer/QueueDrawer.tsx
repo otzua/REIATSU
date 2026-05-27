@@ -29,7 +29,7 @@ const QueueDrawer: React.FC = () => {
           top: 0,
           right: 0,
           width: '350px',
-          height: '100vh',
+          height: '100dvh',
           background: 'rgba(12, 12, 12, 0.95)',
           backdropFilter: 'blur(30px)',
           borderLeft: '1px solid rgba(255, 255, 255, 0.08)',

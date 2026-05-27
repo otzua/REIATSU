@@ -72,12 +72,7 @@ const AnimeHistory = () => {
               Your anime history is empty.
             </div>
           ) : (
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-              gap: '1.5rem',
-              marginTop: '1.5rem' 
-            }}>
+            <div className={cwStyles.grid}>
               {history.map((item, index) => {
                 const watchLink = `/${item.provider || 'anime'}/watch/${item.animeId}?ep=${item.episodeNumber}`;
 
@@ -90,7 +85,6 @@ const AnimeHistory = () => {
                     viewport={{ once: true }}
                     transition={{ delay: (index % 10) * 0.05 }}
                     whileHover={{ y: -5, scale: 1.01, transition: { duration: 0.15, ease: "easeOut" } }}
-                    style={{ width: '100%', maxWidth: 'none' }}
                   >
                     <Link to={watchLink} className={cwStyles.cardLink}>
                       <div className={cwStyles.posterWrapper}>

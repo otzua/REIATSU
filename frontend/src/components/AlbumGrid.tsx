@@ -40,15 +40,15 @@ const AlbumGrid: React.FC<AlbumGridProps> = ({ title, data }) => {
                 <SmartImage src={item.poster} alt={item.name} className={styles.artworkImg} />
                 
                 <div className={styles.overlay}>
-                  <div className="flex flex-col items-center gap-2">
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                     <Eye color="white" size={36} className={styles.playIcon} />
-                    <span className="text-white text-xs font-bold tracking-wider uppercase">View Tracks</span>
+                    <span style={{ color: '#fff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05rem', textTransform: 'uppercase' }}>View Tracks</span>
                   </div>
                 </div>
 
                 <div className={styles.actions}>
                   {item.year && (
-                    <div className="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded border border-white/10 backdrop-blur">
+                    <div style={{ background: 'rgba(0, 0, 0, 0.8)', color: '#fff', fontSize: '10px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)' }}>
                       {item.year}
                     </div>
                   )}

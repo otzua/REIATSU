@@ -29,8 +29,19 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--grid-min-width);
+  gap: var(--grid-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 2rem;
+  padding-right: var(--page-padding-x);
+}
+
+.grid::-webkit-scrollbar {
+  display: none;
 }
 
 .animeCard {
@@ -41,6 +52,7 @@
   transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
+  scroll-snap-align: start;
 }
 
 .animeCard:hover {
@@ -217,7 +229,7 @@
 
 @media (max-width: 768px) {
   .section {
-    padding: var(--space-md) 0 var(--space-md) var(--space-md);
+    padding: var(--space-md) var(--page-padding-x);
     margin-top: 1rem;
   }
 
@@ -227,15 +239,15 @@
 
   .header {
     margin-bottom: 2rem;
-    padding-right: var(--space-md);
   }
 
   .grid {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 1.2rem;
+    gap: var(--grid-gap);
     padding-bottom: 1.5rem;
+    padding-right: var(--page-padding-x);
     -webkit-overflow-scrolling: touch;
   }
 

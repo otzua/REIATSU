@@ -21,7 +21,7 @@ const UpcomingMovies = () => {
   if (loading && movies.length === 0) return null;
 
   return (
-    <section className={styles.section} style={{ marginTop: '4rem' }}>
+    <section className={styles.section}>
       <div className={styles.header}>
         <div className={styles.accentBox} style={{ background: '#3b82f6' }}></div>
         <h2 className={styles.title} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>

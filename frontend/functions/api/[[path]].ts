@@ -24,7 +24,7 @@ export const onRequest: PagesFunction = async (context) => {
       body: context.request.body,
       redirect: 'follow'
     });
-    
+
     // We need to handle headers specifically sometimes, but this is a basic proxy
     return fetch(newRequest);
   }

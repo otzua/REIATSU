@@ -3,7 +3,7 @@
   min-height: 100vh;
   background: #000;
   color: #fff;
-  padding-bottom: 120px; /* Space for player */
+  padding-bottom: 2rem;
   overflow: hidden;
 }
 
@@ -422,7 +422,6 @@
   transform: scale(1.05);
 }
 
-/* Responsive Rules */
 @media (max-width: 992px) {
   .header {
     flex-direction: column;
@@ -436,17 +435,64 @@
   }
   
   .albumTitle {
-    font-size: 2.2rem;
+    font-size: clamp(2rem, 7vw, 2.8rem);
   }
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding-bottom: 180px; /* music player + bottom nav */
+  }
+  
+  .navBar {
+    padding: 1.5rem 4% 1rem;
+  }
+  
+  .header {
+    padding: 1.5rem 4%;
+  }
+  
+  .tracksSection {
+    padding: 0 3%;
+  }
+
   .posterWrapper {
-    width: 200px;
-    height: 200px;
+    width: clamp(150px, 45vw, 200px);
+    height: clamp(150px, 45vw, 200px);
   }
   
   .durationCol {
     display: none;
+  }
+  
+  .rowActionBtn {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
+  
+  .actionsCol {
+    width: 80px;
+    gap: 6px;
+  }
+  
+  .trackRow {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .tableHeader {
+    padding: 0.8rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .albumTitle {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+  }
+  .mainPlayBtn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  .tracksSection {
+    padding: 0 0.5rem;
   }
 }

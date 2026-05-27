@@ -14,12 +14,14 @@ const Home = () => {
       <HalftoneWave />
       <div className={styles.content}>
         <Hero />
-        <ContinueWatching />
-        <AiringAnime />
-        <UpcomingAnime />
-        <TopMovies />
-        <TopAnime />
-        <AnimeFacts />
+        <div className={styles.gridsWrapper}>
+          <ContinueWatching />
+          <AiringAnime />
+          <UpcomingAnime />
+          <TopMovies />
+          <TopAnime />
+          <AnimeFacts />
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  padding: 8rem 2rem 4rem;
+  padding: 8rem 2rem 2rem;
   scrollbar-gutter: stable;
 }
 
@@ -680,11 +680,6 @@
   transform: scale(1.05);
 }
 
-.animeDetails {
-  margin-top: 3rem;
-  padding-bottom: 4rem;
-}
-
 .recommendedSection {
   margin-top: 2rem;
   padding-bottom: 5rem;
@@ -814,14 +809,32 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 8rem 1rem 4rem;
+    padding: 5.5rem 0.875rem var(--mobile-bottom-area);
   }
-  
+
+  .topNav {
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.75rem;
+    overflow: hidden;
+  }
+
+  .animeNameLink {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+    display: inline-block;
+  }
+
   .playerControls {
     flex-direction: column;
     align-items: flex-start;
-    padding: 1.5rem;
-    gap: 1.5rem;
+    padding: 1.25rem;
+    gap: 1.25rem;
   }
   
   .epMeta {
@@ -834,15 +847,18 @@
     justify-content: space-between;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .navButtons {
     width: 100%;
+    display: flex;
+    gap: 0.5rem;
   }
 
   .navBtn {
     flex: 1;
+    min-height: 44px;
   }
 
   .divider {
@@ -855,41 +871,76 @@
   }
   
   .miniPoster {
-    display: none;
+    display: block; /* Show poster on mobile */
+    width: 120px;
+  }
+
+  .animeMainInfo {
+    gap: 1.5rem;
   }
   
   .animeTitle {
     font-size: 1.5rem;
   }
+
+  .sidebar {
+    height: 55vh;
+    min-height: 360px;
+  }
+
+  .recommendedGrid {
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width), 1fr));
+    gap: var(--grid-gap);
+  }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: 6rem 0.5rem 2rem;
+    padding: 5rem 0.5rem var(--mobile-bottom-area);
   }
   
   .playerControls {
     padding: 1rem;
     gap: 1rem;
+    border-radius: 18px;
   }
   
   .epTitle {
     font-size: 1.1rem;
   }
+
+  .epCount {
+    font-size: 0.65rem;
+  }
   
   .animeDetails {
-    padding: 1.5rem;
-    border-radius: 20px;
+    padding: 1.25rem;
+    border-radius: 18px;
+  }
+
+  .animeMainInfo {
+    flex-direction: column; /* Stack poster above text */
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+  }
+
+  .miniPoster {
+    width: 160px;
+  }
+
+  .badges {
+    justify-content: center;
   }
   
   .animeTitle {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
   
   .controlsGroup {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: 0.75rem;
   }
   
   .toggleGroup, .serverToggle {
@@ -900,11 +951,17 @@
   .toggleBtn, .serverBtn {
     flex: 1;
     text-align: center;
+    min-height: 40px;
   }
   
   .sidebar {
-    height: 500px;
-    border-radius: 20px;
+    height: 52vh;
+    min-height: 320px;
+    border-radius: 18px;
+  }
+
+  .videoWrapper {
+    border-radius: 14px;
   }
 }
 

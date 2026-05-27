@@ -160,33 +160,65 @@ async def search(q: str = Query(...), limit: int = 20):
 
 @app.get("/stream")
 async def stream(q: str = Query(...)):
-    # Cobalt Engine: The Master Key for bypassing YouTube blocks
+    # Upgraded Streaming Engine: Priority Local yt-dlp Extraction + Invidious Fallback
     try:
-        # Extract video ID
+        # Extract video ID for metadata and fallback purposes
         video_id = q
         if "watch?v=" in q:
             video_id = q.split("watch?v=")[1].split("&")[0]
         elif "youtu.be/" in q:
             video_id = q.split("youtu.be/")[1].split("?")[0]
         elif "music.youtube.com" in q:
-             video_id = q.split("watch?v=")[1].split("&")[0]
-        
-        url_to_extract = f"https://www.youtube.com/watch?v={video_id}" if len(video_id) == 11 else q
-        if "ytsearch:" in url_to_extract or not ("youtube.com" in url_to_extract or "youtu.be" in url_to_extract):
-             # Official YouTube Music search (Bypasses yt-dlp blocks)
-             try:
-                 from ytmusicapi import YTMusic
-                 ytm = YTMusic()
-                 search_q = q.replace("ytsearch:", "")
-                 results = ytm.search(search_q, filter="songs")
-                 if results:
-                     video_id = results[0]['videoId']
-                     url_to_extract = f"https://www.youtube.com/watch?v={video_id}"
-             except Exception as ytm_e:
-                 logger.warning(f"YTMusic search failed: {ytm_e}")
-                 # Fallback to a simple scraper if possible... or just fail
+            video_id = q.split("watch?v=")[1].split("&")[0]
 
-        # Invidious Bridge (The Decentralized Powerhouse)
+        # 1. Prioritize yt-dlp with Search Bypass (extremely reliable, avoids bot-detection blocks)
+        def extract_with_ytdlp(query_or_id: str):
+            # Check if it looks like a video ID or a URL containing video ID
+            vid = query_or_id
+            if "watch?v=" in query_or_id:
+                vid = query_or_id.split("watch?v=")[1].split("&")[0]
+            elif "youtu.be/" in query_or_id:
+                vid = query_or_id.split("youtu.be/")[1].split("?")[0]
+            elif "music.youtube.com" in query_or_id:
+                vid = query_or_id.split("watch?v=")[1].split("&")[0]
+
+            # Use ytsearch1 on the ID to bypass YouTube's strict watch page bot blocks!
+            url_to_extract = f"ytsearch1:{vid}"
+            
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'quiet': True,
+                'no_warnings': True,
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url_to_extract, download=False)
+                if 'entries' in info and len(info['entries']) > 0:
+                    entry = info['entries'][0]
+                    return {
+                        "stream_url": entry.get('url'),
+                        "title": entry.get('title', 'YouTube Audio'),
+                        "thumbnail": entry.get('thumbnail') or f"https://img.youtube.com/vi/{entry.get('id')}/maxresdefault.jpg",
+                        "user_agent": "Mozilla/5.0"
+                    }
+                elif 'url' in info:
+                    return {
+                        "stream_url": info.get('url'),
+                        "title": info.get('title', 'YouTube Audio'),
+                        "thumbnail": info.get('thumbnail') or f"https://img.youtube.com/vi/{info.get('id')}/maxresdefault.jpg",
+                        "user_agent": "Mozilla/5.0"
+                    }
+            return None
+
+        try:
+            logger.info(f"Attempting premium local yt-dlp search extraction for: {q}")
+            result = await asyncio.to_thread(extract_with_ytdlp, q)
+            if result and result.get("stream_url"):
+                logger.info(f"Premium yt-dlp stream resolved successfully for: {result.get('title')}")
+                return result
+        except Exception as ytdlp_err:
+            logger.warning(f"Premium yt-dlp extraction failed: {ytdlp_err}. Falling back to Invidious...")
+
+        # 2. Fallback: Invidious Bridge (The Decentralized Backup Powerhouse)
         invidious_instances = [
             "https://inv.tux.rs",
             "https://invidious.snopyta.org",
@@ -215,7 +247,7 @@ async def stream(q: str = Query(...)):
                     logger.warning(f"Invidious instance {instance} failed: {inv_e}")
                     continue
         
-        raise Exception("All Invidious instances failed to provide a stream")
+        raise Exception("All streaming engines and backup instances failed to provide a stream")
 
     except Exception as e:
         logger.error(f"Playback failed: {e}")

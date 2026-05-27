@@ -1,3 +1,27 @@
 .musicContainer {
-  /* Restored to match Home.module.css style */
+  /* Matches Home.module.css style */
+}
+
+.pageWrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 5rem; /* Account for desktop player */
+}
+
+@media (max-width: 768px) {
+  .pageWrapper {
+    gap: 1rem;
+    /* music player (68px) + bottom nav (62px) + gap (~24px) + buffer */
+    padding-bottom: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageWrapper {
+    gap: 0.75rem;
+    padding-bottom: 180px;
+  }
 }
