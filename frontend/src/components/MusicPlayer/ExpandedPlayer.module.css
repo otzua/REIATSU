@@ -162,6 +162,44 @@
   margin: 2rem 0;
 }
 
+/* Synced LRC lines */
+.lyricsSpacer {
+  height: 40%;
+  flex-shrink: 0;
+}
+
+.lrcLine {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 0.3s ease, font-size 0.3s ease, opacity 0.3s ease;
+  letter-spacing: -0.01em;
+}
+
+.lrcLine:hover {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lrcLinePast {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.lrcLineActive {
+  color: #ffffff;
+  font-size: 1.35rem;
+  opacity: 1;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
 .lyricsLoading, .lyricsEmpty {
   flex: 1;
   display: flex;

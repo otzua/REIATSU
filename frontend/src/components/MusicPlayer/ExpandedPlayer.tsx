@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1, Volume2, VolumeX, ListMusic, ChevronDown, Download, Loader2, MoreHorizontal, Mic2 } from 'lucide-react';
@@ -7,6 +7,28 @@ import { musicApi } from '../../services/musicApi';
 import type { LyricsResult } from '../../services/musicApi';
 import SmartImage from '../SmartImage';
 import styles from './ExpandedPlayer.module.css';
+
+// Parse LRC format: [mm:ss.xx] lyric text
+interface LrcLine {
+  time: number; // seconds
+  text: string;
+}
+
+function parseLrc(raw: string): LrcLine[] {
+  const lines: LrcLine[] = [];
+  for (const line of raw.split('\n')) {
+    const match = line.match(/^\[(\d+):(\d+)\.(\d+)\](.*)/);
+    if (match) {
+      const mins = parseInt(match[1]);
+      const secs = parseInt(match[2]);
+      const hundredths = parseInt(match[3]);
+      const time = mins * 60 + secs + hundredths / 100;
+      const text = match[4].trim();
+      if (text) lines.push({ time, text });
+    }
+  }
+  return lines.sort((a, b) => a.time - b.time);
+}
 
 const ExpandedPlayer: React.FC = () => {
   const {
@@ -31,6 +53,7 @@ const ExpandedPlayer: React.FC = () => {
     toggleRepeat,
     setIsQueueOpen
   } = useMusic();
+
   const navigate = useNavigate();
   const [resolvedArtistId, setResolvedArtistId] = useState<string | null>(null);
 
@@ -38,47 +61,66 @@ const ExpandedPlayer: React.FC = () => {
   const [lyrics, setLyrics] = useState<LyricsResult | null>(null);
   const [loadingLyrics, setLoadingLyrics] = useState(false);
 
+  const lyricsScrollRef = useRef<HTMLDivElement>(null);
+  const activeLineRef = useRef<HTMLDivElement>(null);
+
+  // Resolve artist ID on track change
   useEffect(() => {
     if (!currentTrack) return;
-    const timer = setTimeout(() => {
-      setResolvedArtistId(null);
-    }, 0);
+    const timer = setTimeout(() => setResolvedArtistId(null), 0);
     musicApi.resolveArtistId(currentTrack.artist)
-      .then(res => {
-        if (res && res.id) {
-          setResolvedArtistId(res.id);
-        }
-      })
-      .catch(err => console.error("Error background resolving artist", err));
-
-    // Reset lyrics when track changes
-    setLyrics(null);
-    setShowLyrics(false);
+      .then(res => { if (res?.id) setResolvedArtistId(res.id); })
+      .catch(err => console.error('Error resolving artist', err));
     return () => clearTimeout(timer);
   }, [currentTrack]);
 
-  // Fetch lyrics when showLyrics is toggled on (or fetch them eagerly when expanded if desired, but toggling is cleaner)
+  // Eagerly prefetch lyrics whenever track changes — no waiting for button click
   useEffect(() => {
-    if (!currentTrack || !showLyrics || lyrics) return;
+    if (!currentTrack) return;
+    setLyrics(null);
+    setShowLyrics(false);
     let isMounted = true;
-    
-    const fetchLyrics = async () => {
+
+    const prefetch = async () => {
       setLoadingLyrics(true);
       try {
         const res = await musicApi.lyrics(currentTrack.name, currentTrack.artist);
-        if (isMounted) {
-          setLyrics(res);
-        }
+        if (isMounted) setLyrics(res);
       } catch (err) {
-        console.error("Failed to fetch lyrics", err);
+        console.error('Failed to prefetch lyrics', err);
       } finally {
         if (isMounted) setLoadingLyrics(false);
       }
     };
-    fetchLyrics();
-    
+    prefetch();
     return () => { isMounted = false; };
-  }, [currentTrack, showLyrics, lyrics]);
+  }, [currentTrack]);
+
+  // Parse synced lyrics into timestamped lines
+  const lrcLines = useMemo<LrcLine[]>(() => {
+    if (lyrics?.syncedLyrics) return parseLrc(lyrics.syncedLyrics);
+    return [];
+  }, [lyrics]);
+
+  // Find active line index based on currentTime
+  const activeLineIndex = useMemo(() => {
+    if (!lrcLines.length) return -1;
+    let idx = 0;
+    for (let i = 0; i < lrcLines.length; i++) {
+      if (currentTime >= lrcLines[i].time) idx = i;
+      else break;
+    }
+    return idx;
+  }, [lrcLines, currentTime]);
+
+  // Auto-scroll to active lyric line
+  useEffect(() => {
+    if (!showLyrics || activeLineIndex < 0 || !activeLineRef.current || !lyricsScrollRef.current) return;
+    activeLineRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  }, [activeLineIndex, showLyrics]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragValue, setDragValue] = useState(0);
@@ -92,6 +134,8 @@ const ExpandedPlayer: React.FC = () => {
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  const hasLyrics = lyrics && (lyrics.syncedLyrics || lyrics.plainLyrics);
 
   return (
     <AnimatePresence>
@@ -124,7 +168,7 @@ const ExpandedPlayer: React.FC = () => {
               </button>
             </div>
 
-            {/* Artwork OR Lyrics */}
+            {/* Artwork OR Synced Lyrics */}
             <div className={styles.artworkContainer}>
               <AnimatePresence mode="wait">
                 {showLyrics ? (
@@ -141,14 +185,33 @@ const ExpandedPlayer: React.FC = () => {
                         <Loader2 className={styles.spinnerIcon} size={32} />
                         <p>Searching for lyrics...</p>
                       </div>
-                    ) : lyrics && (lyrics.syncedLyrics || lyrics.plainLyrics) ? (
-                      <div className={styles.lyricsScrollBox}>
-                        <p className={styles.lyricsText}>
-                          {lyrics.syncedLyrics
-                            ? lyrics.syncedLyrics.split('\n').map(l => l.replace(/^\[\d+:\d+\.\d+\]/, '')).join('\n') // very basic strip for now, LRCLIB synced lyrics have [mm:ss.xx] prefix
-                            : lyrics.plainLyrics}
-                        </p>
-                      </div>
+                    ) : hasLyrics ? (
+                      lrcLines.length > 0 ? (
+                        // ── SYNCED LYRICS ───────────────────────────────────
+                        <div className={styles.lyricsScrollBox} ref={lyricsScrollRef}>
+                          <div className={styles.lyricsSpacer} />
+                          {lrcLines.map((line, i) => {
+                            const isActive = i === activeLineIndex;
+                            const isPast = i < activeLineIndex;
+                            return (
+                              <div
+                                key={i}
+                                ref={isActive ? activeLineRef : null}
+                                className={`${styles.lrcLine} ${isActive ? styles.lrcLineActive : ''} ${isPast ? styles.lrcLinePast : ''}`}
+                                onClick={() => seek(line.time)}
+                              >
+                                {line.text}
+                              </div>
+                            );
+                          })}
+                          <div className={styles.lyricsSpacer} />
+                        </div>
+                      ) : (
+                        // ── PLAIN LYRICS fallback ───────────────────────────
+                        <div className={styles.lyricsScrollBox} ref={lyricsScrollRef}>
+                          <p className={styles.lyricsText}>{lyrics.plainLyrics}</p>
+                        </div>
+                      )
                     ) : (
                       <div className={styles.lyricsEmpty}>
                         <Mic2 size={48} opacity={0.2} />
@@ -176,20 +239,11 @@ const ExpandedPlayer: React.FC = () => {
                 <h2
                   onClick={async (e) => {
                     e.stopPropagation();
-                    if (resolvedArtistId) {
-                      setIsExpanded(false);
-                      navigate(`/music/artist/${resolvedArtistId}`);
-                      return;
-                    }
+                    if (resolvedArtistId) { setIsExpanded(false); navigate(`/music/artist/${resolvedArtistId}`); return; }
                     try {
                       const res = await musicApi.resolveArtistId(currentTrack.artist);
-                      if (res && res.id) {
-                        setIsExpanded(false);
-                        navigate(`/music/artist/${res.id}`);
-                      }
-                    } catch (err) {
-                      console.error("Failed to navigate to artist profile", err);
-                    }
+                      if (res?.id) { setIsExpanded(false); navigate(`/music/artist/${res.id}`); }
+                    } catch (err) { console.error('Failed to navigate to artist profile', err); }
                   }}
                   title={`View ${currentTrack.artist} Profile`}
                 >
@@ -203,30 +257,12 @@ const ExpandedPlayer: React.FC = () => {
               {/* Seek Bar */}
               <div className={styles.seekBarContainer}>
                 <input
-                  type="range"
-                  min={0}
-                  max={duration || 100}
-                  value={displayTime}
-                  onChange={(e) => {
-                    setDragValue(parseFloat(e.target.value));
-                    if (!isDragging) setIsDragging(true);
-                  }}
-                  onMouseDown={() => {
-                    setIsDragging(true);
-                    setDragValue(currentTime);
-                  }}
-                  onMouseUp={() => {
-                    setIsDragging(false);
-                    seek(dragValue);
-                  }}
-                  onTouchStart={() => {
-                    setIsDragging(true);
-                    setDragValue(currentTime);
-                  }}
-                  onTouchEnd={() => {
-                    setIsDragging(false);
-                    seek(dragValue);
-                  }}
+                  type="range" min={0} max={duration || 100} value={displayTime}
+                  onChange={(e) => { setDragValue(parseFloat(e.target.value)); if (!isDragging) setIsDragging(true); }}
+                  onMouseDown={() => { setIsDragging(true); setDragValue(currentTime); }}
+                  onMouseUp={() => { setIsDragging(false); seek(dragValue); }}
+                  onTouchStart={() => { setIsDragging(true); setDragValue(currentTime); }}
+                  onTouchEnd={() => { setIsDragging(false); seek(dragValue); }}
                   className={styles.seekBar}
                   style={{ '--progress': `${(displayTime / (duration || 1)) * 100}%` } as React.CSSProperties}
                 />
@@ -238,17 +274,12 @@ const ExpandedPlayer: React.FC = () => {
 
               {/* Main Buttons */}
               <div className={styles.mainControls}>
-                <button
-                  className={`${styles.smallButton} ${shuffle ? styles.active : ''}`}
-                  onClick={toggleShuffle}
-                >
+                <button className={`${styles.smallButton} ${shuffle ? styles.active : ''}`} onClick={toggleShuffle}>
                   <Shuffle size={20} />
                 </button>
-
                 <button className={styles.mediaButton} onClick={skipBack}>
                   <SkipBack size={32} fill="currentColor" />
                 </button>
-
                 <button className={styles.playButton} onClick={togglePlay} disabled={loadingStream}>
                   {loadingStream ? (
                     <Loader2 className={styles.spinnerIcon} size={32} />
@@ -258,15 +289,10 @@ const ExpandedPlayer: React.FC = () => {
                     <Play size={40} fill="currentColor" className={styles.playIconOffset} />
                   )}
                 </button>
-
                 <button className={styles.mediaButton} onClick={skipForward}>
                   <SkipForward size={32} fill="currentColor" />
                 </button>
-
-                <button
-                  className={`${styles.smallButton} ${repeat !== 'none' ? styles.active : ''}`}
-                  onClick={toggleRepeat}
-                >
+                <button className={`${styles.smallButton} ${repeat !== 'none' ? styles.active : ''}`} onClick={toggleRepeat}>
                   {repeat === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
                 </button>
               </div>
@@ -278,23 +304,22 @@ const ExpandedPlayer: React.FC = () => {
                     {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                   </button>
                   <input
-                    type="range"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={muted ? 0 : volume}
+                    type="range" min={0} max={1} step={0.01} value={muted ? 0 : volume}
                     onChange={(e) => setVolume(parseFloat(e.target.value))}
                     className={styles.volumeSlider}
                   />
                 </div>
 
                 <div className={styles.actions}>
-                  <button 
-                    className={`${styles.iconButton} ${showLyrics ? styles.activeIcon : ''}`} 
+                  <button
+                    className={`${styles.iconButton} ${showLyrics ? styles.activeIcon : ''}`}
                     onClick={() => setShowLyrics(!showLyrics)}
-                    title="Lyrics"
+                    title={loadingLyrics ? 'Loading lyrics...' : hasLyrics ? 'Lyrics' : 'No lyrics available'}
                   >
-                    <Mic2 size={22} />
+                    {loadingLyrics && !showLyrics
+                      ? <Loader2 size={22} className={styles.spinnerIcon} />
+                      : <Mic2 size={22} />
+                    }
                   </button>
                   <button className={styles.iconButton} onClick={() => { setIsQueueOpen(true); setIsExpanded(false); }}>
                     <ListMusic size={22} />
