@@ -903,28 +903,72 @@ async def get_album(album_id: str):
 
 @app.get("/lyrics")
 async def get_lyrics(track_name: str, artist_name: str, duration_ms: Optional[float] = None):
-    try:
-        params = {
-            "track_name": track_name,
-            "artist_name": artist_name
-        }
-        
-        async with aiohttp.ClientSession() as session:
-            # First try the direct matching endpoint
-            async with session.get("https://lrclib.net/api/get", params=params, timeout=5) as resp:
+    import re as _re
+    import aiohttp
+
+    def clean_track_name(name: str) -> str:
+        """Strip featured artists and other suffixes that trip up lyric databases."""
+        cleaned = _re.sub(r'\s*[\(\[](feat\.?|ft\.?|with|prod\.?|featuring|x)[^\)\]]*[\)\]]', '', name, flags=_re.IGNORECASE)
+        cleaned = _re.sub(r'\s*-\s*(Radio Edit|Live|Remix|Acoustic|Version|Official|Extended Mix).*$', '', cleaned, flags=_re.IGNORECASE)
+        return cleaned.strip()
+
+    def clean_artist_name(name: str) -> str:
+        """Extract primary artist, ignoring featured guests."""
+        for sep in [",", " & ", " feat.", " Feat.", " ft.", " Ft.", " x ", " X "]:
+            if sep in name:
+                name = name.split(sep)[0]
+        return name.strip()
+
+    clean_track = clean_track_name(track_name)
+    clean_artist = clean_artist_name(artist_name)
+    _timeout = aiohttp.ClientTimeout(total=8)
+
+    async def try_get(session, t_name, a_name):
+        try:
+            params = {"track_name": t_name, "artist_name": a_name}
+            async with session.get("https://lrclib.net/api/get", params=params, timeout=_timeout) as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    if data:
+                    if data and (data.get("plainLyrics") or data.get("syncedLyrics")):
                         return data
-                        
-            # If not found, try the search endpoint and return the first result
-            search_params = {"q": f"{artist_name} {track_name}"}
-            async with session.get("https://lrclib.net/api/search", params=search_params, timeout=5) as resp:
+        except Exception as e:
+            logger.warning(f"try_get failed for '{t_name}' / '{a_name}': {e}")
+        return None
+
+    async def try_search(session, query):
+        try:
+            async with session.get("https://lrclib.net/api/search", params={"q": query}, timeout=_timeout) as resp:
                 if resp.status == 200:
                     results = await resp.json()
                     if results and len(results) > 0:
                         return results[0]
-                        
+        except Exception as e:
+            logger.warning(f"try_search failed for query '{query}': {e}")
+        return None
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            result = await try_get(session, track_name, artist_name)
+            if result:
+                return result
+
+            if clean_track != track_name or clean_artist != artist_name:
+                result = await try_get(session, clean_track, clean_artist)
+                if result:
+                    return result
+
+            result = await try_search(session, f"{clean_artist} {clean_track}")
+            if result:
+                return result
+
+            result = await try_search(session, clean_track)
+            if result:
+                return result
+
+            result = await try_search(session, f"{artist_name} {track_name}")
+            if result:
+                return result
+
         return {"plainLyrics": None, "syncedLyrics": None}
     except Exception as e:
         logger.error(f"Lyrics fetch failed for {artist_name} - {track_name}: {e}")
