@@ -33,6 +33,7 @@ interface MusicContextType {
   removeFromQueue: (trackId: string) => void;
   clearQueue: () => void;
   recentlyPlayed: Track[];
+  audioRef: React.RefObject<HTMLAudioElement>;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -254,7 +255,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       isQueueOpen, setIsQueueOpen, isExpanded, setIsExpanded,
       playTrack, stopMusic, togglePlay, skipForward, skipBack, setVolume, setMuted, seek,
       toggleShuffle, toggleRepeat, addToQueue, removeFromQueue, clearQueue,
-      recentlyPlayed
+      recentlyPlayed, audioRef
     }}>
       {children}
     </MusicContext.Provider>
