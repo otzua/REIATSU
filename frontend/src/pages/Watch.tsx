@@ -4,6 +4,7 @@ import { Play, ChevronLeft, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, EpisodeData } from '../services/animeApi';
+import { useMusic } from '../context/MusicContext';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
 import NextEpisodeTimer from '../components/NextEpisodeTimer';
@@ -46,6 +47,13 @@ const Watch = () => {
   const [searchParams] = useSearchParams();
   const epParam = searchParams.get('ep');
   const location = useLocation();
+  const { stopMusic } = useMusic();
+
+  // Stop music as soon as the user opens a watch page
+  useEffect(() => {
+    stopMusic();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Use route provider, fallback to miruro or animekai if path starts with them, else default provider
   let provider = (pathProvider && pathProvider !== 'anime') ? pathProvider : (searchParams.get('provider') || undefined);
   const providerMatch = location.pathname.match(/^\/(miruro|animekai)/);

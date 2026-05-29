@@ -4,6 +4,7 @@ import { ChevronLeft, Play, Tv, Film, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cinemaApi } from '../services/cinemaApi';
 import type { CinemaMovieDetail, CinemaMovie } from '../services/cinemaApi';
+import { useMusic } from '../context/MusicContext';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
 import styles from './Watch.module.css'; // Reusing Watch styles
@@ -35,6 +36,13 @@ const CinemaWatch = () => {
   const [recommended, setRecommended] = useState<CinemaMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { stopMusic } = useMusic();
+
+  // Stop music as soon as the user opens a watch page
+  useEffect(() => {
+    stopMusic();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const [prevId, setPrevId] = useState(id);
   const [prevMediaType, setPrevMediaType] = useState(mediaTypeParam);

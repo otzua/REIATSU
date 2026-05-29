@@ -20,6 +20,7 @@ interface MusicContextType {
   isExpanded: boolean;
   setIsExpanded: (isExpanded: boolean) => void;
   playTrack: (track: Track, newQueue?: Track[]) => Promise<void>;
+  stopMusic: () => void;
   togglePlay: () => void;
   skipForward: () => void;
   skipBack: () => void;
@@ -230,12 +231,28 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const clearQueue = () => setQueue([]);
 
+  const stopMusic = () => {
+    try {
+      audioRef.current.pause();
+      audioRef.current.removeAttribute('src');
+      audioRef.current.load();
+    } catch (e) {
+      console.warn('REIATSU: Error stopping music:', e);
+    }
+    setIsPlaying(false);
+    setCurrentTrack(null);
+    setQueue([]);
+    setProgress(0);
+    setCurrentTime(0);
+    setDuration(0);
+  };
+
   return (
     <MusicContext.Provider value={{
       currentTrack, queue, isPlaying, loadingStream, streamError, setStreamError,
       volume, muted, progress, currentTime, duration, shuffle, repeat,
       isQueueOpen, setIsQueueOpen, isExpanded, setIsExpanded,
-      playTrack, togglePlay, skipForward, skipBack, setVolume, setMuted, seek,
+      playTrack, stopMusic, togglePlay, skipForward, skipBack, setVolume, setMuted, seek,
       toggleShuffle, toggleRepeat, addToQueue, removeFromQueue, clearQueue,
       recentlyPlayed
     }}>

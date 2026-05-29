@@ -4,6 +4,7 @@ import { ChevronLeft, Info, Calendar, Tag, Flame } from 'lucide-react';
 import Hls from 'hls.js';
 import { beyondApi, MUSIC_API_BASE } from '../services/beyondApi';
 import type { BeyondVideo, BeyondDetails } from '../services/beyondApi';
+import { useMusic } from '../context/MusicContext';
 import HalftoneWave from '../components/HalftoneWave';
 import SmartImage from '../components/SmartImage';
 import styles from './Watch.module.css';
@@ -20,6 +21,13 @@ const BeyondWatch = () => {
   const [activeStream, setActiveStream] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { stopMusic } = useMusic();
+
+  // Stop music as soon as the user opens a watch page
+  useEffect(() => {
+    stopMusic();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Keyboard shortcuts: fullscreen, play/pause, seek, mute
   useEffect(() => {
