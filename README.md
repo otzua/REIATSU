@@ -15,18 +15,19 @@
 
 ## 🌌 The Vision | ビジョン
 
-**Reiatsu** is an open-source multimedia engine designed for speed, privacy, and aesthetic dominance. It provides a unified, self-hosted platform for streaming **Anime**, **Movies**, and **Music** without the bloat of corporate trackers or restrictive interfaces.
+**Reiatsu** is a personal open-source multimedia engine designed for speed, privacy, and aesthetic dominance. Originally built as a passion project for friends and family, it provides a unified, self-hosted platform for streaming **Anime**, **Movies**, and **Music** without the bloat of corporate trackers or restrictive interfaces.
 
 Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the act of consumption into an interactive experience.
 
 ## 🚀 Key Features | 特徴
 
-- **Open Source & Transparent**: 100% open source. Audit the code, self-host the data, and contribute to the evolution.
+- **Open Source & Transparent**: 100% open source. Audit the code, self-host the data, and run it for your own circle.
 - **Tri-Interface Ecosystem**: A single application for three distinct worlds:
   - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
-  - **映 CINEMA**: A cinematic gateway for movies and TV series, now featuring an interactive **12-Month Release Calendar** with desktop-optimized timeline navigation.
-  - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC. All tracks initialize at 100% volume with high-resolution visual thumbnails, active queuing, and interactive player navigation.
-- **Unified History System**: Automatically track your progress across all sections (Anime, Cinema, Music, Beyond) with persistent history logs.
+  - **映 CINEMA**: A cinematic gateway for movies and TV series, now featuring an interactive **12-Month Release Calendar** with desktop-optimized timeline navigation and anti-ISP blocking TMDB proxying.
+  - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC.
+- **Unified History & MyList System**: Automatically track your progress across all sections (Anime, Cinema, Music, Beyond) with persistent local history logs and a dedicated MyList page.
+- **Creator Profile / About Me**: A sleek, integrated developer profile modal showcasing tech-stack and personal links in place of bloated authentication systems.
 - **Glassmorphic UI**: High-fidelity glass surfaces with real-time backdrop blurring and reactive halftone backgrounds.
 
 ## 🎨 Design Philosophy | デザイン
@@ -41,7 +42,7 @@ Reiatsu is built on the **Neo-Vintage Digital** aesthetic. We combine 90s brutal
 
 - **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js (Deployed live on Vercel)
 - **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, WatchHentai stream resolution, AlphaAPIs extraction, Miruro provider integration with Hanime fallback, and HLS proxying (Deployed live on Vercel Serverless Functions).
-- **Cinema API (Next.js)**: A robust backend utilizing Drizzle ORM and Neon DB for movie management.
+- **Cinema API**: A robust frontend/backend integration utilizing TMDB via dedicated proxies to bypass regional ISP blocks.
 - **Music API (FastAPI)**: A powerful Python backend utilizing `ytmusicapi`, `yt-dlp`, and the custom `SpotiFLAC` lossless downloading engine.
 - **Design**: Vanilla CSS Modules with a focus on typography and motion.
 
@@ -51,7 +52,6 @@ Reiatsu is built on the **Neo-Vintage Digital** aesthetic. We combine 90s brutal
 REIATSU/
 ├── frontend/           # The core React + Vite application
 ├── anime-api/          # API for Anime & Beyond extraction, Miruro provider + HLS Proxy
-├── cinema-api/         # Scalable backend for movies & series
 ├── music-api/          # FastAPI backend for music, artist/album lookup, and streaming proxy
 ├── SpotiFLAC-Module-Version-main/ # Lossless background FLAC downloader integration
 ├── ocean-api/          # Legacy/Backup extraction logic
@@ -69,16 +69,19 @@ REIATSU/
    ```
 
 2. **Run All-in-One (Recommended):**
-   *Each directory contains its own dependencies and local server configuration.*
+   *Each directory contains its own dependencies and local server configuration. You can easily run the entire stack using the root `package.json` scripts:*
 
-   - **Frontend**: `cd frontend && npm install && npm run dev`
-   - **Anime API**: `cd anime-api && npm install && npm run dev` (Runs on 4001)
-   - **Cinema API**: `cd cinema-api && npm install && npm run dev`
-   - **Music API**: `cd music-api && pip install -r requirements.txt && uvicorn main:app --reload` (Runs on 8000)
+   ```bash
+   npm run dev
+   ```
+
+   - **Frontend**: Runs on 5173
+   - **Anime API**: Runs on 4001
+   - **Music API**: Runs on 8000
 
 ## 🤝 Contributing | 貢献する
 
-Reiatsu is a community-driven project. We welcome all contributions—from code and documentation to UI/UX suggestions and bug reports.
+While Reiatsu is developed primarily as a closed-circle project for personal use, it remains open-source. Suggestions, bug reports, and UX improvements are welcome!
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -91,12 +94,13 @@ Reiatsu is a community-driven project. We welcome all contributions—from code 
 - [x] High-performance Halftone Engine
 - [x] Neo-Vintage Design System
 - [x] Unified Global Search
-- [x] Cinema API Integration
+- [x] Cinema API Integration & ISP-Block Proxying
 - [x] Anime Schedule & Tracking
 - [x] Beyond Portal & HLS Proxy Integration
 - [x] Music Section Reconstruction & Lossless Sync Engine
 - [x] Interactive Cinema Release Calendar & Timeline
-- [x] Cross-Section User History Tracking
+- [x] Cross-Section User History Tracking (MyList)
+- [x] Creator Profile / About Me Modal
 - [ ] Self-Hosting Docker Suite
 - [ ] PWA Support for Mobile Streaming
 
