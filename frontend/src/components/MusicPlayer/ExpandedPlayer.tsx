@@ -20,8 +20,8 @@ function parseLrc(raw: string): LrcLine[] {
     if (match) {
       const mins = parseInt(match[1]);
       const secs = parseInt(match[2]);
-      const hundredths = parseInt(match[3]);
-      const time = mins * 60 + secs + hundredths / 100;
+      const fraction = parseFloat('0.' + match[3]);
+      const time = mins * 60 + secs + fraction;
       const text = match[4].trim();
       if (text) lines.push({ time, text });
     }
@@ -119,9 +119,8 @@ const ExpandedPlayer: React.FC = () => {
   const activeLineIndex = useMemo(() => {
     if (!lrcLines.length) return -1;
     let idx = 0;
-    // Add a small offset (e.g., 0.3s) to make lyrics appear slightly before they are sung
-    // This often feels more natural.
-    const lookaheadTime = syncTime + 0.3;
+    // Tiny offset to make lyrics appear right exactly as sung
+    const lookaheadTime = syncTime + 0.1;
     for (let i = 0; i < lrcLines.length; i++) {
       if (lookaheadTime >= lrcLines[i].time) idx = i;
       else break;
