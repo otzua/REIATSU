@@ -34,6 +34,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width), 1fr));
   gap: var(--grid-gap);
+  padding-top: 1.5rem; /* space for the floating rank badge above each card */
 }
 
 .animeCard {
@@ -43,6 +44,7 @@
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
   cursor: pointer;
   position: relative;
+  overflow: visible; /* allow rank badge to overflow above the card */
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

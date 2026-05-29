@@ -36,7 +36,7 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: 20px 40px;
+  padding: 1.25rem 2.5rem;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -72,10 +72,10 @@
 }
 
 .header {
-  padding: 120px 40px 40px;
+  padding: 7.5rem 2.5rem 2.5rem;
   display: flex;
   align-items: flex-end;
-  gap: 40px;
+  gap: 2.5rem;
   position: relative;
   z-index: 1;
 }
@@ -178,7 +178,7 @@
 }
 
 .tracksSection {
-  padding: 0 40px;
+  padding: 0 2.5rem;
   position: relative;
   z-index: 1;
 }

@@ -87,10 +87,10 @@
   gap: 1.5rem;
   margin-bottom: 4rem;
   overflow-x: auto;
-  padding: 0 5vw 1.5rem;
+  padding: 0.5rem 0 1.5rem;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
   width: 100%;
 }
 

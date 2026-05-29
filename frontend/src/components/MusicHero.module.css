@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   margin-top: 0;
-  padding: 0 5%;
+  padding: 0 var(--page-padding-x);
 }
 
 .heroGlow {
@@ -272,7 +272,7 @@
 }
 
 @media (max-width: 1024px) {
-  .hero { padding: 0 2rem; }
+  .hero { padding: 0 var(--page-padding-x); }
   .sliderContainer { height: 600px; }
   .title { font-size: 3.5rem; }
 }

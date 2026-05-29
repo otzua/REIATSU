@@ -83,12 +83,6 @@
   text-transform: uppercase;
 }
 
-.titleGroup {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
 .backBtn {
   color: var(--color-cream);
   display: flex;
