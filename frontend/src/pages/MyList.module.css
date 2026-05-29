@@ -1,8 +1,8 @@
 .container {
   min-height: 100vh;
   padding: 8rem 4rem 4rem;
-  background-color: var(--bg-main);
   color: var(--color-cream);
+  position: relative;
 }
 
 .content {
