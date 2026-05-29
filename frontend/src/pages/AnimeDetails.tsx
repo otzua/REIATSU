@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useParams, useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, Play } from 'lucide-react';
+import { ChevronLeft, Play, Bookmark, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { animeApi } from '../services/animeApi';
 import type { AnimeDetail, AnimeCard } from '../services/animeApi';
@@ -23,6 +23,62 @@ const AnimeDetails = () => {
     setLoading(true);
     setAnimeInfo(null);
   }
+
+  // Derive saved status from localStorage keyed on id (re-runs when id changes)
+  const savedFromStorage = useMemo(() => {
+    const savedList = localStorage.getItem('reiatsu_mylist');
+    if (savedList && id) {
+      try {
+        const list = JSON.parse(savedList) as { id: string }[];
+        return list.some(item => item.id === id);
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }, [id]);
+
+  const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
+  const isSaved = savedOverride !== null ? savedOverride : savedFromStorage;
+  const savingRef = useRef(false);
+
+  // Reset override whenever the anime id changes
+  if (id !== prevId) {
+    if (savedOverride !== null) setSavedOverride(null);
+  }
+
+  const toggleSave = () => {
+    if (!animeInfo || !id || savingRef.current) return;
+    savingRef.current = true;
+    const savedList = localStorage.getItem('reiatsu_mylist');
+    let list: { id: string, title: string, type: string, poster: string, url: string, addedAt: number }[] = [];
+    if (savedList) {
+      try {
+        list = JSON.parse(savedList);
+      } catch {
+        list = [];
+      }
+    }
+
+    if (isSaved) {
+      list = list.filter(item => item.id !== id);
+      setSavedOverride(false);
+    } else {
+      // Always deduplicate before pushing
+      list = list.filter(item => item.id !== id);
+      list.push({
+        id: id,                        // use URL param — same value used in the lookup
+        title: animeInfo.anime.name,
+        type: 'anime',
+        poster: animeInfo.anime.poster,
+        url: `/${provider || 'anime'}/anime/${id}`,
+        addedAt: Date.now()
+      });
+      setSavedOverride(true);
+    }
+    localStorage.setItem('reiatsu_mylist', JSON.stringify(list));
+    savingRef.current = false;
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -112,10 +168,14 @@ const AnimeDetails = () => {
               <div className={styles.posterWrapper}>
                 <SmartImage src={anime.poster} alt={anime.name} className={styles.poster} loading="eager" />
                 <div className={styles.actionsMobile}>
-                  <Link to={`/watch/${anime.id}`} className={styles.watchBtn}>
+                  <Link to={`/${provider || 'anime'}/watch/${anime.id}`} className={styles.watchBtn}>
                     <Play fill="currentColor" size={20} />
                     <span>WATCH NOW</span>
                   </Link>
+                  <button onClick={toggleSave} className={`${styles.saveBtn}${isSaved ? ` ${styles.saved}` : ''}`}>
+                    {isSaved ? <Check size={18} /> : <Bookmark size={18} />}
+                    <span>{isSaved ? 'SAVED' : 'MY LIST'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -173,6 +233,10 @@ const AnimeDetails = () => {
                     <Play fill="currentColor" size={20} />
                     <span>WATCH NOW</span>
                   </Link>
+                  <button onClick={toggleSave} className={`${styles.saveBtn}${isSaved ? ` ${styles.saved}` : ''}`}>
+                    {isSaved ? <Check size={18} /> : <Bookmark size={18} />}
+                    <span>{isSaved ? 'SAVED' : 'MY LIST'}</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -248,10 +312,7 @@ const AnimeDetails = () => {
                     <Link to={`/${provider || 'anime'}/${provider ? 'anime/' : ''}${rec.id}`} className={styles.cardLink}>
                       <div className={styles.posterPlaceholder}>
                         {rec.poster && (
-                          <>
-                            <SmartImage src={rec.poster} aria-hidden="true" className={styles.recPosterGlow} draggable={false} />
-                            <SmartImage src={rec.poster} alt={rec.name} className={styles.recPosterImg} draggable={false} />
-                          </>
+                          <SmartImage src={rec.poster} alt={rec.name} className={styles.recPosterImg} draggable={false} />
                         )}
                         <div className={styles.episodeOverlay}>
                           {rec.episodes.sub != null && <span>SUB {rec.episodes.sub}</span>}

@@ -8,6 +8,7 @@ export default defineConfig({
     target: 'esnext',
     cssTarget: ['chrome80', 'safari13', 'edge88', 'firefox78'],
     sourcemap: true,
+    chunkSizeWarningLimit: 600,
   },
   server: {
     proxy: {
@@ -26,9 +27,16 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/toon-api/, '')
       },
       '/tmdb-api': {
-        target: 'https://twilight-cake-defb.hunternisha55.workers.dev/3',
+        target: 'https://api.tmdb.org',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/tmdb-api/, '')
+        secure: false,
+        rewrite: (path) => path.replace(/^\/tmdb-api/, '/3'),
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.setHeader('User-Agent', 'Mozilla/5.0');
+            proxyReq.setHeader('Accept', 'application/json');
+          });
+        },
       },
     },
   },

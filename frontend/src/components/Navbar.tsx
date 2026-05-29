@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download } from 'lucide-react';
+import { Home, Search, Calendar, ArrowRightLeft, User, X, Lock, Sparkles, Download, Bookmark } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { animeApi } from '../services/animeApi';
@@ -11,13 +11,16 @@ import SmartImage from './SmartImage';
 import styles from './Navbar.module.css';
 import { useMusic } from '../context/MusicContext';
 import MusicDownloadModal from './MusicDownloadModal';
+import AboutMe from './AboutMe';
 
 const Navbar = () => {
   const { playTrack } = useMusic();
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  const isCinema = location.pathname.startsWith('/cinema') || (location.pathname === '/schedule' && searchParams.get('type') === 'cinema');
+  const isCinema = location.pathname.startsWith('/cinema') || 
+                   (location.pathname === '/schedule' && searchParams.get('type') === 'cinema') ||
+                   (location.pathname === '/mylist' && searchParams.get('type') === 'cinema');
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
 
@@ -26,6 +29,7 @@ const Navbar = () => {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
   const [query, setQuery] = useState('');
@@ -72,6 +76,7 @@ const Navbar = () => {
       icon: isMusic ? Download : Calendar 
     },
     { id: 'search', path: '#search', icon: Search },
+    ...(!isMusic && !isBeyond ? [{ id: 'mylist', path: isCinema ? '/mylist?type=cinema' : '/mylist', icon: Bookmark }] : []),
     { id: 'switch', path: '#switch', icon: ArrowRightLeft },
   ];
 
@@ -387,7 +392,7 @@ const Navbar = () => {
         </nav>
 
         <div className={`${styles.accountCapsule} glass`}>
-          <button className={styles.accountBtn}>
+          <button className={styles.accountBtn} onClick={() => setAboutOpen(true)}>
             <User size={22} strokeWidth={2} />
           </button>
         </div>
@@ -711,6 +716,10 @@ const Navbar = () => {
       <MusicDownloadModal 
         isOpen={downloadModalOpen} 
         onClose={() => setDownloadModalOpen(false)} 
+      />
+      <AboutMe 
+        isOpen={aboutOpen} 
+        onClose={() => setAboutOpen(false)} 
       />
     </>
   );

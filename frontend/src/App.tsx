@@ -1,25 +1,28 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import Cinema from './pages/Cinema';
-import CinemaDetails from './pages/CinemaDetails';
-import CinemaWatch from './pages/CinemaWatch';
-import Watch from './pages/Watch';
-import AnimeDetails from './pages/AnimeDetails';
-import Schedule from './pages/Schedule';
-import Music from './pages/Music';
-import AlbumDetails from './pages/AlbumDetails';
-import ArtistDetails from './pages/ArtistDetails';
-import Beyond from './pages/Beyond';
-import BeyondWatch from './pages/BeyondWatch';
-import SearchPage from './pages/SearchPage';
-import AnimeKaiHome from './pages/AnimeKaiHome';
 import Layout from './components/Layout';
 
+const Home = lazy(() => import('./pages/Home'));
+const Cinema = lazy(() => import('./pages/Cinema'));
+const CinemaDetails = lazy(() => import('./pages/CinemaDetails'));
+const CinemaWatch = lazy(() => import('./pages/CinemaWatch'));
+const Watch = lazy(() => import('./pages/Watch'));
+const AnimeDetails = lazy(() => import('./pages/AnimeDetails'));
+const Schedule = lazy(() => import('./pages/Schedule'));
+const Music = lazy(() => import('./pages/Music'));
+const AlbumDetails = lazy(() => import('./pages/AlbumDetails'));
+const ArtistDetails = lazy(() => import('./pages/ArtistDetails'));
+const Beyond = lazy(() => import('./pages/Beyond'));
+const BeyondWatch = lazy(() => import('./pages/BeyondWatch'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+const AnimeKaiHome = lazy(() => import('./pages/AnimeKaiHome'));
+const MyList = lazy(() => import('./pages/MyList'));
 
-import AnimeHistory from './pages/AnimeHistory';
-import CinemaHistory from './pages/CinemaHistory';
-import MusicHistory from './pages/MusicHistory';
-import BeyondHistory from './pages/BeyondHistory';
+const AnimeHistory = lazy(() => import('./pages/AnimeHistory'));
+const CinemaHistory = lazy(() => import('./pages/CinemaHistory'));
+const MusicHistory = lazy(() => import('./pages/MusicHistory'));
+const BeyondHistory = lazy(() => import('./pages/BeyondHistory'));
+
 
 function App() {
   const location = useLocation();
@@ -27,7 +30,8 @@ function App() {
   return (
     <div className="app">
       <Layout>
-        <Routes location={location} key={location.pathname}>
+        <Suspense fallback={null}>
+          <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Navigate to="/anime" replace />} />
           <Route path="/anime" element={<Home />} />
           <Route path="/animekai" element={<AnimeKaiHome />} />
@@ -50,7 +54,9 @@ function App() {
           <Route path="/beyond/history" element={<BeyondHistory />} />
           <Route path="/beyond/watch/:id" element={<BeyondWatch />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/mylist" element={<MyList />} />
         </Routes>
+        </Suspense>
       </Layout>
     </div>
   );

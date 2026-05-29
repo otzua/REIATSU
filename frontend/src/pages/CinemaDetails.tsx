@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ChevronLeft, Play } from 'lucide-react';
+import { ChevronLeft, Play, Bookmark, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cinemaApi } from '../services/cinemaApi';
 import type { CinemaMovieDetail, CinemaMovie } from '../services/cinemaApi';
@@ -27,6 +27,62 @@ const CinemaDetails = () => {
     setLoading(true);
     setMovie(null);
   }
+
+  // Derive saved status from localStorage keyed on id (re-runs when id changes)
+  const savedFromStorage = useMemo(() => {
+    const savedList = localStorage.getItem('reiatsu_mylist');
+    if (savedList && id) {
+      try {
+        const list = JSON.parse(savedList) as { id: string }[];
+        return list.some(item => item.id === id);
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }, [id]);
+
+  const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
+  const isSaved = savedOverride !== null ? savedOverride : savedFromStorage;
+  const savingRef = useRef(false);
+
+  // Reset override whenever the item id changes
+  if (id !== prevId || mediaTypeParam !== prevMediaType) {
+    if (savedOverride !== null) setSavedOverride(null);
+  }
+
+  const toggleSave = () => {
+    if (!movie || !id || savingRef.current) return;
+    savingRef.current = true;
+    const savedList = localStorage.getItem('reiatsu_mylist');
+    let list: { id: string, title: string, type: string, poster: string, url: string, addedAt: number }[] = [];
+    if (savedList) {
+      try {
+        list = JSON.parse(savedList);
+      } catch {
+        list = [];
+      }
+    }
+
+    if (isSaved) {
+      list = list.filter(item => item.id !== id);
+      setSavedOverride(false);
+    } else {
+      // Always deduplicate before pushing
+      list = list.filter(item => item.id !== id);
+      list.push({
+        id: id,                        // use URL param — same value used in the lookup
+        title: movie.title,
+        type: 'cinema',
+        poster: movie.imageUrl,
+        url: `/cinema/details/${id}?type=${movie.mediaType}`,
+        addedAt: Date.now()
+      });
+      setSavedOverride(true);
+    }
+    localStorage.setItem('reiatsu_mylist', JSON.stringify(list));
+    savingRef.current = false;
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -110,6 +166,10 @@ const CinemaDetails = () => {
                     <Play fill="currentColor" size={20} />
                     <span>WATCH NOW</span>
                   </Link>
+                  <button onClick={toggleSave} className={`${styles.saveBtn}${isSaved ? ` ${styles.saved}` : ''}`}>
+                    {isSaved ? <Check size={18} /> : <Bookmark size={18} />}
+                    <span>{isSaved ? 'SAVED' : 'MY LIST'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -163,6 +223,10 @@ const CinemaDetails = () => {
                     <Play fill="currentColor" size={20} />
                     <span>WATCH NOW</span>
                   </Link>
+                  <button onClick={toggleSave} className={`${styles.saveBtn}${isSaved ? ` ${styles.saved}` : ''}`}>
+                    {isSaved ? <Check size={18} /> : <Bookmark size={18} />}
+                    <span>{isSaved ? 'SAVED' : 'MY LIST'}</span>
+                  </button>
                 </div>
               </div>
             </div>

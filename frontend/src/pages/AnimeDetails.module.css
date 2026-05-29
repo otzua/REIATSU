@@ -213,6 +213,7 @@
   margin-top: auto;
   padding-top: 2rem;
   display: flex;
+  gap: 1rem;
 }
 
 .actionsMobile {
@@ -235,12 +236,51 @@
   letter-spacing: 0.15rem;
   transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 10px 30px rgba(184, 58, 45, 0.3);
-  width: 100%;
+  flex: 1;
 }
 
 .watchBtn:hover {
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 15px 40px rgba(184, 58, 45, 0.5);
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--color-cream);
+  padding: 1.2rem 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(220, 201, 169, 0.15);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.saveBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(220, 201, 169, 0.3);
+  transform: translateY(-2px);
+}
+
+.saveBtn.saved {
+  background: rgba(0, 245, 255, 0.08);
+  border-color: rgba(0, 245, 255, 0.3);
+  color: #00f5ff;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.1);
+}
+
+.saveBtn.saved:hover {
+  background: rgba(0, 245, 255, 0.12);
+  border-color: rgba(0, 245, 255, 0.5);
 }
 
 /* Seasons Section */
@@ -361,15 +401,16 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 2rem 1.5rem;
+  /* isolate stacking context so hover transforms don't clip siblings */
+  isolation: isolate;
 }
 
 .animeCard {
   display: flex;
   flex-direction: column;
-  transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.animeCard:hover {
+  /* create a new stacking context per card */
+  isolation: isolate;
+  will-change: transform;
 }
 
 .cardLink {
@@ -387,29 +428,13 @@
   background: rgba(220, 201, 169, 0.03);
   border-radius: 16px;
   position: relative;
-  /* Removed overflow: hidden */
+  overflow: hidden;
   border: 1px solid rgba(220, 201, 169, 0.05);
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.recPosterGlow {
-  position: absolute;
-  top: 10%;
-  left: 5%;
-  width: 90%;
-  height: 90%;
-  object-fit: cover;
-  filter: blur(20px) saturate(150%);
-  opacity: 0;
-  transform: translateZ(0);
-  transition: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: -1;
-  pointer-events: none;
-}
-
-.animeCard:hover .recPosterGlow {
-  opacity: 0.6;
-  filter: blur(28px) saturate(200%);
-  transform: translateY(10px) translateZ(0);
+.animeCard:hover .posterPlaceholder {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
 }
 
 .recPosterImg {
@@ -419,8 +444,12 @@
   height: 100%;
   object-fit: cover;
   border-radius: 16px;
-  transition: transform 0.05s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
+}
+
+.animeCard:hover .recPosterImg {
+  transform: scale(1.05);
 }
 
 .episodeOverlay {
