@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1, Volume2, VolumeX, ListMusic, ChevronDown, Download, Loader2, MoreHorizontal } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1, Volume2, VolumeX, ListMusic, ChevronDown, Download, Loader2, MoreHorizontal, Mic2 } from 'lucide-react';
 import { useMusic } from '../../context/MusicContext';
 import { musicApi } from '../../services/musicApi';
+import type { LyricsResult } from '../../services/musicApi';
 import SmartImage from '../SmartImage';
 import styles from './ExpandedPlayer.module.css';
 
@@ -33,6 +34,10 @@ const ExpandedPlayer: React.FC = () => {
   const navigate = useNavigate();
   const [resolvedArtistId, setResolvedArtistId] = useState<string | null>(null);
 
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [lyrics, setLyrics] = useState<LyricsResult | null>(null);
+  const [loadingLyrics, setLoadingLyrics] = useState(false);
+
   useEffect(() => {
     if (!currentTrack) return;
     const timer = setTimeout(() => {
@@ -45,8 +50,35 @@ const ExpandedPlayer: React.FC = () => {
         }
       })
       .catch(err => console.error("Error background resolving artist", err));
+
+    // Reset lyrics when track changes
+    setLyrics(null);
+    setShowLyrics(false);
     return () => clearTimeout(timer);
   }, [currentTrack]);
+
+  // Fetch lyrics when showLyrics is toggled on (or fetch them eagerly when expanded if desired, but toggling is cleaner)
+  useEffect(() => {
+    if (!currentTrack || !showLyrics || lyrics) return;
+    let isMounted = true;
+    
+    const fetchLyrics = async () => {
+      setLoadingLyrics(true);
+      try {
+        const res = await musicApi.lyrics(currentTrack.name, currentTrack.artist);
+        if (isMounted) {
+          setLyrics(res);
+        }
+      } catch (err) {
+        console.error("Failed to fetch lyrics", err);
+      } finally {
+        if (isMounted) setLoadingLyrics(false);
+      }
+    };
+    fetchLyrics();
+    
+    return () => { isMounted = false; };
+  }, [currentTrack, showLyrics, lyrics]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragValue, setDragValue] = useState(0);
@@ -92,15 +124,49 @@ const ExpandedPlayer: React.FC = () => {
               </button>
             </div>
 
-            {/* Artwork */}
+            {/* Artwork OR Lyrics */}
             <div className={styles.artworkContainer}>
-              <motion.div
-                animate={{ scale: isPlaying ? 1 : 0.9, opacity: isPlaying ? 1 : 0.8 }}
-                transition={{ type: 'spring', damping: 20 }}
-                className={styles.artwork}
-              >
-                <SmartImage src={currentTrack.poster} alt={currentTrack.name} />
-              </motion.div>
+              <AnimatePresence mode="wait">
+                {showLyrics ? (
+                  <motion.div
+                    key="lyrics"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ type: 'spring', damping: 20 }}
+                    className={styles.lyricsContainer}
+                  >
+                    {loadingLyrics ? (
+                      <div className={styles.lyricsLoading}>
+                        <Loader2 className={styles.spinnerIcon} size={32} />
+                        <p>Searching for lyrics...</p>
+                      </div>
+                    ) : lyrics && (lyrics.syncedLyrics || lyrics.plainLyrics) ? (
+                      <div className={styles.lyricsScrollBox}>
+                        <p className={styles.lyricsText}>
+                          {lyrics.syncedLyrics
+                            ? lyrics.syncedLyrics.split('\n').map(l => l.replace(/^\[\d+:\d+\.\d+\]/, '')).join('\n') // very basic strip for now, LRCLIB synced lyrics have [mm:ss.xx] prefix
+                            : lyrics.plainLyrics}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className={styles.lyricsEmpty}>
+                        <Mic2 size={48} opacity={0.2} />
+                        <p>No lyrics found for this track.</p>
+                      </div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="artwork"
+                    animate={{ scale: isPlaying ? 1 : 0.9, opacity: isPlaying ? 1 : 0.8 }}
+                    transition={{ type: 'spring', damping: 20 }}
+                    className={styles.artwork}
+                  >
+                    <SmartImage src={currentTrack.poster} alt={currentTrack.name} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Track Details */}
@@ -223,6 +289,13 @@ const ExpandedPlayer: React.FC = () => {
                 </div>
 
                 <div className={styles.actions}>
+                  <button 
+                    className={`${styles.iconButton} ${showLyrics ? styles.activeIcon : ''}`} 
+                    onClick={() => setShowLyrics(!showLyrics)}
+                    title="Lyrics"
+                  >
+                    <Mic2 size={22} />
+                  </button>
                   <button className={styles.iconButton} onClick={() => { setIsQueueOpen(true); setIsExpanded(false); }}>
                     <ListMusic size={22} />
                   </button>

@@ -49,6 +49,12 @@ export interface DownloadResult {
   downloadUrl?: string;
 }
 
+export interface LyricsResult {
+  plainLyrics: string | null;
+  syncedLyrics: string | null;
+  instrumental?: boolean;
+}
+
 export const musicApi = {
   /**
    * Search for tracks via YouTube Music.
@@ -200,6 +206,16 @@ export const musicApi = {
   downloadStatus: async (url: string): Promise<{ status: string; file?: string }> => {
     const res = await axios.get<{ status: string; file?: string }>(`${MUSIC_API_BASE}/download-status`, {
       params: { url }
+    });
+    return res.data;
+  },
+
+  /**
+   * Get lyrics for a track.
+   */
+  lyrics: async (track_name: string, artist_name: string): Promise<LyricsResult> => {
+    const res = await axios.get<LyricsResult>(`${MUSIC_API_BASE}/lyrics`, {
+      params: { track_name, artist_name }
     });
     return res.data;
   },

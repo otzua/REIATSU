@@ -115,6 +115,75 @@
   object-fit: cover;
 }
 
+/* Lyrics */
+.lyricsContainer {
+  width: 100%;
+  max-width: 450px;
+  height: 100%;
+  max-height: 380px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 24px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lyricsScrollBox {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+.lyricsScrollBox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lyricsScrollBox::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.lyricsText {
+  white-space: pre-wrap;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  opacity: 0.9;
+  margin: 2rem 0;
+}
+
+.lyricsLoading, .lyricsEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0.6;
+}
+
+.lyricsEmpty p, .lyricsLoading p {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.activeIcon {
+  opacity: 1 !important;
+  color: var(--accent);
+  text-shadow: 0 0 15px rgba(184, 58, 45, 0.6);
+  transform: translateY(-2px);
+}
+
 .trackDetails {
   display: flex;
   align-items: center;

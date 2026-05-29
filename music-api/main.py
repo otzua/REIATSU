@@ -901,6 +901,35 @@ async def get_album(album_id: str):
         logger.error(f"Album fetch failed for {album_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/lyrics")
+async def get_lyrics(track_name: str, artist_name: str, duration_ms: Optional[float] = None):
+    try:
+        params = {
+            "track_name": track_name,
+            "artist_name": artist_name
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            # First try the direct matching endpoint
+            async with session.get("https://lrclib.net/api/get", params=params, timeout=5) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data:
+                        return data
+                        
+            # If not found, try the search endpoint and return the first result
+            search_params = {"q": f"{artist_name} {track_name}"}
+            async with session.get("https://lrclib.net/api/search", params=search_params, timeout=5) as resp:
+                if resp.status == 200:
+                    results = await resp.json()
+                    if results and len(results) > 0:
+                        return results[0]
+                        
+        return {"plainLyrics": None, "syncedLyrics": None}
+    except Exception as e:
+        logger.error(f"Lyrics fetch failed for {artist_name} - {track_name}: {e}")
+        return {"plainLyrics": None, "syncedLyrics": None}
+
 @app.get("/artist/resolve-id")
 async def resolve_artist_id(name: str):
     try:
