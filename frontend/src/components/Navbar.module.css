@@ -785,166 +785,108 @@
 }
 
 /* ==========================================================================
-   PREMIUM RETRO-ANALOG PRECISION LOGO
+   SPIRITUAL AURA LOGO (REIATSU Ethereal Energy)
    ========================================================================== */
 
-.premiumLogo {
+.auraLogo {
   position: relative;
   overflow: hidden;
-  border-radius: 12px !important;
-  border: 2px solid var(--color-cream) !important;
-  background: var(--color-black) !important;
-  box-shadow: 4px 4px 0px rgba(220, 201, 169, 0.25) !important;
-  transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  border-radius: 50% !important; /* Perfect circle */
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.premiumLogo:hover {
-  transform: translate(2px, 2px) !important;
-  box-shadow: 1px 1px 0px rgba(220, 201, 169, 0.25) !important;
+.auraLogo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px var(--aura-color, rgba(255,255,255,0.2));
 }
 
-.logoVintageGrid {
+.auraCore {
   position: absolute;
   inset: 0;
   z-index: 1;
-  opacity: 0.15;
-  background-image: radial-gradient(var(--color-cream) 1px, transparent 1px);
-  background-size: 6px 6px;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-
-.premiumLogo:hover .logoVintageGrid {
-  opacity: 0.35;
-}
-
-.logoCornerDecor {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.logoCornerDecor::before,
-.logoCornerDecor::after {
-  content: '';
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-color: var(--color-cream);
-  border-style: solid;
+  background: radial-gradient(circle at center, var(--aura-color, rgba(255,255,255,0.3)) 0%, transparent 70%);
   opacity: 0.5;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.5s ease;
 }
 
-/* Top-Left Viewfinder Guide */
-.logoCornerDecor::before {
-  top: 4px;
-  left: 4px;
-  border-width: 1.5px 0 0 1.5px;
+.auraPulsePrimary,
+.auraPulseSecondary {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid var(--aura-color, rgba(255,255,255,0.5));
+  z-index: 2;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* Bottom-Right Viewfinder Guide */
-.logoCornerDecor::after {
-  bottom: 4px;
-  right: 4px;
-  border-width: 0 1.5px 1.5px 0;
+.auraPulsePrimary {
+  animation: pulseAura 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
-.premiumLogo:hover .logoCornerDecor::before {
-  transform: translate(2px, 2px);
-  opacity: 0.9;
+.auraPulseSecondary {
+  animation: pulseAura 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 1.5s;
 }
 
-.premiumLogo:hover .logoCornerDecor::after {
-  transform: translate(-2px, -2px);
-  opacity: 0.9;
+@keyframes pulseAura {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.8;
+    border-width: 2px;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+    border-width: 0px;
+  }
 }
 
 .logoKanji {
   position: relative;
   z-index: 3;
-  color: var(--color-cream) !important;
-  font-family: var(--font-jp) !important;
-  font-size: 2.1rem !important;
-  font-weight: 900 !important;
-  text-shadow: 0 0 8px rgba(220, 201, 169, 0.35) !important;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: var(--color-white);
+  font-family: var(--font-jp);
+  font-size: 2.2rem;
+  font-weight: 900;
+  text-shadow: 0 0 15px var(--aura-color, rgba(255,255,255,0.5));
+  transition: all 0.3s ease;
 }
 
-.premiumLogo:hover .logoKanji {
-  transform: scale(1.05);
+.auraLogo:hover .logoKanji {
+  transform: scale(1.1);
+  text-shadow: 0 0 25px var(--aura-color, rgba(255,255,255,0.8));
+}
+
+.auraLogo:hover .auraCore {
+  opacity: 0.9;
+  transform: scale(1.2);
 }
 
 /* ==========================================================================
-   DYNAMIC ANALOG INTERFACE STYLINGS (CREAM, RED, GREEN, AMBER)
+   DYNAMIC AURA THEMES
    ========================================================================== */
 
-/* 1. Cinema Theme (Lacquer Crimson & Off-White Cream Ticks) */
-.cinemaTheme.premiumLogo {
-  background: var(--color-red) !important;
-  border-color: var(--color-cream) !important;
-  box-shadow: 4px 4px 0px rgba(184, 58, 45, 0.3) !important;
-}
-.cinemaTheme.premiumLogo:hover {
-  background: #962c20 !important;
-}
-.cinemaTheme .logoVintageGrid {
-  background-image: radial-gradient(rgba(220, 201, 169, 0.3) 1px, transparent 1px);
-}
-.cinemaTheme .logoCornerDecor::before,
-.cinemaTheme .logoCornerDecor::after {
-  border-color: var(--color-cream);
-}
-.cinemaTheme .logoKanji {
-  color: var(--color-cream) !important;
-  text-shadow: 0 0 8px rgba(220, 201, 169, 0.2) !important;
+.cinemaTheme.auraLogo {
+  --aura-color: rgba(229, 9, 20, 0.8); /* Crimson Red */
+  border-color: rgba(229, 9, 20, 0.3);
 }
 
-/* 2. Anime Theme (Raw Obsidian Black & Cream Guides) */
-.animeTheme.premiumLogo {
-  background: var(--color-black) !important;
-  border-color: var(--color-cream) !important;
-}
-.animeTheme.premiumLogo:hover {
-  background: #111111 !important;
+.animeTheme.auraLogo {
+  --aura-color: rgba(138, 43, 226, 0.8); /* Mystical Violet */
+  border-color: rgba(138, 43, 226, 0.3);
 }
 
-/* 3. Music Theme (Organic Forest Olive Green & Cream) */
-.musicTheme.premiumLogo {
-  background: var(--color-green) !important;
-  border-color: var(--color-cream) !important;
-  box-shadow: 4px 4px 0px rgba(78, 104, 81, 0.3) !important;
-}
-.musicTheme.premiumLogo:hover {
-  background: #3e5240 !important;
-}
-.musicTheme .logoVintageGrid {
-  background-image: radial-gradient(rgba(220, 201, 169, 0.3) 1px, transparent 1px);
-}
-.musicTheme .logoCornerDecor::before,
-.musicTheme .logoCornerDecor::after {
-  border-color: var(--color-cream);
+.musicTheme.auraLogo {
+  --aura-color: rgba(30, 215, 96, 0.8); /* Emerald Green */
+  border-color: rgba(30, 215, 96, 0.3);
 }
 
-/* 4. Beyond Theme (Vintage Amber Bakelite & Brass Gold) */
-.beyondTheme.premiumLogo {
-  background: #251B12 !important; /* Bakelite dark casing */
-  border-color: #D4AF37 !important; /* Gold/Brass border */
-  box-shadow: 4px 4px 0px rgba(212, 175, 55, 0.25) !important;
-}
-.beyondTheme.premiumLogo:hover {
-  background: #1B130C !important;
-}
-.beyondTheme .logoVintageGrid {
-  background-image: radial-gradient(rgba(212, 175, 55, 0.3) 1px, transparent 1px);
-}
-.beyondTheme .logoCornerDecor::before,
-.beyondTheme .logoCornerDecor::after {
-  border-color: #D4AF37;
-}
-.beyondTheme .logoKanji {
-  color: #D4AF37 !important;
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.35) !important;
+.beyondTheme.auraLogo {
+  --aura-color: rgba(0, 245, 255, 0.8); /* Cyber Cyan */
+  border-color: rgba(0, 245, 255, 0.3);
 }
 
