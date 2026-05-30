@@ -784,3 +784,187 @@
   color: var(--accent);
 }
 
+/* ==========================================================================
+   PREMIUM DYNAMIC LOGO REDESIGN
+   ========================================================================== */
+
+.premiumLogo {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(10, 10, 10, 0.4) !important;
+}
+
+.premiumLogo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, transparent 30%, rgba(220, 201, 169, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 0;
+}
+
+.premiumLogo:hover::before {
+  opacity: 1;
+}
+
+.logoSvgWrapper {
+  position: absolute;
+  inset: 2px;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoRingOuter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  color: rgba(220, 201, 169, 0.2);
+  transform: rotate(0deg);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logoRingInner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  color: rgba(220, 201, 169, 0.4);
+  transform: rotate(0deg);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Spin animations on hover */
+@keyframes spinClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinCounterClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 8px currentColor); }
+  50% { opacity: 1; filter: drop-shadow(0 0 15px currentColor); }
+}
+
+.premiumLogo:hover .logoRingOuter {
+  animation: spinClockwise 12s linear infinite;
+}
+
+.premiumLogo:hover .logoRingInner {
+  animation: spinCounterClockwise 8s linear infinite;
+}
+
+/* ==========================================================================
+   DYNAMIC INTERFACE SPECIFIC ACCENTS & GLOWS
+   ========================================================================== */
+
+/* 1. Cinema Theme (Crimson Red / Cinematic Gold Accent) */
+.cinemaTheme.premiumLogo {
+  border-color: rgba(229, 9, 20, 0.25) !important;
+}
+.cinemaTheme.premiumLogo:hover {
+  border-color: rgba(229, 9, 20, 0.6) !important;
+  box-shadow: 
+    0 0 35px rgba(229, 9, 20, 0.35),
+    inset 0 0 15px rgba(229, 9, 20, 0.15) !important;
+}
+.cinemaTheme .logoRingOuter {
+  color: rgba(229, 9, 20, 0.25);
+}
+.cinemaTheme .logoRingInner {
+  color: rgba(229, 9, 20, 0.5);
+}
+.cinemaTheme:hover .logoRingInner {
+  color: rgba(229, 9, 20, 0.8);
+  animation: spinCounterClockwise 8s linear infinite, pulseGlow 2s ease-in-out infinite;
+}
+.cinemaTheme .logoKanji {
+  color: #fff;
+  text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
+}
+
+/* 2. Anime Theme (Purple Aura / Cyan Highlights) */
+.animeTheme.premiumLogo {
+  border-color: rgba(138, 43, 226, 0.25) !important;
+}
+.animeTheme.premiumLogo:hover {
+  border-color: rgba(138, 43, 226, 0.6) !important;
+  box-shadow: 
+    0 0 35px rgba(138, 43, 226, 0.35),
+    inset 0 0 15px rgba(138, 43, 226, 0.15) !important;
+}
+.animeTheme .logoRingOuter {
+  color: rgba(138, 43, 226, 0.25);
+}
+.animeTheme .logoRingInner {
+  color: rgba(138, 43, 226, 0.5);
+}
+.animeTheme:hover .logoRingInner {
+  color: rgba(138, 43, 226, 0.8);
+  animation: spinCounterClockwise 8s linear infinite, pulseGlow 2s ease-in-out infinite;
+}
+.animeTheme .logoKanji {
+  color: #fff;
+  text-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+}
+
+/* 3. HiFi Music Theme (Neo-Emerald Green / Spotify Vibe) */
+.musicTheme.premiumLogo {
+  border-color: rgba(30, 215, 96, 0.25) !important;
+}
+.musicTheme.premiumLogo:hover {
+  border-color: rgba(30, 215, 96, 0.6) !important;
+  box-shadow: 
+    0 0 35px rgba(30, 215, 96, 0.35),
+    inset 0 0 15px rgba(30, 215, 96, 0.15) !important;
+}
+.musicTheme .logoRingOuter {
+  color: rgba(30, 215, 96, 0.25);
+}
+.musicTheme .logoRingInner {
+  color: rgba(30, 215, 96, 0.5);
+}
+.musicTheme:hover .logoRingInner {
+  color: rgba(30, 215, 96, 0.8);
+  animation: spinCounterClockwise 8s linear infinite, pulseGlow 2s ease-in-out infinite;
+}
+.musicTheme .logoKanji {
+  color: #fff;
+  text-shadow: 0 0 15px rgba(30, 215, 96, 0.6);
+}
+
+/* 4. Beyond Portal Theme (Cyberpunk Neon Cyan / Pink Accent) */
+.beyondTheme.premiumLogo {
+  border-color: rgba(0, 245, 255, 0.25) !important;
+}
+.beyondTheme.premiumLogo:hover {
+  border-color: rgba(0, 245, 255, 0.6) !important;
+  box-shadow: 
+    0 0 35px rgba(0, 245, 255, 0.4),
+    inset 0 0 15px rgba(255, 0, 127, 0.2) !important;
+}
+.beyondTheme .logoRingOuter {
+  color: rgba(0, 245, 255, 0.25);
+}
+.beyondTheme .logoRingInner {
+  color: rgba(255, 0, 127, 0.5);
+}
+.beyondTheme:hover .logoRingInner {
+  color: rgba(0, 245, 255, 0.8);
+  animation: spinCounterClockwise 8s linear infinite, pulseGlow 2s ease-in-out infinite;
+}
+.beyondTheme .logoKanji {
+  color: #fff;
+  text-shadow: 
+    0 0 10px rgba(0, 245, 255, 0.6),
+    0 0 20px rgba(255, 0, 127, 0.4);
+}
+
