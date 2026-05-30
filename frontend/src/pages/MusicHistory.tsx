@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Play, Disc } from 'lucide-react';
+import { ArrowLeft, Play, Disc, Trash2, X } from 'lucide-react';
 import SmartImage from '../components/SmartImage';
 import HalftoneWave from '../components/HalftoneWave';
 import { useMusic } from '../context/MusicContext';
@@ -9,7 +9,7 @@ import cwStyles from '../components/ContinueWatching.module.css';
 import pageStyles from './Home.module.css';
 
 const MusicHistory = () => {
-  const { recentlyPlayed, playTrack, isPlaying, currentTrack } = useMusic();
+  const { recentlyPlayed, playTrack, isPlaying, currentTrack, clearHistory, removeFromHistory } = useMusic();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -25,7 +25,29 @@ const MusicHistory = () => {
               <ArrowLeft size={24} />
             </Link>
             <div className={cwStyles.accentBox}></div>
-            <h2 className={cwStyles.title}>LISTENING HISTORY</h2>
+            <h2 className={cwStyles.title} style={{ flex: 1 }}>LISTENING HISTORY</h2>
+            {recentlyPlayed.length > 0 && (
+              <button 
+                onClick={clearHistory}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  background: 'rgba(255, 59, 48, 0.1)',
+                  color: '#ff3b30',
+                  border: '1px solid rgba(255, 59, 48, 0.2)',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  fontFamily: 'var(--font-heading)'
+                }}
+              >
+                <Trash2 size={16} />
+                CLEAR
+              </button>
+            )}
           </div>
 
           {recentlyPlayed.length === 0 ? (
@@ -33,7 +55,7 @@ const MusicHistory = () => {
               Your music history is empty.
             </div>
           ) : (
-            <div className={cwStyles.grid}>
+            <div className={cwStyles.cwGrid}>
               {recentlyPlayed.map((item, index) => {
                 const isActive = currentTrack?.id === item.id;
                 
@@ -48,10 +70,21 @@ const MusicHistory = () => {
                     whileHover={{ y: -5, scale: 1.01, transition: { duration: 0.15, ease: "easeOut" } }}
                     style={{ 
                       cursor: 'pointer',
-                      borderColor: isActive ? 'var(--accent)' : 'rgba(220, 201, 169, 0.1)'
+                      borderColor: isActive ? 'var(--accent)' : 'rgba(220, 201, 169, 0.1)',
+                      position: 'relative'
                     }}
                     onClick={() => playTrack(item, recentlyPlayed)}
                   >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromHistory(item.id);
+                      }}
+                      className={cwStyles.deleteBtn}
+                      title="Remove from history"
+                    >
+                      <X size={14} />
+                    </button>
                     <div className={cwStyles.cardLink}>
                       <div className={cwStyles.posterWrapper}>
                          <SmartImage src={item.poster} className={cwStyles.poster} />

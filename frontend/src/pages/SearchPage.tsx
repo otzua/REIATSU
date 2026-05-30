@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { animeApi, type AnimeCard, type SearchResult } from '../services/animeApi';
 import { cinemaApi, type CinemaMovie } from '../services/cinemaApi';
 import SmartImage from '../components/SmartImage';
+import HalftoneWave from '../components/HalftoneWave';
 import styles from './SearchPage.module.css';
 
 const SearchPage = () => {
@@ -40,29 +41,16 @@ const SearchPage = () => {
           cinemaApi.search(query).catch(() => [])
         ]);
 
-        const queryLower = query.toLowerCase();
         const aData = animeData as SearchResult & { suggestion?: string };
         
         // Handle "Did you mean?" from API
         setDidYouMean(aData?.suggestion || '');
         
-        // Final sanity filter on frontend to ensure results are relevant to query
-        const strictAnime = (aData.animes || []).filter((item: AnimeCard) => 
-          item.name.toLowerCase().includes(queryLower) || 
-          queryLower.includes(item.name.toLowerCase()) ||
-          (item.otherInfo && item.otherInfo.some(info => info.toLowerCase().includes(queryLower)))
-        );
-
-        // If strict filtering removes everything, fall back to what the backend gave (it might be fuzzy matching)
-        setAnimeResults(strictAnime.length > 0 ? strictAnime : (aData.animes || []));
+        // Trust the API's fuzzy/relevance ranking — show all results it returns
+        setAnimeResults(aData.animes || []);
         
-        // Strict filter for Cinema results to ensure relevance
-        setCinemaResults(
-          (cinemaData || []).filter((item) => 
-            (item.title || '').toLowerCase().includes(queryLower) ||
-            queryLower.includes((item.title || '').toLowerCase())
-          )
-        );
+        // For cinema, just pass through what the API returns
+        setCinemaResults(cinemaData || []);
       } catch (err) {
         console.error('Search error:', err);
       } finally {
@@ -90,6 +78,7 @@ const SearchPage = () => {
 
   return (
     <div className={styles.searchPage}>
+      <HalftoneWave />
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.searchTitle}>

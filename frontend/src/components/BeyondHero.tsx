@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Play, Flame } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Flame, Shuffle } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import type { BeyondVideo } from '../services/beyondApi';
@@ -9,9 +9,10 @@ import styles from './Hero.module.css';
 interface BeyondHeroProps {
   videos: BeyondVideo[];
   onVideoSelect: (video: BeyondVideo) => void;
+  onRandom?: () => void;
 }
 
-const BeyondHero = ({ videos, onVideoSelect }: BeyondHeroProps) => {
+const BeyondHero = ({ videos, onVideoSelect, onRandom }: BeyondHeroProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const slides = videos.slice(0, 6);
 
@@ -97,6 +98,16 @@ const BeyondHero = ({ videos, onVideoSelect }: BeyondHeroProps) => {
                       <Play size={16} fill="currentColor" />
                       WATCH NOW
                     </span>
+                    {onRandom && (
+                      <button
+                        className={styles.surpriseBtn}
+                        onClick={(e) => { e.stopPropagation(); onRandom(); }}
+                        title="Play a random video"
+                      >
+                        <Shuffle size={14} />
+                        SURPRISE ME
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

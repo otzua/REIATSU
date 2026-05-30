@@ -1,6 +1,5 @@
 .searchPage {
   min-height: 100vh;
-  background: var(--bg-main);
   padding: 8rem 4rem 6rem 4rem;
   color: var(--color-cream);
 }

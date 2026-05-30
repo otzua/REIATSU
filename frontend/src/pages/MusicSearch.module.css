@@ -1,0 +1,262 @@
+.page {
+  min-height: 100vh;
+  padding: 8rem 4rem 6rem;
+  color: var(--color-cream);
+}
+
+.header {
+  max-width: 1100px;
+  margin: 0 auto 4rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.titleIcon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 15px rgba(184, 58, 45, 0.4));
+  flex-shrink: 0;
+}
+
+.header h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin: 0;
+  background: linear-gradient(to right, var(--color-cream), rgba(220, 201, 169, 0.5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.queryDisplay {
+  font-size: 1.2rem;
+  color: rgba(220, 201, 169, 0.4);
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.queryDisplay span {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Loading */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10rem 0;
+  gap: 1.5rem;
+  color: rgba(220, 201, 169, 0.4);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* No results */
+.noResults {
+  text-align: center;
+  padding: 10rem 0;
+  color: rgba(220, 201, 169, 0.5);
+}
+
+.noResults h2 {
+  font-size: 2.5rem;
+  margin: 2rem 0 1rem;
+  color: var(--color-cream);
+}
+
+.noResults p {
+  max-width: 400px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.backHome {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 16px;
+  text-decoration: none;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.backHome:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(184, 58, 45, 0.3);
+}
+
+/* Track list */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2.5rem 56px 1fr auto auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.row:hover {
+  background: rgba(220, 201, 169, 0.06);
+}
+
+.row:hover .index {
+  opacity: 0;
+}
+
+.row:hover .thumbOverlay {
+  opacity: 1;
+}
+
+.index {
+  color: rgba(220, 201, 169, 0.35);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  transition: opacity 0.15s ease;
+}
+
+/* Thumbnail */
+.thumb {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(220, 201, 169, 0.05);
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Info */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.trackName {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist {
+  font-size: 0.8rem;
+  color: rgba(220, 201, 169, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album {
+  font-size: 0.8rem;
+  color: rgba(220, 201, 169, 0.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  max-width: 220px;
+}
+
+.duration {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: rgba(220, 201, 169, 0.35);
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 3rem;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page {
+    padding: 5.5rem 1rem 2rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .row {
+    grid-template-columns: 2rem 48px 1fr auto;
+    gap: 0.75rem;
+  }
+
+  .album {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 5rem 0.75rem var(--mobile-bottom-area) 0.75rem;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+  }
+
+  .index {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 48px 1fr auto;
+  }
+}

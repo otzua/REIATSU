@@ -199,14 +199,12 @@ const Navbar = () => {
       localTimer = setTimeout(() => {
         if (active) setSuggestion('');
       }, 0);
-    } else {
+    } else if (!isMusic) {
+      // Music already does a full search — skip the suggestion call to avoid double-fetching
       suggestionDebounceRef.current = setTimeout(async () => {
         try {
           let topName = '';
-          if (isMusic) {
-            const data = await musicApi.search(query).catch(() => []);
-            topName = data[0]?.name || '';
-          } else if (isBeyond) {
+          if (isBeyond) {
             const data = await beyondApi.search(query).catch(() => []);
             topName = data[0]?.title || '';
           } else if (isCinema) {
@@ -416,9 +414,9 @@ const Navbar = () => {
           <motion.div
             key="switch-overlay"
             className={`${styles.switchOverlay} glass`}
-            initial={{ opacity: 0, y: 20, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            initial={{ opacity: 0, y: '-40%', x: '-50%' }}
+            animate={{ opacity: 1, y: '-50%', x: '-50%' }}
+            exit={{ opacity: 0, y: '-40%', x: '-50%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             <div className={styles.switchHeader}>
@@ -521,8 +519,13 @@ const Navbar = () => {
                       return;
                     }
                     if (e.key === 'Enter' && query.trim()) {
-                      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
-                      closeSearch();
+                      if (isMusic) {
+                        navigate(`/music/search?q=${encodeURIComponent(query.trim())}`);
+                        closeSearch();
+                      } else if (!isBeyond) {
+                        navigate(`/search?q=${encodeURIComponent(query.trim())}&type=${searchFilter}`);
+                        closeSearch();
+                      }
                     }
                   }}
                 />

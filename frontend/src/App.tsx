@@ -12,6 +12,7 @@ const Schedule = lazy(() => import('./pages/Schedule'));
 const Music = lazy(() => import('./pages/Music'));
 const AlbumDetails = lazy(() => import('./pages/AlbumDetails'));
 const ArtistDetails = lazy(() => import('./pages/ArtistDetails'));
+const MusicSearch = lazy(() => import('./pages/MusicSearch'));
 const Beyond = lazy(() => import('./pages/Beyond'));
 const BeyondWatch = lazy(() => import('./pages/BeyondWatch'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
@@ -50,6 +51,7 @@ function App() {
           <Route path="/music/history" element={<MusicHistory />} />
           <Route path="/music/album/:id" element={<AlbumDetails />} />
           <Route path="/music/artist/:id" element={<ArtistDetails />} />
+          <Route path="/music/search" element={<MusicSearch />} />
           <Route path="/beyond" element={<Beyond />} />
           <Route path="/beyond/history" element={<BeyondHistory />} />
           <Route path="/beyond/watch/:id" element={<BeyondWatch />} />

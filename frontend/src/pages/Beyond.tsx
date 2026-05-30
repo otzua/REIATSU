@@ -27,12 +27,26 @@ const pureRandomSort = <T,>(array: T[]): T[] => {
   return result;
 };
 
+const getPadSlice = (arr: BeyondVideo[], start: number, length: number) => {
+  if (arr.length === 0) return [];
+  const result: BeyondVideo[] = [];
+  let currentIndex = start % arr.length;
+  for (let i = 0; i < length; i++) {
+    result.push(arr[currentIndex]);
+    currentIndex = (currentIndex + 1) % arr.length;
+  }
+  return result;
+};
+
 const Beyond = () => {
   const navigate = useNavigate();
   const [videos, setVideos] = useState<BeyondVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [server, setServer] = useState<'hanime' | 'watchhentai'>('hanime');
+  const [server, setServer] = useState<'hanime' | 'watchhentai'>(() => {
+    const saved = localStorage.getItem('beyond_provider');
+    return (saved === 'hanime' || saved === 'watchhentai') ? saved : 'hanime';
+  });
   const [continueWatching, setContinueWatching] = useState<BeyondVideo[]>(() => {
     const saved = localStorage.getItem('beyond_history');
     if (saved) {
@@ -80,10 +94,10 @@ const Beyond = () => {
     navigate(`/beyond/watch/${video.id}`);
   };
 
-  const heroVideos = useMemo(() => videos.slice(0, 6), [videos]);
-  const hotVideos = useMemo(() => videos.slice(6, 18), [videos]);
-  const newVideos = useMemo(() => videos.slice(18, 30), [videos]);
-  const famousVideos = useMemo(() => pureRandomSort(videos).slice(0, 12), [videos]);
+  const heroVideos = useMemo(() => getPadSlice(videos, 0, 6), [videos]);
+  const hotVideos = useMemo(() => getPadSlice(videos, 6, 10), [videos]);
+  const newVideos = useMemo(() => getPadSlice(videos, 16, 10), [videos]);
+  const famousVideos = useMemo(() => getPadSlice(pureRandomSort(videos), 0, 10), [videos]);
 
   return (
     <div className={pageStyles.homeContainer}>
@@ -98,13 +112,13 @@ const Beyond = () => {
             <div className={styles.serverToggle}>
               <button
                 className={`${styles.serverBtn} ${server === 'hanime' ? styles.active : ''}`}
-                onClick={() => { setServer('hanime'); fetchFeed('hanime'); }}
+                onClick={() => { setServer('hanime'); localStorage.setItem('beyond_provider', 'hanime'); fetchFeed('hanime'); }}
               >
                 HANIME TV
               </button>
               <button
                 className={`${styles.serverBtn} ${server === 'watchhentai' ? styles.active : ''}`}
-                onClick={() => { setServer('watchhentai'); fetchFeed('watchhentai'); }}
+                onClick={() => { setServer('watchhentai'); localStorage.setItem('beyond_provider', 'watchhentai'); fetchFeed('watchhentai'); }}
               >
                 WATCHHENTAI
               </button>
@@ -142,7 +156,15 @@ const Beyond = () => {
         {/* Main content — only render once loaded with data */}
         {!loading && !error && videos.length > 0 && (
           <>
-            <BeyondHero videos={heroVideos} onVideoSelect={handleVideoSelect} />
+            <BeyondHero
+              videos={heroVideos}
+              onVideoSelect={handleVideoSelect}
+              onRandom={() => {
+                if (videos.length === 0) return;
+                const random = videos[Math.floor(Math.random() * videos.length)];
+                handleVideoSelect(random);
+              }}
+            />
 
             {/* Continue Watching */}
             {continueWatching.length > 0 && (

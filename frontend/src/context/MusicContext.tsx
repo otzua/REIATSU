@@ -33,6 +33,8 @@ interface MusicContextType {
   removeFromQueue: (trackId: string) => void;
   clearQueue: () => void;
   recentlyPlayed: Track[];
+  clearHistory: () => void;
+  removeFromHistory: (trackId: string) => void;
   audioRef: React.RefObject<HTMLAudioElement>;
 }
 
@@ -248,6 +250,19 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setDuration(0);
   };
 
+  const clearHistory = () => {
+    setRecentlyPlayed([]);
+    localStorage.removeItem('reiatsu_recently_played');
+  };
+
+  const removeFromHistory = (trackId: string) => {
+    setRecentlyPlayed(prev => {
+      const updated = prev.filter(t => t.id !== trackId);
+      localStorage.setItem('reiatsu_recently_played', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
     <MusicContext.Provider value={{
       currentTrack, queue, isPlaying, loadingStream, streamError, setStreamError,
@@ -255,7 +270,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       isQueueOpen, setIsQueueOpen, isExpanded, setIsExpanded,
       playTrack, stopMusic, togglePlay, skipForward, skipBack, setVolume, setMuted, seek,
       toggleShuffle, toggleRepeat, addToQueue, removeFromQueue, clearQueue,
-      recentlyPlayed, audioRef
+      recentlyPlayed, clearHistory, removeFromHistory, audioRef
     }}>
       {children}
     </MusicContext.Provider>

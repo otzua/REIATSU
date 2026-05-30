@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Play, Flame } from 'lucide-react';
 import type { BeyondVideo } from '../services/beyondApi';
 import SmartImage from './SmartImage';
-import topStyles from './TopMovies.module.css';
 import styles from './BeyondGrid.module.css';
 
 interface BeyondGridProps {
@@ -13,43 +12,44 @@ interface BeyondGridProps {
 
 const BeyondGrid = ({ videos, onVideoSelect, title }: BeyondGridProps) => {
   return (
-    <section className={topStyles.section}>
-      <div className={topStyles.header}>
-        <div className={topStyles.accentBox}></div>
-        <h2 className={`${topStyles.title} ${styles.titleRow}`}>
+    <section className={styles.section}>
+      <div className={styles.header}>
+        <div className={styles.accentBox}></div>
+        <h2 className={styles.title}>
           <Flame size={24} className={styles.titleIcon} />
           {title}
         </h2>
       </div>
 
-      <div className={topStyles.grid}>
+      <div className={styles.grid}>
         {videos.map((video, index) => {
           const pubYear = video.pubDate ? new Date(video.pubDate).getFullYear() : '';
           return (
             <motion.div
               key={`${video.id}-${index}`}
-              className={topStyles.animeCard}
-              initial={{ opacity: 0, scale: 0.9 }}
+              className={styles.card}
+              initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.03 }}
-              whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.15, ease: 'easeOut' } }}
+              whileHover={{ y: -6, transition: { duration: 0.15, ease: 'easeOut' } }}
               onClick={() => onVideoSelect(video)}
             >
-              <div className={topStyles.cardLink}>
-                <div className={topStyles.posterPlaceholder}>
-                  <div className={topStyles.badge}>PREMIUM</div>
-                  <SmartImage src={video.thumbnail} aria-hidden="true" className={topStyles.posterGlow} draggable={false} />
-                  <SmartImage src={video.thumbnail} alt={video.title} className={topStyles.posterImg} draggable={false} />
+              <div className={styles.thumb}>
+                <SmartImage src={video.thumbnail} aria-hidden="true" className={styles.thumbGlow} draggable={false} />
+                <SmartImage src={video.thumbnail} alt={video.title} className={styles.thumbImg} draggable={false} />
+                <div className={styles.playOverlay}>
+                  <Play size={28} fill="currentColor" />
                 </div>
-                <div className={topStyles.info}>
-                  <h3 className={topStyles.animeTitle} title={video.title}>{video.title}</h3>
-                  <div className={`${topStyles.episodesMeta} ${styles.episodesMeta}`}>
-                    {pubYear && <span className={topStyles.type}>{pubYear}</span>}
-                    <span className={`${topStyles.type} ${styles.watchBadge}`}>
-                      <Play size={10} fill="currentColor" /> WATCH
-                    </span>
-                  </div>
+                <span className={styles.badge}>PREMIUM</span>
+              </div>
+              <div className={styles.info}>
+                <h3 className={styles.cardTitle} title={video.title}>{video.title}</h3>
+                <div className={styles.meta}>
+                  {pubYear && <span className={styles.pill}>{pubYear}</span>}
+                  <span className={styles.watchPill}>
+                    <Play size={9} fill="currentColor" /> WATCH
+                  </span>
                 </div>
               </div>
             </motion.div>

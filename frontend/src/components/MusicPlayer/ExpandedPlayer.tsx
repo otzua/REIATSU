@@ -60,10 +60,13 @@ const ExpandedPlayer: React.FC = () => {
   const [lyrics, setLyrics] = useState<LyricsResult | null>(null);
   const [loadingLyrics, setLoadingLyrics] = useState(false);
   const [syncTime, setSyncTime] = useState(0);
+  const [playbackTime, setPlaybackTime] = useState(0);
 
   const lyricsScrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
+  const seekRafRef = useRef<number | undefined>(undefined);
+  const lastSeekbarUpdateRef = useRef(0);
 
   useEffect(() => {
     if (!currentTrack) return;
@@ -74,10 +77,16 @@ const ExpandedPlayer: React.FC = () => {
     return () => clearTimeout(timer);
   }, [currentTrack]);
 
-  useEffect(() => {
-    if (!currentTrack) return;
+  // Reset lyrics state when track changes
+  const [prevTrackId, setPrevTrackId] = useState<string | null>(null);
+  if (currentTrack && prevTrackId !== currentTrack.id) {
+    setPrevTrackId(currentTrack.id);
     setLyrics(null);
     setShowLyrics(false);
+  }
+
+  useEffect(() => {
+    if (!currentTrack) return;
     let isMounted = true;
 
     const prefetch = async () => {
@@ -96,37 +105,47 @@ const ExpandedPlayer: React.FC = () => {
   }, [currentTrack]);
 
   const lrcLines = useMemo<LrcLine[]>(() => {
-    if (lyrics?.syncedLyrics) return parseLrc(lyrics.syncedLyrics);
-    return [];
+    return lyrics?.syncedLyrics ? parseLrc(lyrics.syncedLyrics) : [];
   }, [lyrics]);
 
+  // RAF loop: runs whenever lyrics panel is open AND song is playing.
+  // Sets syncTime state at 60fps so activeLineIndex (below) stays tight with the audio.
   useEffect(() => {
-    if (!showLyrics || !isPlaying || !audioRef.current) return;
-    
-    const updateTime = () => {
-      if (audioRef.current) {
-        setSyncTime(audioRef.current.currentTime);
-      }
-      rafRef.current = requestAnimationFrame(updateTime);
+    if (!showLyrics || !isPlaying) return;
+    const update = () => {
+      if (audioRef.current) setSyncTime(audioRef.current.currentTime);
+      rafRef.current = requestAnimationFrame(update);
     };
-    
-    rafRef.current = requestAnimationFrame(updateTime);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    rafRef.current = requestAnimationFrame(update);
+    return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current); };
   }, [showLyrics, isPlaying, audioRef]);
 
+  // Derive active line from syncTime — same pattern as the original working version
   const activeLineIndex = useMemo(() => {
     if (!lrcLines.length) return -1;
+    const lookahead = syncTime + 0.1;
     let idx = 0;
-    // Tiny offset to make lyrics appear right exactly as sung
-    const lookaheadTime = syncTime + 0.1;
     for (let i = 0; i < lrcLines.length; i++) {
-      if (lookaheadTime >= lrcLines[i].time) idx = i;
+      if (lookahead >= lrcLines[i].time) idx = i;
       else break;
     }
     return idx;
   }, [lrcLines, syncTime]);
+
+  // Always-on seekbar RAF: updates playbackTime at ~4fps for the seek slider
+  useEffect(() => {
+    const tick = () => {
+      const t = audioRef.current?.currentTime ?? 0;
+      const now = performance.now();
+      if (now - lastSeekbarUpdateRef.current >= 250) {
+        lastSeekbarUpdateRef.current = now;
+        setPlaybackTime(t);
+      }
+      seekRafRef.current = requestAnimationFrame(tick);
+    };
+    seekRafRef.current = requestAnimationFrame(tick);
+    return () => { if (seekRafRef.current !== undefined) cancelAnimationFrame(seekRafRef.current); };
+  }, [audioRef]);
 
   useEffect(() => {
     if (!showLyrics || activeLineIndex < 0 || !activeLineRef.current || !lyricsScrollRef.current) return;
@@ -151,8 +170,8 @@ const ExpandedPlayer: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragValue, setDragValue] = useState(0);
 
-  // For the seekbar, we can still use the precise syncTime to be smooth, or fallback to standard
-  const displayTime = isDragging ? dragValue : (audioRef.current?.currentTime || 0);
+  // Seekbar display: use low-frequency playbackTime state (not ref) — linter-safe
+  const displayTime = isDragging ? dragValue : playbackTime;
 
   if (!currentTrack) return null;
 
@@ -236,9 +255,9 @@ const ExpandedPlayer: React.FC = () => {
                   <input
                     type="range" min={0} max={duration || 100} value={displayTime}
                     onChange={(e) => { setDragValue(parseFloat(e.target.value)); if (!isDragging) setIsDragging(true); }}
-                    onMouseDown={() => { setIsDragging(true); setDragValue(audioRef.current?.currentTime || 0); }}
+                    onMouseDown={() => { setIsDragging(true); setDragValue(playbackTime); }}
                     onMouseUp={() => { setIsDragging(false); seek(dragValue); }}
-                    onTouchStart={() => { setIsDragging(true); setDragValue(audioRef.current?.currentTime || 0); }}
+                    onTouchStart={() => { setIsDragging(true); setDragValue(playbackTime); }}
                     onTouchEnd={() => { setIsDragging(false); seek(dragValue); }}
                     className={styles.seekBar}
                     style={{ '--progress': `${(displayTime / (duration || 1)) * 100}%` } as React.CSSProperties}

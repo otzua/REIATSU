@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Play, Tv, Clock, ArrowLeft } from 'lucide-react';
+import { Play, Tv, Clock, ArrowLeft, Trash2, X } from 'lucide-react';
 import SmartImage from '../components/SmartImage';
 import HalftoneWave from '../components/HalftoneWave';
 import cwStyles from '../components/ContinueWatching.module.css';
@@ -26,7 +26,7 @@ const decodeEntities = (text: string) => {
 };
 
 const AnimeHistory = () => {
-  const [history] = useState<AnimeCWData[]>(() => {
+  const [history, setHistory] = useState<AnimeCWData[]>(() => {
     const data = localStorage.getItem('reiatsu_continue_watching');
     if (data) {
       try {
@@ -55,6 +55,21 @@ const AnimeHistory = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('reiatsu_continue_watching');
+  };
+
+  const removeFromHistory = (e: React.MouseEvent, animeId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setHistory(prev => {
+      const updated = prev.filter(t => t.animeId !== animeId);
+      localStorage.setItem('reiatsu_continue_watching', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
     <div className={pageStyles.homeContainer}>
       <HalftoneWave />
@@ -66,7 +81,29 @@ const AnimeHistory = () => {
             </Link>
             <div className={cwStyles.titleGroup}>
               <div className={cwStyles.accentBox}></div>
-              <h2 className={cwStyles.title}>WATCH HISTORY</h2>
+              <h2 className={cwStyles.title} style={{ flex: 1 }}>WATCH HISTORY</h2>
+              {history.length > 0 && (
+                <button 
+                  onClick={clearHistory}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: 'rgba(255, 59, 48, 0.1)',
+                    color: '#ff3b30',
+                    border: '1px solid rgba(255, 59, 48, 0.2)',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    fontFamily: 'var(--font-heading)'
+                  }}
+                >
+                  <Trash2 size={16} />
+                  CLEAR
+                </button>
+              )}
             </div>
           </div>
 
@@ -75,7 +112,7 @@ const AnimeHistory = () => {
               Your anime history is empty.
             </div>
           ) : (
-            <div className={cwStyles.grid}>
+            <div className={cwStyles.cwGrid}>
               {history.map((item, index) => {
                 const watchLink = `/${item.provider || 'anime'}/watch/${item.animeId}?ep=${item.episodeNumber}`;
 
@@ -88,7 +125,15 @@ const AnimeHistory = () => {
                     viewport={{ once: true }}
                     transition={{ delay: (index % 10) * 0.05 }}
                     whileHover={{ y: -5, scale: 1.01, transition: { duration: 0.15, ease: 'easeOut' } }}
+                    style={{ position: 'relative' }}
                   >
+                    <button
+                      onClick={(e) => removeFromHistory(e, item.animeId)}
+                      className={cwStyles.deleteBtn}
+                      title="Remove from history"
+                    >
+                      <X size={14} />
+                    </button>
                     <Link to={watchLink} className={cwStyles.cardLink}>
                       <div className={cwStyles.posterWrapper}>
                         <SmartImage src={item.animePoster} className={cwStyles.poster} />
