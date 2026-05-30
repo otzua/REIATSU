@@ -3,7 +3,8 @@
 <div align="center">
   <img src="./reiatsu_banner_1778080050417.png" alt="REIATSU Banner" width="100%">
   <br />
-  <p><i>The ultimate open-source, self-hosted streaming service for Anime, Movies, and Music.</i></p>
+  
+  [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Inter&weight=500&size=18&pause=1500&color=A9A9A9&center=true&vCenter=true&width=600&lines=The+ultimate+self-hosted+streaming+service.;Stream+Anime,+Movies,+and+Music.;Fast,+Private,+and+Beautiful.)](https://git.io/typing-svg)
   
   ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
   ![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Vite%20%7C%20TS-blue?style=for-the-badge)
