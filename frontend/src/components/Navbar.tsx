@@ -337,16 +337,8 @@ const Navbar = () => {
           onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} 
           style={{ cursor: 'pointer' }}
         >
-          <div className={styles.logoSvgWrapper}>
-            <svg className={styles.logoRingOuter} viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="1.5" strokeDasharray="12 8 4 8" fill="none" />
-            </svg>
-            <svg className={styles.logoRingInner} viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="1" strokeDasharray="6 24 12 12" fill="none" />
-              <circle cx="50" cy="12" r="2" fill="currentColor" />
-              <circle cx="50" cy="88" r="2" fill="currentColor" />
-            </svg>
-          </div>
+          <div className={styles.logoFluidBlob}></div>
+          <div className={styles.logoGlassOverlay}></div>
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </div>
 
