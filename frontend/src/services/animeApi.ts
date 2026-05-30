@@ -2,7 +2,7 @@
 // VITE_API_URL: set in .env for prod (e.g. https://your-api.vercel.app)
 // Empty string falls back to the Vite dev proxy (/api -> localhost:4000)
 const API_HOST = import.meta.env.VITE_API_URL || '';
-const BASE = API_HOST ? `${API_HOST}/api/v2/anikai` : '/api/v2/anikai';
+const BASE = API_HOST ? `${API_HOST}/api/v2/anikoto` : '/api/v2/anikoto';
 
 export interface SpotlightAnime {
   id: string;

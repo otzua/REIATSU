@@ -183,15 +183,15 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
   // ── id ──────────────────────────────────────────────────────────────────────
   const idMatch =
     html.match(/postid-(\d+)/i) ||
-    html.match(/data-post-id="(\d+)"/i);
+    html.match(/data-post-id=['"](\d+)['"]/i);
   const id = idMatch ? idMatch[1] : "";
 
   // ── title ────────────────────────────────────────────────────────────────────
-  const titleMatch = html.match(/<div class="data">\s*<h1>([^<]+)<\/h1>/i);
+  const titleMatch = html.match(/<div class=['"]data['"]>\s*<h1>([^<]+)<\/h1>/i);
   const title = titleMatch ? decodeHtmlEntities(titleMatch[1].trim()) : "";
 
   // ── canonical URL ─────────────────────────────────────────────────────────────
-  const canonicalMatch = html.match(/<link rel="canonical" href="([^"]+)"/i);
+  const canonicalMatch = html.match(/<link rel=['"]canonical['"] href=['"]([^'"]+)['"]/i);
   const url = canonicalMatch
     ? canonicalMatch[1]
     : `https://watchhentai.net/series/${slug}/`;
@@ -199,29 +199,29 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
   // ── poster ───────────────────────────────────────────────────────────────────
   // The poster is the first lazy-loaded img inside .sheader .poster with itemprop="image"
   const posterMatch =
-    html.match(/itemprop="image"[^>]*data-src="([^"]+)"/i) ||
-    html.match(/data-src="([^"]+\/uploads\/[^"]+\/poster\.[^"]+)"/i);
+    html.match(/itemprop=['"]image['"][^>]*data-src=['"]([^'"]+)['"]/i) ||
+    html.match(/data-src=['"]([^'"]+\/uploads\/[^'"]+\/poster\.[^'"]+)['"]/i);
   const poster = posterMatch ? posterMatch[1] : "";
 
   // ── censored status ───────────────────────────────────────────────────────────
   // Scope to .sheader only so sidebar doesn't pollute
   const sheaderMatch = html.match(
-    /<div class="sheader">([\s\S]*?)<\/div>\s*<\/div>\s*<div class="sbox"/
+    /<div class=['"]sheader['"]>([\s\S]*?)<\/div>\s*<\/div>\s*<div class=['"]sbox['"]/
   );
   const sheaderHtml = sheaderMatch ? sheaderMatch[1] : html.slice(0, 8000);
   let censored: SeriesDetail["censored"] = "unknown";
-  if (/<div class="buttoncensured">/i.test(sheaderHtml)) censored = "censored";
-  else if (/<div class="buttonuncensured">/i.test(sheaderHtml)) censored = "uncensored";
+  if (/<div class=['"]buttoncensured['"]>/i.test(sheaderHtml)) censored = "censored";
+  else if (/<div class=['"]buttonuncensured['"]>/i.test(sheaderHtml)) censored = "uncensored";
 
   // ── date created ─────────────────────────────────────────────────────────────
-  const dateMatch = html.match(/itemprop="dateCreated">([^<]+)<\/span>/i);
+  const dateMatch = html.match(/itemprop=['"]dateCreated['"]>([^<]+)<\/span>/i);
   const dateCreated = dateMatch ? dateMatch[1].trim() : "";
 
   // ── genres ────────────────────────────────────────────────────────────────────
-  const sgeneroMatch = html.match(/<div class="sgeneros">([\s\S]*?)<\/div>/i);
+  const sgeneroMatch = html.match(/<div class=['"]sgeneros['"]>([\s\S]*?)<\/div>/i);
   const genres: Genre[] = [];
   if (sgeneroMatch) {
-    const gRe = /<a href="([^"]+)"[^>]*>([^<]+)<\/a>/gi;
+    const gRe = /<a href=['"]([^'"]+)['"][^>]*>([^<]+)<\/a>/gi;
     let gm: RegExpExecArray | null;
     while ((gm = gRe.exec(sgeneroMatch[1])) !== null) {
       genres.push({ name: cleanText(gm[2]), url: gm[1] });
@@ -230,26 +230,26 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
 
   // ── rating ────────────────────────────────────────────────────────────────────
   const ratingMatch = html.match(
-    /<span class="dt_rating_vgs" itemprop="ratingValue">([^<]+)<\/span>/i
+    /<span class=['"]dt_rating_vgs['"] itemprop=['"]ratingValue['"]>([^<]+)<\/span>/i
   );
   const rating = ratingMatch ? ratingMatch[1].trim() : "";
 
   const ratingCountMatch = html.match(
-    /<span class="rating-count" itemprop="ratingCount">([^<]+)<\/span>/i
+    /<span class=['"]rating-count['"] itemprop=['"]ratingCount['"]>([^<]+)<\/span>/i
   );
   const ratingCount = ratingCountMatch ? ratingCountMatch[1].trim() : "";
 
   // ── favorites & watched ───────────────────────────────────────────────────────
   // list-count-POSTID and views-count-POSTID spans
-  const favMatch = html.match(/class="list-count-\d+">(\d+)<\/span>/i);
+  const favMatch = html.match(/class=['"]list-count-\d+['"]>(\d+)<\/span>/i);
   const favorites = favMatch ? favMatch[1] : "";
-  const viewsMatch = html.match(/class="views-count-\d+">(\d+)<\/span>/i);
+  const viewsMatch = html.match(/class=['"]views-count-\d+['"]>(\d+)<\/span>/i);
   const watchedCount = viewsMatch ? viewsMatch[1] : "";
 
   // ── synopsis ──────────────────────────────────────────────────────────────────
   // .wp-content > <p> (before gallery)
   const synopsisBlockMatch = html.match(
-    /<div class="wp-content">([\s\S]*?)<div id='dt_galery'/i
+    /<div class=['"]wp-content['"]>([\s\S]*?)<div id=['"]dt_galery['"]/i
   );
   let synopsis = "";
   if (synopsisBlockMatch) {
@@ -260,9 +260,9 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
   // ── backdrops ─────────────────────────────────────────────────────────────────
   const backdrops: string[] = [];
   // Primary: from gallery div
-  const galleryMatch = html.match(/<div id='dt_galery'[^>]*>([\s\S]*?)<\/div>\s*<\/div>/i);
+  const galleryMatch = html.match(/<div id=['"]dt_galery['"][^>]*>([\s\S]*?)<\/div>\s*<\/div>/i);
   if (galleryMatch) {
-    const bRe = /data-src='([^']+)'/gi;
+    const bRe = /data-src=['"]([^'"]+)['"]/gi;
     let bm: RegExpExecArray | null;
     while ((bm = bRe.exec(galleryMatch[1])) !== null) {
       if (!backdrops.includes(bm[1])) backdrops.push(bm[1]);
@@ -270,7 +270,7 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
   }
   // Fallback: og:image meta tags
   if (backdrops.length === 0) {
-    const ogRe = /<meta property='og:image' content='([^']+)'/gi;
+    const ogRe = /<meta property=['"]og:image['"] content=['"]([^'"]+)['"]/gi;
     let om: RegExpExecArray | null;
     while ((om = ogRe.exec(html)) !== null) {
       if (!backdrops.includes(om[1])) backdrops.push(om[1]);
@@ -278,19 +278,19 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
   }
 
   // ── episodes ──────────────────────────────────────────────────────────────────
-  const epBlockMatch = html.match(/<ul class='episodios'>([\s\S]*?)<\/ul>/i);
+  const epBlockMatch = html.match(/<ul class=['"]episodios['"]>([\s\S]*?)<\/ul>/i);
   const episodes: Episode[] = [];
   if (epBlockMatch) {
-    const liRe = /<li[^>]*class='mark-(\d+)'[^>]*>([\s\S]*?)<\/li>/gi;
+    const liRe = /<li[^>]*class=['"]mark-(\d+)['"][^>]*>([\s\S]*?)<\/li>/gi;
     let li: RegExpExecArray | null;
     while ((li = liRe.exec(epBlockMatch[1])) !== null) {
       const number = parseInt(li[1], 10);
       const liHtml = li[2];
 
-      const thumbMatch = liHtml.match(/data-src='([^']+)'/i);
+      const thumbMatch = liHtml.match(/data-src=['"]([^'"]+)['"]/i);
       const thumbnail = thumbMatch ? thumbMatch[1] : "";
 
-      const epUrlMatch = liHtml.match(/href='([^']+)'/i);
+      const epUrlMatch = liHtml.match(/href=['"]([^'"]+)['"]/i);
       const epUrl = epUrlMatch ? epUrlMatch[1] : "";
 
       // Title from the anchor text
@@ -299,7 +299,7 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
         ? cleanText(epTitleMatch[1])
         : `Episode ${number}`;
 
-      const epDateMatch = liHtml.match(/<span class='date'>([^<]+)<\/span>/i);
+      const epDateMatch = liHtml.match(/<span class=['"]date['"]>([^<]+)<\/span>/i);
       const epDate = epDateMatch ? epDateMatch[1].trim() : "";
 
       if (epUrl) {
@@ -313,7 +313,7 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
   function getCustomField(label: string): string {
     const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const re = new RegExp(
-      `<b class="variante">${escaped}<\\/b>\\s*<span class="valor">([\\s\\S]*?)<\\/span>`,
+      `<b class=['"]variante['"]>${escaped}<\\/b>\\s*<span class=['"]valor['"]>([\\s\\S]*?)<\\/span>`,
       "i"
     );
     const fm = html.match(re);
@@ -331,7 +331,7 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
 
   // ── related series ────────────────────────────────────────────────────────────
   const relatedBlockMatch = html.match(
-    /<div id="single_relacionados">([\s\S]*?)<\/div>/i
+    /<div id=['"]single_relacionados['"]>([\s\S]*?)<\/div>/i
   );
   const related: RelatedSeries[] = [];
   if (relatedBlockMatch) {
@@ -340,10 +340,10 @@ function parseSeriesDetailHtml(html: string, slug: string): SeriesDetail {
     while ((ra = artRe.exec(relatedBlockMatch[1])) !== null) {
       const raHtml = ra[1];
       const raUrlMatch = raHtml.match(
-        /href="(https:\/\/watchhentai\.net\/series\/[^"]+)"/i
+        /href=['"](https:\/\/watchhentai\.net\/series\/[^'"]+)['"]/i
       );
-      const raPosterMatch = raHtml.match(/data-src="([^"]+\/uploads\/[^"]+)"/i);
-      const raTitleMatch = raHtml.match(/alt="([^"]+)"/i);
+      const raPosterMatch = raHtml.match(/data-src=['"]([^'"]+\/uploads\/[^'"]+)['"]/i);
+      const raTitleMatch = raHtml.match(/alt=['"]([^'"]+)['"]/i);
       if (raUrlMatch && raTitleMatch) {
         related.push({
           title: decodeHtmlEntities(raTitleMatch[1]),

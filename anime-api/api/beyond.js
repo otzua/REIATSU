@@ -1,6 +1,41 @@
 import { Hono } from 'hono';
-import axios from 'axios';
 import { HanimeClient } from '../hanime/dist/index.js';
+
+async function fetchJson(url, options = {}) {
+  const { params, method = 'GET', body, timeout = 10000, ...rest } = options;
+  const urlObj = new URL(url);
+  urlObj.searchParams.append('_t', Date.now().toString());
+  if (params) {
+    Object.keys(params).forEach(key => urlObj.searchParams.append(key, params[key]));
+  }
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const fetchOptions = {
+      method,
+      signal: controller.signal,
+      ...rest
+    };
+    if (body) {
+      fetchOptions.body = JSON.stringify(body);
+      fetchOptions.headers = { ...fetchOptions.headers, 'Content-Type': 'application/json' };
+    }
+    const targetUrl = urlObj.toString();
+    console.log('[fetchJson] Calling:', targetUrl);
+    const res = await fetch(targetUrl, fetchOptions);
+    if (!res.ok) {
+      let bodyText = '';
+      try { bodyText = await res.text(); } catch(_) {}
+      console.error(`[fetchJson Error] Status: ${res.status}, Body: ${bodyText}`);
+      throw new Error(`HTTP ${res.status}: Failed to fetch ${targetUrl}`);
+    }
+    const data = await res.json();
+    return { data };
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 
 const beyond = new Hono();
 const hanimeClient = new HanimeClient();
@@ -18,7 +53,7 @@ beyond.get('/', async (c) => {
 
   if (server === 'watchhentai') {
     try {
-      const res = await axios.get(`${WATCHHENTAI_API}/videos`, { timeout: 10000 });
+      const res = await fetchJson(`${WATCHHENTAI_API}/videos`, { timeout: 10000 });
       const items = res.data?.data?.items?.map(item => {
         const epSlug = item.url ? item.url.split('/videos/')[1]?.replace(/\//g, '') : item.id;
         return {
@@ -38,7 +73,7 @@ beyond.get('/', async (c) => {
   }
 
   try {
-    const response = await axios.post(HANIME_SEARCH_API, {
+    const response = await fetchJson(HANIME_SEARCH_API, { method: 'POST', body: {
       search_text: "",
       tags: [],
       tags_mode: "AND",
@@ -47,7 +82,7 @@ beyond.get('/', async (c) => {
       order_by: "created_at_unix",
       ordering: "desc",
       page_number: 1
-    }, { timeout: 8000 });
+    }, ...{ timeout: 8000 } });
 
     const hits = typeof response.data.hits === 'string'
       ? JSON.parse(response.data.hits)
@@ -96,8 +131,10 @@ beyond.get('/details', async (c) => {
       // If it's a series from search, get the series details and grab the first episode!
       if (targetSlug.startsWith('series:')) {
         const seriesSlug = targetSlug.replace('series:', '');
-        const seriesRes = await axios.get(`${WATCHHENTAI_API}/series/${seriesSlug}`, { timeout: 10000 });
+        const seriesRes = await fetchJson(`${WATCHHENTAI_API}/series/${seriesSlug}`, { timeout: 10000 });
         const episodes = seriesRes.data?.data?.episodes || [];
+          console.log('[Details Path] Series Slug:', seriesSlug, 'Episodes length:', episodes.length, 'seriesRes data:', JSON.stringify(seriesRes.data));
+          console.log('Series Slug:', seriesSlug, 'Episodes length:', episodes.length, 'Series Data:', JSON.stringify(seriesRes.data));
         if (episodes.length > 0) {
           const firstEpUrl = episodes[0].url;
           targetSlug = firstEpUrl.split('/videos/')[1]?.replace(/\//g, '');
@@ -106,7 +143,7 @@ beyond.get('/details', async (c) => {
         }
       }
 
-      const watchRes = await axios.get(`${WATCHHENTAI_API}/watch/${targetSlug}`, { timeout: 10000 });
+      const watchRes = await fetchJson(`${WATCHHENTAI_API}/watch/${targetSlug}`, { timeout: 10000 });
       const data = watchRes.data?.data;
 
       const bestStream = data.player?.sources?.[0]?.src || data.player?.src || '';
@@ -168,16 +205,18 @@ beyond.get('/details', async (c) => {
       let cleanTitle = videoTitle.replace(/\b(ep|episode)?\s*\d+/i, '').trim();
       if (!cleanTitle) cleanTitle = videoTitle;
 
-      let searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: cleanTitle }, timeout: 8000 });
+      console.log('cleanTitle:', cleanTitle);
+      let searchRes = await fetchJson(`${WATCHHENTAI_API}/search`, { params: { q: cleanTitle }, timeout: 8000 });
+      console.log('searchRes results length:', searchRes.data?.data?.results?.length);
       let results = searchRes.data?.data?.results || [];
       if (results.length === 0 && cleanTitle.includes('-')) {
         const hyphenlessTitle = cleanTitle.replace(/-/g, ' ');
-        searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: hyphenlessTitle }, timeout: 8000 });
+        searchRes = await fetchJson(`${WATCHHENTAI_API}/search`, { params: { q: hyphenlessTitle }, timeout: 8000 });
         results = searchRes.data?.data?.results || [];
       }
       if (results.length === 0) {
         const firstWords = cleanTitle.split(/[-:,\s]+/).slice(0, 2).join(' ');
-        searchRes = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q: firstWords }, timeout: 8000 });
+        searchRes = await fetchJson(`${WATCHHENTAI_API}/search`, { params: { q: firstWords }, timeout: 8000 });
         results = searchRes.data?.data?.results || [];
       }
 
@@ -185,7 +224,7 @@ beyond.get('/details', async (c) => {
         let targetUrl = results[0].url;
         if (targetUrl.includes('/series/')) {
           const seriesSlug = targetUrl.split('/series/')[1]?.replace(/\//g, '');
-          const seriesRes = await axios.get(`${WATCHHENTAI_API}/series/${seriesSlug}`, { timeout: 8000 });
+          const seriesRes = await fetchJson(`${WATCHHENTAI_API}/series/${seriesSlug}`, { timeout: 8000 });
           const episodes = seriesRes.data?.data?.episodes || [];
 
           const epMatch = slug.match(/\d+$/);
@@ -197,9 +236,10 @@ beyond.get('/details', async (c) => {
           }
         }
 
+        console.log('TargetUrl before videos check:', targetUrl);
         if (targetUrl.includes('/videos/')) {
           const watchSlug = targetUrl.split('/videos/')[1]?.replace(/\//g, '');
-          const watchRes = await axios.get(`${WATCHHENTAI_API}/watch/${watchSlug}`, { timeout: 8000 });
+          const watchRes = await fetchJson(`${WATCHHENTAI_API}/watch/${watchSlug}`, { timeout: 8000 });
           const data = watchRes.data?.data;
           whData = data;
           if (data?.player) {
@@ -272,7 +312,7 @@ beyond.get('/search', async (c) => {
 
   if (server === 'watchhentai') {
     try {
-      const res = await axios.get(`${WATCHHENTAI_API}/search`, { params: { q }, timeout: 10000 });
+      const res = await fetchJson(`${WATCHHENTAI_API}/search`, { params: { q }, timeout: 10000 });
       const results = res.data?.data?.results?.map(item => {
         const seriesSlug = item.url ? item.url.split('/series/')[1]?.replace(/\//g, '') : 'unknown';
         return {
@@ -292,7 +332,7 @@ beyond.get('/search', async (c) => {
   }
 
   try {
-    const response = await axios.post(HANIME_SEARCH_API, {
+    const response = await fetchJson(HANIME_SEARCH_API, { method: 'POST', body: {
       search_text: q,
       tags: [],
       tags_mode: "AND",
@@ -301,7 +341,7 @@ beyond.get('/search', async (c) => {
       order_by: "views",
       ordering: "desc",
       page_number: 1
-    }, { timeout: 8000 });
+    }, ...{ timeout: 8000 } });
 
     const hits = typeof response.data.hits === 'string'
       ? JSON.parse(response.data.hits)
@@ -440,7 +480,7 @@ beyond.get('/proxy-video', async (c) => {
     c.header('Content-Type', contentType);
     if (contentLength) c.header('Content-Length', contentLength);
     if (contentRange) c.header('Content-Range', contentRange);
-    if (acceptRanges) c.header('Accept-Ranges', acceptRanges);
+    c.header('Accept-Ranges', 'bytes');
     
     c.status(response.status);
     c.header('Access-Control-Allow-Origin', '*');
