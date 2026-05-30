@@ -333,12 +333,12 @@ const Navbar = () => {
     <>
       <div className={styles.navbarContainer}>
         <div 
-          className={`${styles.logoCapsule} ${getInterfaceClass()} ${styles.premiumLogo} glass`} 
+          className={`${styles.logoCapsule} ${getInterfaceClass()} ${styles.premiumLogo}`} 
           onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} 
           style={{ cursor: 'pointer' }}
         >
-          <div className={styles.logoFluidBlob}></div>
-          <div className={styles.logoGlassOverlay}></div>
+          <div className={styles.logoVintageGrid}></div>
+          <div className={styles.logoCornerDecor}></div>
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </div>
 
