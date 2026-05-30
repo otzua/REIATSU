@@ -1,24 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
   <defs>
-    <linearGradient id="crescentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#444444"/>
+    <!-- Deep Cinematic Reiatsu Core (Unified Theme Gradient) -->
+    <radialGradient id="coreGlow" cx="25%" cy="25%" r="75%">
+      <stop offset="0%" stop-color="#E50914" />   <!-- Crimson -->
+      <stop offset="45%" stop-color="#8A2BE2" />  <!-- Violet -->
+      <stop offset="100%" stop-color="#000000" /> <!-- Black -->
+    </radialGradient>
+    
+    <!-- Cyberpunk Glass Edge Refraction -->
+    <linearGradient id="glassEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5FF" stop-opacity="1" />
+      <stop offset="40%" stop-color="#8A2BE2" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
     </linearGradient>
   </defs>
-  
-  <!-- Pure pitch-black squircle -->
+
+  <!-- Absolute premium pitch black squircle -->
   <rect width="120" height="120" rx="28" fill="#000000" />
   
-  <!-- Ethereal Orbital Ring (The Aura) -->
-  <circle cx="60" cy="60" r="42" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.15" />
+  <!-- Base Ethereal Sphere (The Aura) -->
+  <circle cx="60" cy="60" r="38" fill="url(#coreGlow)" />
   
-  <!-- Crescent Singularity (The Pressure) -->
-  <mask id="moonMask">
-    <circle cx="60" cy="60" r="32" fill="white" />
-    <circle cx="72" cy="48" r="34" fill="black" />
-  </mask>
-  <circle cx="60" cy="60" r="32" fill="url(#crescentGrad)" mask="url(#moonMask)" />
+  <!-- The Deep Space Void (Creates the 3D Eclipse) -->
+  <circle cx="76" cy="76" r="42" fill="#000000" />
   
-  <!-- The Crimson Reiatsu Core -->
-  <circle cx="72" cy="48" r="5" fill="#E50914" />
+  <!-- Glassmorphic Refraction Edge (The 3D Ring) -->
+  <circle cx="60" cy="60" r="38" fill="none" stroke="url(#glassEdge)" stroke-width="2" />
+  
+  <!-- The Singularity Spark (Lens Flare) -->
+  <g transform="translate(33, 33)">
+    <circle cx="0" cy="0" r="2" fill="#FFFFFF" />
+    <path d="M 0,-7 L 0,7 M -7,0 L 7,0" stroke="#FFFFFF" stroke-width="1.5" opacity="0.9" stroke-linecap="round" />
+  </g>
 </svg>
