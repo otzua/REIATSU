@@ -430,16 +430,6 @@ const Navbar = () => {
             </div>
             <div className={styles.switchOptions}>
               <button 
-                className={`${styles.switchBtn} ${(!isCinema && !isMusic && !isBeyond) ? styles.activeInterface : ''}`} 
-                onClick={() => { navigate('/'); setSwitchOpen(false); }}
-              >
-                <div className={styles.interfaceIcon}>霊</div>
-                <div className={styles.interfaceInfo}>
-                  <h4>ANIME REIATSU</h4>
-                  <p>{(!isCinema && !isMusic && !isBeyond) ? 'Current Interface' : 'Switch to Anime'}</p>
-                </div>
-              </button>
-              <button 
                 className={`${styles.switchBtn} ${isCinema ? styles.activeInterface : ''}`} 
                 onClick={() => { navigate('/cinema'); setSwitchOpen(false); }}
               >
@@ -447,6 +437,16 @@ const Navbar = () => {
                 <div className={styles.interfaceInfo}>
                   <h4>CINEMA</h4>
                   <p>{isCinema ? 'Current Interface' : 'Switch to Movies'}</p>
+                </div>
+              </button>
+              <button 
+                className={`${styles.switchBtn} ${(!isCinema && !isMusic && !isBeyond) ? styles.activeInterface : ''}`} 
+                onClick={() => { navigate('/anime'); setSwitchOpen(false); }}
+              >
+                <div className={styles.interfaceIcon}>霊</div>
+                <div className={styles.interfaceInfo}>
+                  <h4>ANIME REIATSU</h4>
+                  <p>{(!isCinema && !isMusic && !isBeyond) ? 'Current Interface' : 'Switch to Anime'}</p>
                 </div>
               </button>
               <button 

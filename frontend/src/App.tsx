@@ -33,7 +33,7 @@ function App() {
       <Layout>
         <Suspense fallback={null}>
           <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Navigate to="/anime" replace />} />
+          <Route path="/" element={<Navigate to="/cinema" replace />} />
           <Route path="/anime" element={<Home />} />
           <Route path="/animekai" element={<AnimeKaiHome />} />
           <Route path="/anime/history" element={<AnimeHistory />} />
