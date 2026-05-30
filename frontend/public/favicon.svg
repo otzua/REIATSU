@@ -1,10 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <!-- Dark glassmorphic background -->
-  <rect width="120" height="120" rx="28" fill="#141414" stroke="#DCC9A9" stroke-opacity="0.1" stroke-width="2"/>
+  <!-- Absolute pitch black background for premium feel -->
+  <rect width="120" height="120" rx="30" fill="#000000" />
   
-  <!-- Red accent glow -->
-  <circle cx="60" cy="60" r="40" fill="#B83A2D" opacity="0.15" filter="blur(10px)"/>
-  
-  <!-- Kanji Character "Rei" (Spirit/Soul) -->
-  <text x="60" y="82" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans JP', sans-serif" font-weight="900" font-size="72" fill="#DCC9A9" text-anchor="middle" filter="drop-shadow(0px 4px 12px rgba(0,0,0,0.5))">霊</text>
+  <!-- Crisp, ultra-minimal Kanji -->
+  <text x="60" y="84" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans JP', sans-serif" font-weight="900" font-size="76" fill="#FFFFFF" text-anchor="middle">霊</text>
 </svg>
