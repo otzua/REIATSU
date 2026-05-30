@@ -785,108 +785,104 @@
 }
 
 /* ==========================================================================
-   SPIRITUAL AURA LOGO (REIATSU Ethereal Energy)
+   ULTRA-MINIMAL EDITORIAL MONOGRAM LOGO
    ========================================================================== */
 
-.auraLogo {
+.cleanLogo {
   position: relative;
   overflow: hidden;
-  border-radius: 50% !important; /* Perfect circle */
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.auraLogo:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 30px var(--aura-color, rgba(255,255,255,0.2));
+.cleanLogo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.auraCore {
+.logoGlare {
   position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: radial-gradient(circle at center, var(--aura-color, rgba(255,255,255,0.3)) 0%, transparent 70%);
-  opacity: 0.5;
-  transition: all 0.5s ease;
-}
-
-.auraPulsePrimary,
-.auraPulseSecondary {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
+  top: 0;
+  left: -100%;
+  width: 50%;
   height: 100%;
-  border-radius: 50%;
-  border: 1px solid var(--aura-color, rgba(255,255,255,0.5));
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: skewX(-20deg);
   z-index: 2;
-  transform: translate(-50%, -50%) scale(0.8);
-  opacity: 0;
-  pointer-events: none;
+  transition: none;
 }
 
-.auraPulsePrimary {
-  animation: pulseAura 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+.cleanLogo:hover .logoGlare {
+  animation: glareSweep 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.auraPulseSecondary {
-  animation: pulseAura 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 1.5s;
+@keyframes glareSweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
 }
 
-@keyframes pulseAura {
-  0% {
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0.8;
-    border-width: 2px;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.5);
-    opacity: 0;
-    border-width: 0px;
-  }
+.bgLetter {
+  position: absolute;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 3.5rem;
+  color: rgba(255, 255, 255, 0.04);
+  line-height: 1;
+  /* perfectly offset to create depth behind the Kanji */
+  transform: translate(-15%, 5%);
+  user-select: none;
+  z-index: 1;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.cleanLogo:hover .bgLetter {
+  color: rgba(255, 255, 255, 0.12);
+  transform: translate(-10%, 2%) scale(1.05);
 }
 
 .logoKanji {
   position: relative;
   z-index: 3;
-  color: var(--color-white);
+  color: var(--color-cream);
   font-family: var(--font-jp);
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 900;
-  text-shadow: 0 0 15px var(--aura-color, rgba(255,255,255,0.5));
-  transition: all 0.3s ease;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.auraLogo:hover .logoKanji {
-  transform: scale(1.1);
-  text-shadow: 0 0 25px var(--aura-color, rgba(255,255,255,0.8));
-}
-
-.auraLogo:hover .auraCore {
-  opacity: 0.9;
-  transform: scale(1.2);
+.cleanLogo:hover .logoKanji {
+  transform: scale(1.08);
 }
 
 /* ==========================================================================
-   DYNAMIC AURA THEMES
+   DYNAMIC THEME ACCENTS (SUBTLE, TYPOGRAPHIC)
    ========================================================================== */
 
-.cinemaTheme.auraLogo {
-  --aura-color: rgba(229, 9, 20, 0.8); /* Crimson Red */
-  border-color: rgba(229, 9, 20, 0.3);
+/* 1. Cinema Theme */
+.cinemaTheme:hover .logoKanji {
+  color: var(--color-red);
+  text-shadow: 0 0 15px rgba(184, 58, 45, 0.5);
 }
+.cinemaTheme:hover { border-color: rgba(184, 58, 45, 0.4); }
 
-.animeTheme.auraLogo {
-  --aura-color: rgba(138, 43, 226, 0.8); /* Mystical Violet */
-  border-color: rgba(138, 43, 226, 0.3);
+/* 2. Anime Theme */
+.animeTheme:hover .logoKanji {
+  color: #a78bfa;
+  text-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
 }
+.animeTheme:hover { border-color: rgba(167, 139, 250, 0.4); }
 
-.musicTheme.auraLogo {
-  --aura-color: rgba(30, 215, 96, 0.8); /* Emerald Green */
-  border-color: rgba(30, 215, 96, 0.3);
+/* 3. Music Theme */
+.musicTheme:hover .logoKanji {
+  color: #34d399;
+  text-shadow: 0 0 15px rgba(52, 211, 153, 0.5);
 }
+.musicTheme:hover { border-color: rgba(52, 211, 153, 0.4); }
 
-.beyondTheme.auraLogo {
-  --aura-color: rgba(0, 245, 255, 0.8); /* Cyber Cyan */
-  border-color: rgba(0, 245, 255, 0.3);
+/* 4. Beyond Theme */
+.beyondTheme:hover .logoKanji {
+  color: #22d3ee;
+  text-shadow: 0 0 15px rgba(34, 211, 238, 0.5);
 }
+.beyondTheme:hover { border-color: rgba(34, 211, 238, 0.4); }
 
