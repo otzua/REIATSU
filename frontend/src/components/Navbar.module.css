@@ -799,46 +799,6 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.logoGlare {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-  transform: skewX(-20deg);
-  z-index: 2;
-  transition: none;
-}
-
-.cleanLogo:hover .logoGlare {
-  animation: glareSweep 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes glareSweep {
-  0% { left: -100%; }
-  100% { left: 200%; }
-}
-
-.bgLetter {
-  position: absolute;
-  font-family: var(--font-heading);
-  font-weight: 900;
-  font-size: 3.5rem;
-  color: rgba(255, 255, 255, 0.04);
-  line-height: 1;
-  /* perfectly offset to create depth behind the Kanji */
-  transform: translate(-15%, 5%);
-  user-select: none;
-  z-index: 1;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.cleanLogo:hover .bgLetter {
-  color: rgba(255, 255, 255, 0.12);
-  transform: translate(-10%, 2%) scale(1.05);
-}
-
 .logoKanji {
   position: relative;
   z-index: 3;

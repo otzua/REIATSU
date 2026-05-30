@@ -337,8 +337,6 @@ const Navbar = () => {
           onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} 
           style={{ cursor: 'pointer' }}
         >
-          <div className={styles.logoGlare}></div>
-          <span className={styles.bgLetter}>R</span>
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </div>
 
