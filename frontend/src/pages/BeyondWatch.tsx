@@ -82,7 +82,7 @@ const BeyondWatch = () => {
     if (activeStream.includes('.m3u8')) {
       // Proxy only raw Hanime manifest links that require a Referer header.
       // AlphaAPIs extracted stream links are pre-signed CDN links that stream directly.
-      if (activeStream.includes('weeb.hanime.tv') || activeStream.includes('proxy-required')) {
+      if (activeStream.includes('weeb.hanime.tv') || activeStream.includes('proxy-required') || activeStream.includes('streamable.cloud')) {
         finalUrl = `${MUSIC_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
       }
 
@@ -137,11 +137,15 @@ const BeyondWatch = () => {
         videoElement.src = finalUrl;
       }
     } else {
+      // Proxy MP4 links that require referer
+      if (activeStream.includes('hstorage.xyz') || activeStream.includes('watchhentai')) {
+        finalUrl = `${MUSIC_API_BASE}/beyond/proxy-video?url=${encodeURIComponent(activeStream)}`;
+      }
       // Standard MP4 or direct link — no crossOrigin to avoid blocking CDN streams
       // that don't send Access-Control-Allow-Origin headers.
       videoElement.removeAttribute('crossorigin');
-      if (videoElement.src !== activeStream) {
-        videoElement.src = activeStream;
+      if (videoElement.src !== finalUrl) {
+        videoElement.src = finalUrl;
         videoElement.load();
       }
       videoElement.play().catch(e => console.log('Autoplay blocked:', e));
