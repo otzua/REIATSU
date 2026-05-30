@@ -1,38 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
   <defs>
-    <!-- Brutalist Crimson Singularity (Strictly Red/Black/White) -->
-    <radialGradient id="coreGlow" cx="25%" cy="25%" r="75%">
-      <stop offset="0%" stop-color="#FFFFFF" />    <!-- Blinding Core -->
-      <stop offset="20%" stop-color="#FF1E1E" />   <!-- Pure Aggressive Red -->
-      <stop offset="60%" stop-color="#550000" />   <!-- Deep Blood Shadow -->
-      <stop offset="100%" stop-color="#000000" />  <!-- Vantablack Fade -->
-    </radialGradient>
-    
-    <!-- Razor-Sharp Silver/Red Refraction -->
-    <linearGradient id="glassEdge" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
-      <stop offset="35%" stop-color="#FF1E1E" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    <!-- Vibrant Demon-Cat Gradient -->
+    <linearGradient id="catGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2A4D" />
+      <stop offset="50%" stop-color="#E50914" />
+      <stop offset="100%" stop-color="#7A0000" />
     </linearGradient>
+    
+    <!-- Cutouts for the iconic battle-scarred ear -->
+    <mask id="earNotches">
+      <rect width="120" height="120" fill="white" />
+      <circle cx="27" cy="38" r="4" fill="black" />
+      <circle cx="24" cy="50" r="5.5" fill="black" />
+    </mask>
   </defs>
 
-  <!-- Premium Pitch-Black Squircle -->
-  <rect width="120" height="120" rx="28" fill="#000000" />
+  <!-- Premium Pitch-Black Squircle Background -->
+  <rect width="120" height="120" rx="28" fill="#050505" />
   
-  <!-- Base Crimson Sphere (The Aura) -->
-  <circle cx="60" cy="60" r="38" fill="url(#coreGlow)" />
-  
-  <!-- Massive Dark Matter Void (Creates the 3D Eclipse cut) -->
-  <circle cx="76" cy="76" r="42" fill="#000000" />
-  
-  <!-- Glassmorphic Refraction Edge -->
-  <circle cx="60" cy="60" r="38" fill="none" stroke="url(#glassEdge)" stroke-width="2" />
-  
-  <!-- Bespoke 4-Point Lens Flare (The Spark) -->
-  <g transform="translate(33, 33)">
-    <!-- Subtle red halo -->
-    <circle cx="0" cy="0" r="6" fill="#FF1E1E" opacity="0.4" />
-    <!-- Sharp geometric anime star glint -->
-    <path d="M 0,-9 Q 0,0 9,0 Q 0,0 0,9 Q 0,0 -9,0 Q 0,0 0,-9 Z" fill="#FFFFFF" />
+  <!-- Floating Whiskers -->
+  <g stroke="url(#catGradient)" stroke-width="4.5" stroke-linecap="round">
+    <!-- Left -->
+    <line x1="16" y1="74" x2="24" y2="70" />
+    <line x1="12" y1="86" x2="22" y2="78" />
+    <!-- Right -->
+    <line x1="104" y1="74" x2="96" y2="70" />
+    <line x1="108" y1="86" x2="98" y2="78" />
   </g>
+
+  <!-- Main Cat Silhouette (Mathematically Flawless Symmetrical Beziers) -->
+  <path mask="url(#earNotches)" fill="url(#catGradient)" d="
+    M 60,98 
+    Q 96,98 98,64 
+    Q 100,38 86,24 
+    Q 78,18 74,32 
+    Q 68,46 60,46 
+    Q 52,46 46,32 
+    Q 42,18 34,24 
+    Q 20,38 22,64 
+    Q 24,98 60,98 Z
+  " />
+
+  <!-- Massive Anime Eyes -->
+  <ellipse cx="42" cy="66" rx="14.5" ry="17" fill="#FFFFFF" />
+  <ellipse cx="78" cy="66" rx="14.5" ry="17" fill="#FFFFFF" />
+  
+  <!-- Piercing Demon Pupils -->
+  <ellipse cx="46.5" cy="70" rx="6" ry="9.5" fill="#E50914" />
+  <ellipse cx="73.5" cy="70" rx="6" ry="9.5" fill="#E50914" />
 </svg>
