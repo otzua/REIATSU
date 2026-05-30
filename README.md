@@ -1,6 +1,8 @@
 # REIATSU (霊圧) - Open Source Multimedia Platform
 
 <div align="center">
+  <img src="./frontend/public/favicon.svg" alt="REIATSU Logo" width="150" height="150">
+  <br /><br />
   <img src="./reiatsu_banner_1778080050417.png" alt="REIATSU Banner" width="100%">
   <br />
   
