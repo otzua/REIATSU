@@ -223,6 +223,20 @@
   line-height: 0.9;
 }
 
+/* Right Badge Group */
+.rightBadgeGroup {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.badgeLogo {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+  margin-bottom: 5px;
+}
+
 /* Role block — black with cream text */
 .roleTag {
   display: flex;

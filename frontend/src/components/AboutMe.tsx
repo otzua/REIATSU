@@ -124,9 +124,12 @@ const AboutMe = ({ isOpen, onClose }: AboutMeProps) => {
                     <span className={styles.nameFirst}>KRISH</span>
                     <span className={styles.nameLast}>SINGH</span>
                   </div>
-                  <div className={styles.roleTag}>
-                    <span className={styles.roleTagLabel}>GOD'S</span>
-                    <span className={styles.roleTagLabel}>FAV</span>
+                  <div className={styles.rightBadgeGroup}>
+                    <img src="/logo-square.svg" alt="REIATSU Logo" className={styles.badgeLogo} />
+                    <div className={styles.roleTag}>
+                      <span className={styles.roleTagLabel}>GOD'S</span>
+                      <span className={styles.roleTagLabel}>FAV</span>
+                    </div>
                   </div>
                 </div>
 
