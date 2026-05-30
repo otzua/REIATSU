@@ -1,11 +1,12 @@
 {
   "rewrites": [
     { "source": "/api/music/(.*)", "destination": "https://music-api-sigma-neon.vercel.app/$1" },
-    { "source": "/api/beyond/(.*)", "destination": "https://anime-api-alpha-kohl.vercel.app/api/beyond/$1" },
-    { "source": "/api/anime/(.*)", "destination": "https://anime-api-alpha-kohl.vercel.app/api/$1" },
+    { "source": "/api/music", "destination": "https://music-api-sigma-neon.vercel.app/" },
     { "source": "/api/cinema/(.*)", "destination": "https://cinema-api-sglaxy936-6784s-projects.vercel.app/$1" },
+    { "source": "/api/cinema", "destination": "https://cinema-api-sglaxy936-6784s-projects.vercel.app/" },
     { "source": "/toon-api/(.*)", "destination": "https://toon-stream-api.vercel.app/$1" },
     { "source": "/tmdb-api/(.*)", "destination": "https://api.tmdb.org/3/$1" },
+    { "source": "/api/(.*)", "destination": "https://anime-api-alpha-kohl.vercel.app/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

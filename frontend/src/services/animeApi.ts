@@ -2,7 +2,7 @@
 // VITE_API_URL: set in .env for prod (e.g. https://your-api.vercel.app)
 // Empty string falls back to the Vite dev proxy (/api -> localhost:4000)
 const API_HOST = import.meta.env.VITE_API_URL || '';
-const BASE = API_HOST ? `${API_HOST}/api` : '/api';
+const BASE = API_HOST ? `${API_HOST}/api/v2/anikai` : '/api/v2/anikai';
 
 export interface SpotlightAnime {
   id: string;
@@ -115,32 +115,32 @@ export interface ScheduleAnime {
 }
 
 export const animeApi = {
-  getHome: (provider?: string) => 
-    apiFetch<HomeData>(provider ? `${BASE}/v2/${provider}/home` : `${BASE}/home`),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getHome: (_provider?: string) => 
+    apiFetch<HomeData>(`${BASE}/home`),
 
-  search: (query: string, page = 1, provider?: string) =>
-    apiFetch<SearchResult>(provider 
-      ? `${BASE}/v2/${provider}/search?q=${encodeURIComponent(query)}&page=${page}`
-      : `${BASE}/search?q=${encodeURIComponent(query)}&page=${page}`),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  search: (query: string, page = 1, _provider?: string) =>
+    apiFetch<SearchResult>(`${BASE}/search?q=${encodeURIComponent(query)}&page=${page}`),
 
-  getAnime: (id: string, provider?: string) => 
-    apiFetch<AnimeDetail>(provider ? `${BASE}/v2/${provider}/anime/${id}` : `${BASE}/anime/${id}`),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getAnime: (id: string, _provider?: string) => 
+    apiFetch<AnimeDetail>(`${BASE}/anime/${id}`),
 
-  getEpisodes: async (id: string, provider?: string): Promise<EpisodeData> => {
-    const url = provider ? `${BASE}/v2/${provider}/anime/${id}/episodes` : `${BASE}/anime/${id}/episodes`;
-    return apiFetch<EpisodeData>(url);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getEpisodes: async (id: string, _provider?: string): Promise<EpisodeData> => {
+    return apiFetch<EpisodeData>(`${BASE}/anime/${id}/episodes`);
   },
 
-  getEpisode: (id: string, num: number, provider?: string) => 
-    apiFetch<EpisodeDetail>(provider 
-      ? `${BASE}/v2/${provider}/anime/${id}/ep/${num}`
-      : `${BASE}/anime/${id}/ep/${num}`),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getEpisode: (id: string, num: number, _provider?: string) => 
+    apiFetch<EpisodeDetail>(`${BASE}/anime/${id}/ep/${num}`),
 
-  getType: (name: string, page = 1, provider?: string) =>
-    apiFetch<{ type: string; animes: AnimeCard[] }>(provider
-      ? `${BASE}/v2/${provider}/type/${name}?page=${page}`
-      : `${BASE}/type/${name}?page=${page}`),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getType: (name: string, page = 1, _provider?: string) =>
+    apiFetch<{ type: string; animes: AnimeCard[] }>(`${BASE}/type/${name}?page=${page}`),
 
   getSchedule: (day: string) =>
     apiFetch<ScheduleAnime[]>(`${BASE}/schedule?day=${day}`),
 };
+

@@ -160,7 +160,7 @@ async def search(q: str = Query(...), limit: int = 20):
 
 @app.get("/stream")
 async def stream(q: str = Query(...)):
-    # Upgraded Streaming Engine: Priority Local yt-dlp Extraction + Invidious Fallback
+    # Upgraded Streaming Engine: Priority pytubefix + Local yt-dlp + Dynamic Invidious Fallback
     try:
         # Extract video ID for metadata and fallback purposes
         video_id = q
@@ -171,7 +171,119 @@ async def stream(q: str = Query(...)):
         elif "music.youtube.com" in q:
             video_id = q.split("watch?v=")[1].split("&")[0]
 
-        # 1. Prioritize yt-dlp with Search Bypass (extremely reliable, avoids bot-detection blocks)
+        # Helper to extract using dynamic/static Cobalt instances
+        def extract_with_cobalt(vid: str):
+            # Try to fetch working Cobalt instances from cobalt.directory/api/tests
+            instances = []
+            try:
+                logger.info("Fetching healthy Cobalt instances dynamically...")
+                res = requests.get("https://cobalt.directory/api/tests", timeout=4)
+                if res.status_code == 200:
+                    data = res.json()
+                    items = data.get("data", [])
+                    for item in items:
+                        api_host = item.get("api")
+                        protocol = item.get("protocol", "https")
+                        if not api_host:
+                            continue
+                        api_url = f"{protocol}://{api_host}"
+                        tests = item.get("tests", {})
+                        yt_working = tests.get("youtube", {}).get("status", False)
+                        yt_music_working = tests.get("youtube-music", {}).get("status", False)
+                        score = item.get("score", 0)
+                        # We only want instances with a score >= 50% and with youtube or youtube-music working
+                        if score >= 50 and (yt_working or yt_music_working):
+                            instances.append((api_url, score))
+                    # Sort by score descending
+                    instances.sort(key=lambda x: x[1], reverse=True)
+                    instances = [x[0] for x in instances]
+            except Exception as api_err:
+                logger.warning(f"Failed to fetch dynamic Cobalt list: {api_err}")
+
+            # Static fallback list of known working Cobalt APIs
+            fallback_instances = [
+                "https://cobaltapi.squair.xyz",
+                "https://apicobalt.mgytr.top",
+                "https://dog.kittycat.boo"
+            ]
+            for fb in fallback_instances:
+                if fb not in instances:
+                    instances.append(fb)
+
+            # Test video URL
+            yt_url = f"https://www.youtube.com/watch?v={vid}"
+
+            # Payloads to try: v10 (new) first, then v7 (fallback)
+            v10_payload = {
+                "url": yt_url,
+                "downloadMode": "audio",
+                "audioFormat": "mp3"
+            }
+            v7_payload = {
+                "url": yt_url,
+                "isAudioOnly": True,
+                "aFormat": "mp3"
+            }
+            
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0"
+            }
+
+            for inst in instances[:10]: # Try top 10 instances
+                logger.info(f"Trying Cobalt instance: {inst}")
+                # Try v10 payload first
+                try:
+                    res = requests.post(inst, json=v10_payload, headers=headers, timeout=6)
+                    if res.status_code == 200:
+                        res_data = res.json()
+                        if 'url' in res_data:
+                            logger.info(f"Cobalt v10 successfully resolved via {inst}")
+                            return {
+                                "stream_url": res_data['url'],
+                                "title": "Streamed via Cobalt",
+                                "thumbnail": f"https://img.youtube.com/vi/{vid}/maxresdefault.jpg",
+                                "user_agent": "Mozilla/5.0"
+                            }
+                except Exception as e:
+                    logger.warning(f"Cobalt v10 payload failed on {inst}: {e}")
+
+                # Try v7 payload fallback
+                try:
+                    res = requests.post(inst, json=v7_payload, headers=headers, timeout=6)
+                    if res.status_code == 200:
+                        res_data = res.json()
+                        if 'url' in res_data:
+                            logger.info(f"Cobalt v7 successfully resolved via {inst}")
+                            return {
+                                "stream_url": res_data['url'],
+                                "title": "Streamed via Cobalt",
+                                "thumbnail": f"https://img.youtube.com/vi/{vid}/maxresdefault.jpg",
+                                "user_agent": "Mozilla/5.0"
+                            }
+                except Exception as e:
+                    logger.warning(f"Cobalt v7 payload failed on {inst}: {e}")
+
+            return None
+
+        # Helper to extract using pytubefix
+        def extract_with_pytubefix(vid: str):
+            from pytubefix import YouTube
+            yt = YouTube(f'https://www.youtube.com/watch?v={vid}')
+            stream = yt.streams.get_by_itag(140)  # 140 is audio m4a (128kbps)
+            if not stream:
+                stream = yt.streams.filter(only_audio=True).first()
+            if stream:
+                return {
+                    "stream_url": stream.url,
+                    "title": yt.title or 'YouTube Audio',
+                    "thumbnail": yt.thumbnail_url or f"https://img.youtube.com/vi/{vid}/maxresdefault.jpg",
+                    "user_agent": "Mozilla/5.0"
+                }
+            return None
+
+        # Helper to extract using yt-dlp
         def extract_with_ytdlp(query_or_id: str):
             # Check if it looks like a video ID or a URL containing video ID
             vid = query_or_id
@@ -189,6 +301,7 @@ async def stream(q: str = Query(...)):
                 'format': 'bestaudio/best',
                 'quiet': True,
                 'no_warnings': True,
+                'extractor_args': {'youtube': {'player_client': ['android', 'ios']}}
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url_to_extract, download=False)
@@ -209,6 +322,27 @@ async def stream(q: str = Query(...)):
                     }
             return None
 
+        # 1. First priority: Cobalt Resolution (Dynamic & Multi-host)
+        try:
+            logger.info(f"Attempting premium Cobalt extraction for ID: {video_id}")
+            result = await asyncio.to_thread(extract_with_cobalt, video_id)
+            if result and result.get("stream_url"):
+                logger.info(f"Cobalt resolved successfully: {result.get('stream_url')[:120]}")
+                return result
+        except Exception as cobalt_err:
+            logger.warning(f"Cobalt extraction failed: {cobalt_err}. Trying pytubefix...")
+
+        # 2. Second priority: pytubefix (local backup)
+        try:
+            logger.info(f"Attempting pytubefix extraction for ID: {video_id}")
+            result = await asyncio.to_thread(extract_with_pytubefix, video_id)
+            if result and result.get("stream_url"):
+                logger.info(f"pytubefix stream resolved successfully: {result.get('title')}")
+                return result
+        except Exception as pytube_err:
+            logger.warning(f"pytubefix extraction failed: {pytube_err}. Trying yt-dlp...")
+
+        # 3. Third priority: yt-dlp with mobile signatures and search bypass
         try:
             logger.info(f"Attempting premium local yt-dlp search extraction for: {q}")
             result = await asyncio.to_thread(extract_with_ytdlp, q)
@@ -216,42 +350,75 @@ async def stream(q: str = Query(...)):
                 logger.info(f"Premium yt-dlp stream resolved successfully for: {result.get('title')}")
                 return result
         except Exception as ytdlp_err:
-            logger.warning(f"Premium yt-dlp extraction failed: {ytdlp_err}. Falling back to Invidious...")
+            logger.warning(f"Premium yt-dlp extraction failed: {ytdlp_err}. Trying Invidious dynamic fallback...")
 
-        # 2. Fallback: Invidious Bridge (The Decentralized Backup Powerhouse)
-        invidious_instances = [
-            "https://inv.tux.rs",
-            "https://invidious.snopyta.org",
-            "https://invidious.sethforprivacy.com",
-            "https://invidious.flokinet.to",
-            "https://inv.river.group"
-        ]
-        
-        async with aiohttp.ClientSession() as session:
-            for instance in invidious_instances:
-                try:
-                    # Invidious has a 'latest_version' endpoint that redirects to the stream
-                    stream_url = f"{instance}/latest_version?id={video_id}&itag=140" # itag 140 is M4A audio
-                    logger.info(f"Trying Invidious instance: {instance} for ID: {video_id}")
-                    
-                    # We check if the link is actually reachable
-                    async with session.head(stream_url, allow_redirects=True, timeout=5) as resp:
-                        if resp.status == 200 or resp.status == 302:
+        # 3. Third priority: Dynamic Invidious Redirect Resolver (Bulletproof backup)
+        try:
+            logger.info("Fetching healthy Invidious instances dynamically...")
+            res = requests.get("https://api.invidious.io/instances.json?sort_by=type,health", timeout=5)
+            data = res.json()
+            instances = []
+            for item in data:
+                if not isinstance(item, list) or len(item) < 2:
+                    continue
+                details = item[1]
+                if not isinstance(details, dict):
+                    continue
+                monitor = details.get("monitor")
+                is_up = False
+                if isinstance(monitor, dict):
+                    is_up = not monitor.get("down", True)
+                if details.get("type") == "https" and is_up:
+                    uri = details.get("uri")
+                    if uri:
+                        instances.append(uri)
+        except Exception as api_err:
+            logger.warning(f"Failed to fetch dynamic Invidious list: {api_err}. Using hardcoded fallback list.")
+            instances = [
+                "https://invidious.f5.si",
+                "https://inv.nadeko.net",
+                "https://yt.chocolatemoo53.com",
+                "https://inv.thepixora.com",
+                "https://invidious.nerdvpn.de"
+            ]
+
+        # Iterate healthy instances and follow redirects to find the direct googlevideo.com URL
+        headers = {"User-Agent": "Mozilla/5.0"}
+        for inst in instances[:10]: # Check top 10 healthy instances
+            current_url = f"{inst}/latest_version?id={video_id}&itag=140"
+            logger.info(f"Trying Invidious instance: {inst}")
+            try:
+                for step in range(4):
+                    res = requests.get(current_url, headers=headers, allow_redirects=False, timeout=8)
+                    if res.status_code in (301, 302, 303, 307, 308):
+                        loc = res.headers.get("location")
+                        if not loc:
+                            break
+                        if loc.startswith("/"):
+                            current_url = f"{inst}{loc}"
+                        else:
+                            current_url = loc
+                        
+                        if "googlevideo.com" in current_url:
+                            logger.info(f"Invidious successfully resolved to GoogleVideo URL via {inst}")
                             return {
-                                "stream_url": str(resp.url) if resp.url else stream_url,
+                                "stream_url": current_url,
                                 "title": "Streamed via Invidious",
                                 "thumbnail": f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg",
                                 "user_agent": "Mozilla/5.0"
                             }
-                except Exception as inv_e:
-                    logger.warning(f"Invidious instance {instance} failed: {inv_e}")
-                    continue
-        
+                    else:
+                        break
+            except Exception as inv_e:
+                logger.warning(f"Invidious instance {inst} failed during redirect chain: {inv_e}")
+                continue
+
         raise Exception("All streaming engines and backup instances failed to provide a stream")
 
     except Exception as e:
         logger.error(f"Playback failed: {e}")
         raise HTTPException(status_code=500, detail=f"Playback currently unavailable. Error: {str(e)}")
+
 
 @app.get("/audio-proxy")
 async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
@@ -262,7 +429,7 @@ async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
 
     session = aiohttp.ClientSession()
     try:
-        resp = await session.get(url, headers=headers)
+        resp = await session.get(url, headers=headers, allow_redirects=True)
         status_code = resp.status
         
         # Build headers to return to the browser
@@ -294,6 +461,7 @@ async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
         await session.close()
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ── Improved Download Tracking ───────────────────────────────────────────
 class DownloadStatus:
     def __init__(self):
@@ -301,10 +469,151 @@ class DownloadStatus:
         self.locks = {}     # url -> asyncio.Lock()
         self.progress = {}  # url -> status_string (e.g. "Downloading 5/56")
 
+# Detect if running in Vercel or Netlify serverless context, or if filesystem is read-only
+IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("NETLIFY") == "1" or not os.access(DOWNLOAD_DIR, os.W_OK)
+
+def resolve_to_video_id(q: str) -> Optional[str]:
+    # YouTube URL parsing
+    if "watch?v=" in q:
+        return q.split("watch?v=")[1].split("&")[0]
+    elif "youtu.be/" in q:
+        return q.split("youtu.be/")[1].split("?")[0]
+    elif "music.youtube.com" in q:
+        return q.split("watch?v=")[1].split("&")[0]
+    elif len(q) == 11 and not q.startswith("http") and re.match(r'^[a-zA-Z0-9_-]{11}$', q):
+        return q
+    
+    # Spotify URL resolving via OEmbed
+    if "spotify.com" in q:
+        try:
+            oembed_resp = requests.get(f"https://open.spotify.com/oembed?url={q}", timeout=5)
+            if oembed_resp.status_code == 200:
+                q = oembed_resp.json().get("title", q)
+                logger.info(f"Resolved Spotify URL to title: {q}")
+        except Exception as e:
+            logger.warning(f"OEmbed resolution failed: {e}")
+
+    # Search standard YouTube Music via ytmusicapi
+    try:
+        from ytmusicapi import YTMusic
+        ytmusic = YTMusic()
+        search_results = ytmusic.search(q, filter="songs", limit=1)
+        if search_results and search_results[0].get("videoId"):
+            return search_results[0].get("videoId")
+    except Exception as e:
+        logger.warning(f"YTMusic search failed: {e}")
+
+    # Search standard YouTube via yt-dlp
+    try:
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            res = ydl.extract_info(f"ytsearch1:{q}", download=False)
+            if res and 'entries' in res and len(res['entries']) > 0:
+                return res['entries'][0].get('id')
+    except Exception as e:
+        logger.warning(f"yt-dlp search failed: {e}")
+
+    return None
+
+def resolve_with_cobalt(video_id: str) -> Optional[str]:
+    instances = []
+    try:
+        logger.info("Fetching healthy Cobalt instances dynamically...")
+        res = requests.get("https://cobalt.directory/api/tests", timeout=4)
+        if res.status_code == 200:
+            data = res.json()
+            items = data.get("data", [])
+            for item in items:
+                api_host = item.get("api")
+                protocol = item.get("protocol", "https")
+                if not api_host:
+                    continue
+                api_url = f"{protocol}://{api_host}"
+                tests = item.get("tests", {})
+                yt_working = tests.get("youtube", {}).get("status", False)
+                yt_music_working = tests.get("youtube-music", {}).get("status", False)
+                score = item.get("score", 0)
+                if score >= 50 and (yt_working or yt_music_working):
+                    instances.append((api_url, score))
+            instances.sort(key=lambda x: x[1], reverse=True)
+            instances = [x[0] for x in instances]
+    except Exception as api_err:
+        logger.warning(f"Failed to fetch dynamic Cobalt list: {api_err}")
+
+    fallback_instances = [
+        "https://cobaltapi.squair.xyz",
+        "https://apicobalt.mgytr.top",
+        "https://dog.kittycat.boo"
+    ]
+    for fb in fallback_instances:
+        if fb not in instances:
+            instances.append(fb)
+
+    yt_url = f"https://www.youtube.com/watch?v={video_id}"
+    v10_payload = {
+        "url": yt_url,
+        "downloadMode": "audio",
+        "audioFormat": "mp3"
+    }
+    v7_payload = {
+        "url": yt_url,
+        "isAudioOnly": True,
+        "aFormat": "mp3"
+    }
+    
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    for inst in instances[:10]:
+        logger.info(f"Trying Cobalt instance: {inst}")
+        try:
+            res = requests.post(inst, json=v10_payload, headers=headers, timeout=6)
+            if res.status_code == 200:
+                res_data = res.json()
+                if 'url' in res_data:
+                    logger.info(f"Cobalt v10 successfully resolved via {inst}")
+                    return res_data['url']
+        except Exception as e:
+            logger.warning(f"Cobalt v10 payload failed on {inst}: {e}")
+
+        try:
+            res = requests.post(inst, json=v7_payload, headers=headers, timeout=6)
+            if res.status_code == 200:
+                res_data = res.json()
+                if 'url' in res_data:
+                    logger.info(f"Cobalt v7 successfully resolved via {inst}")
+                    return res_data['url']
+        except Exception as e:
+            logger.warning(f"Cobalt v7 payload failed on {inst}: {e}")
+
+    return None
+
 dl_manager = DownloadStatus()
 
 @app.get("/download-status")
 async def get_download_status(url: str):
+    if IS_VERCEL:
+        # Vercel Serverless bypass: if we have it cached in completed, or we can resolve it on-the-fly
+        if url in dl_manager.completed:
+            return {"status": "completed", "file": "music_download.mp3"}
+        try:
+            video_id = await asyncio.to_thread(resolve_to_video_id, url)
+            if video_id:
+                cobalt_url = await asyncio.to_thread(resolve_with_cobalt, video_id)
+                if cobalt_url:
+                    dl_manager.completed[url] = cobalt_url
+                    return {"status": "completed", "file": "music_download.mp3"}
+        except Exception:
+            pass
+        return {"status": "completed", "file": "music_download.mp3"}
+
     if url in dl_manager.completed:
         return {"status": "completed", "file": os.path.basename(dl_manager.completed[url])}
     
@@ -313,6 +622,27 @@ async def get_download_status(url: str):
 
 @app.get("/download")
 async def download_track(url: str, name: Optional[str] = None, artist: Optional[str] = None, background_tasks: BackgroundTasks = None):
+    if IS_VERCEL:
+        logger.info(f"[Vercel Download] Resolving on-the-fly Cobalt link for: {url}")
+        video_id = await asyncio.to_thread(resolve_to_video_id, url)
+        if not video_id:
+            raise HTTPException(status_code=404, detail="Track could not be resolved on YouTube.")
+            
+        cobalt_url = await asyncio.to_thread(resolve_with_cobalt, video_id)
+        if not cobalt_url:
+            raise HTTPException(status_code=500, detail="Could not resolve download link via Cobalt.")
+            
+        dl_manager.completed[url] = cobalt_url
+        encoded_url = urllib.parse.quote(url)
+        return {
+            "message": "Download ready via Cobalt (Serverless Bypass)",
+            "engine": "Cobalt (Serverless Bypass)",
+            "url": url,
+            "name": name,
+            "artist": artist,
+            "downloadUrl": f"/api/music/download-file?url={encoded_url}"
+        }
+
     engine = "SpotiFLAC (Lossless)" if ("spotify.com" in url and SPOTIFLAC_AVAILABLE) else "yt-dlp (Fallback)"
     
     # We trigger the download in background, but the client will follow up with /download-file
@@ -330,6 +660,20 @@ async def download_track(url: str, name: Optional[str] = None, artist: Optional[
 
 @app.get("/download-file")
 async def download_file(url: str):
+    if IS_VERCEL:
+        logger.info(f"[Vercel Download File] Redirecting to Cobalt URL for: {url}")
+        cobalt_url = dl_manager.completed.get(url)
+        if not cobalt_url or not cobalt_url.startswith("http"):
+            video_id = await asyncio.to_thread(resolve_to_video_id, url)
+            if video_id:
+                cobalt_url = await asyncio.to_thread(resolve_with_cobalt, video_id)
+                
+        if cobalt_url and cobalt_url.startswith("http"):
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(cobalt_url)
+            
+        raise HTTPException(status_code=404, detail="Download failed or Cobalt URL could not be resolved.")
+
     # This will wait if a download is already in progress for this URL
     file_path = await run_download(url)
     

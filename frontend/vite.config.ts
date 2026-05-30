@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'esnext',
-    cssTarget: ['chrome80', 'safari13', 'edge88', 'firefox78'],
     sourcemap: true,
     chunkSizeWarningLimit: 600,
   },

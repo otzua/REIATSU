@@ -38,3 +38,5 @@ playwright>=1.52.0
 # Replaces playwright's Node.js driver for CDP communication, saving ~86 MB
 # from the final binary. Pure Python, no native dependencies.
 websockets>=13.0
+pytubefix
+
