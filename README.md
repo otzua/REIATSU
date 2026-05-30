@@ -2,9 +2,6 @@
 
 <div align="center">
   <img src="./frontend/public/favicon.svg" alt="REIATSU Logo" width="150" height="150">
-  <br /><br />
-  <img src="./reiatsu_banner_1778080050417.png" alt="REIATSU Banner" width="100%">
-  <br />
   
   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Inter&weight=500&size=18&pause=1500&color=A9A9A9&center=true&vCenter=true&width=600&lines=The+ultimate+self-hosted+streaming+service.;Stream+Anime,+Movies,+and+Music.;Fast,+Private,+and+Beautiful.)](https://git.io/typing-svg)
   
