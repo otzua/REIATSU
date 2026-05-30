@@ -1,7 +1,6 @@
 // api/index.js
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { handle } from '@hono/node-server/vercel';
 import { getProvider, getProviderWithFallback, getProviderOrder, listProviders } from '../core/providerManager.js';
 import { cacheStats, cacheDel, withCache, TTL } from '../utils/cache.js';
 import { findClosestMatch } from '../utils/string.js';
@@ -466,4 +465,4 @@ app.onError((error, c) => {
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export { app };
-export default handle(app);
+export default app;

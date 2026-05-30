@@ -7,7 +7,7 @@ const hanimeClient = new HanimeClient();
 const ALPHA_BASE = 'https://www.alphaapis.org';
 const HANIME_SEARCH_API = 'https://search.htv-services.com';
 const HANIME_VIDEO_API = 'https://hanime.tv/api/v8/video';
-const WATCHHENTAI_API = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:4005/api' : 'https://watchhentai-api-main.vercel.app/api';
+const WATCHHENTAI_API = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:4005/api' : 'https://reiatsu-watchhentai-api.otzuaa.workers.dev/api';
 
 /**
  * GET /api/beyond
@@ -334,16 +334,17 @@ beyond.get('/proxy-image', async (c) => {
   if (!url) return c.text('Missing url', 400);
 
   try {
-    const response = await axios.get(url, {
-      headers: { 'Referer': 'https://hanime.tv/' },
-      responseType: 'arraybuffer'
+    const response = await fetch(url, {
+      headers: { 'Referer': 'https://hanime.tv/' }
     });
+    if (!response.ok) throw new Error('Fetch failed');
 
-    c.header('Content-Type', response.headers['content-type']);
+    const buffer = await response.arrayBuffer();
+    c.header('Content-Type', response.headers.get('content-type') || 'image/jpeg');
     c.header('Cache-Control', 'public, max-age=86400');
-    return c.body(response.data);
+    return c.body(buffer);
   } catch (error) {
-    return c.text('Failed to proxy image', 500);
+    return c.text('Failed to proxy image: ' + (error.message || error.toString()), 500);
   }
 });
 
@@ -353,20 +354,19 @@ beyond.get('/proxy-image', async (c) => {
 beyond.get('/proxy-m3u8', async (c) => {
   const url = c.req.query('url');
   if (!url) return c.text('Missing url', 400);
+  console.log('PROXY URL IS:', url);
 
   try {
-    const response = await axios.get(url, {
+    const response = await fetch(url, {
       headers: { 'Referer': 'https://hanime.tv/' }
     });
+    if (!response.ok) throw new Error('Fetch failed');
 
-    let manifest = response.data;
+    let manifest = await response.text();
     const baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
 
     manifest = manifest.replace(/^(?!#)(.+)$/gm, (match) => {
       const segmentUrl = match.startsWith('http') ? match : baseUrl + match;
-      // OPTIMIZATION: Individual video segments (.ts files) are served from edge CDNs that do not enforce the Referer header.
-      // Returning the absolute segment CDN URL directly allows the browser to stream segments directly without proxying
-      // them through the serverless function, completely eliminating serverless timeouts and severe buffering.
       return segmentUrl;
     });
 
@@ -375,7 +375,8 @@ beyond.get('/proxy-m3u8', async (c) => {
     c.header('Access-Control-Allow-Origin', '*');
     return c.text(manifest);
   } catch (error) {
-    return c.text('Failed to proxy m3u8', 500);
+    console.error('M3U8 Proxy Error:', error, error.stack);
+    return c.text('Failed to proxy m3u8: ' + (error.message || error.toString()), 500);
   }
 });
 
@@ -387,17 +388,18 @@ beyond.get('/proxy-segment', async (c) => {
   if (!url) return c.text('Missing url', 400);
 
   try {
-    const response = await axios.get(url, {
-      headers: { 'Referer': 'https://hanime.tv/' },
-      responseType: 'arraybuffer',
-      timeout: 10000
+    const response = await fetch(url, {
+      headers: { 'Referer': 'https://hanime.tv/' }
     });
+    if (!response.ok) throw new Error('Fetch failed');
 
-    c.header('Content-Type', response.headers['content-type'] || 'video/MP2T');
-    c.header('Content-Length', response.data.length.toString());
+    const buffer = await response.arrayBuffer();
+
+    c.header('Content-Type', response.headers.get('content-type') || 'video/MP2T');
+    c.header('Content-Length', buffer.byteLength.toString());
     c.header('Cache-Control', 'public, max-age=3600');
     c.header('Access-Control-Allow-Origin', '*');
-    return c.body(response.data);
+    return c.body(buffer);
   } catch (error) {
     console.error('[Proxy Segment Error]', error.message, url);
     return c.text('Failed to proxy segment', 500);
@@ -427,21 +429,23 @@ beyond.get('/proxy-video', async (c) => {
   if (range) headers['Range'] = range;
 
   try {
-    const response = await axios.get(url, {
-      headers,
-      responseType: 'stream',
-      timeout: 30000
-    });
+    const response = await fetch(url, { headers });
+    if (!response.ok && response.status !== 206) throw new Error('Fetch failed');
 
-    c.header('Content-Type', response.headers['content-type'] || 'video/mp4');
-    if (response.headers['content-length']) c.header('Content-Length', response.headers['content-length']);
-    if (response.headers['content-range']) c.header('Content-Range', response.headers['content-range']);
-    if (response.headers['accept-ranges']) c.header('Accept-Ranges', response.headers['accept-ranges']);
+    const contentType = response.headers.get('content-type') || 'video/mp4';
+    const contentLength = response.headers.get('content-length');
+    const contentRange = response.headers.get('content-range');
+    const acceptRanges = response.headers.get('accept-ranges');
+
+    c.header('Content-Type', contentType);
+    if (contentLength) c.header('Content-Length', contentLength);
+    if (contentRange) c.header('Content-Range', contentRange);
+    if (acceptRanges) c.header('Accept-Ranges', acceptRanges);
     
     c.status(response.status);
     c.header('Access-Control-Allow-Origin', '*');
     
-    return c.body(response.data);
+    return c.body(response.body);
   } catch (error) {
     console.error('[Proxy Video Error]', error.message, url);
     return c.text('Failed to proxy video', 500);
@@ -449,3 +453,4 @@ beyond.get('/proxy-video', async (c) => {
 });
 
 export default beyond;
+
