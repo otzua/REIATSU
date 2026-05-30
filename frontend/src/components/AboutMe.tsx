@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Github, Linkedin, Instagram, Mail, Code2, Terminal } from 'lucide-react';
+import { X, Code, User, Camera, Mail, Code2, Terminal } from 'lucide-react';
 import styles from './AboutMe.module.css';
 
 interface AboutMeProps {
@@ -66,15 +66,15 @@ const AboutMe = ({ isOpen, onClose }: AboutMeProps) => {
 
                 <div className={styles.socialGrid}>
                   <a href="https://github.com/otzua" target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
-                    <Github size={16} />
+                    <Code size={16} />
                     <span>GITHUB</span>
                   </a>
                   <a href="https://www.linkedin.com/in/krish-dmg/" target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
-                    <Linkedin size={16} />
+                    <User size={16} />
                     <span>LINKEDIN</span>
                   </a>
                   <a href="https://instagram.com/otaku_bhaiya" target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
-                    <Instagram size={16} />
+                    <Camera size={16} />
                     <span>INSTAGRAM</span>
                   </a>
                   <a href="mailto:krish.json@gmail.com" className={styles.socialLink}>

@@ -13,32 +13,40 @@
 
 ---
 
-## Overview
+## The Vision | ビジョン
 
-Reiatsu is a self-hosted multimedia platform designed for streaming anime, movies, and music. Originally built as a personal project, it provides a unified interface without trackers or restricted accessibility. It focuses on speed, privacy, and a customized frontend experience.
+**Reiatsu** is a personal open-source multimedia engine designed for speed, privacy, and aesthetic dominance. Originally built as a passion project for friends and family, it provides a unified, self-hosted platform for streaming **Anime**, **Movies**, and **Music** without the bloat of corporate trackers or restrictive interfaces.
 
-## Features
+Built with a high-contrast "Vintage Digital" aesthetic, Reiatsu transforms the act of consumption into an interactive experience.
 
-- **Open Source**: Fully open source, allowing you to audit the code and self-host your data.
-- **Privacy Focused**: No telemetry or external trackers. Your watch history and data remain local.
-- **Unified Media Interfaces**:
-  - **Anime**: Stream anime with integrated scheduling.
-  - **Cinema**: Movie and TV series interface featuring a 12-month release calendar with timeline navigation and TMDB proxying to prevent ISP blocking.
-  - **Music**: Music portal with YouTube Music stream resolution, dynamic artist pages, and integrated lossless FLAC background downloading via SpotiFLAC.
-- **Cross-Section Tracking**: Automatically tracks progress across all sections with persistent local history logs and a dedicated MyList page.
-- **HLS Segment Proxy**: A backend system to bypass CDN restrictions and ensure stable video playback across all regions.
-- **Global Search**: Press `/` to search across all media types instantly.
-- **Custom UI**: Features a high-contrast vintage design with real-time backdrop blurring and reactive halftone backgrounds.
+## Key Features | 特徴
 
-## Tech Stack
+- **Open Source & Transparent**: 100% open source. Audit the code, self-host the data, and run it for your own circle.
+- **Tri-Interface Ecosystem**: A single application for three distinct worlds:
+  - **霊 ANIME**: High-performance anime streaming with integrated scheduling.
+  - **映 CINEMA**: A cinematic gateway for movies and TV series, now featuring an interactive **12-Month Release Calendar** with desktop-optimized timeline navigation and anti-ISP blocking TMDB proxying.
+  - **音 MUSIC**: A high-fidelity, aesthetic music portal with seamless YouTube Music stream resolution, dynamic artist pages, curated album views, and integrated lossless FLAC background downloading via SpotiFLAC.
+- **Unified History & MyList System**: Automatically track your progress across all sections (Anime, Cinema, Music, Beyond) with persistent local history logs and a dedicated MyList page.
+- **Creator Profile / About Me**: A sleek, integrated developer profile modal showcasing tech-stack and personal links in place of bloated authentication systems.
+- **Glassmorphic UI**: High-fidelity glass surfaces with real-time backdrop blurring and reactive halftone backgrounds.
 
-- **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js
-- **Anime/Beyond API (Hono)**: Node.js service for stream resolution, AlphaAPIs extraction, Miruro provider integration with Hanime fallback, and HLS proxying.
-- **Cinema API**: Frontend/backend integration utilizing TMDB via dedicated proxies.
-- **Music API (FastAPI)**: Python backend utilizing `ytmusicapi`, `yt-dlp`, and the custom `SpotiFLAC` downloading engine.
-- **Design**: Vanilla CSS Modules.
+## Design Philosophy | デザイン
+Reiatsu is built on the **Neo-Vintage Digital** aesthetic. We combine 90s brutalism with modern glassmorphism to create an interface that feels both nostalgic and futuristic. Every element is designed to respond to user interaction, creating a living multimedia environment.
 
-## Project Structure
+- **Brutalist Halftone Engine**: A unique, mouse-reactive background engine that responds to your presence.
+- **HLS Segment Proxy**: A robust backend system to bypass CDN restrictions and ensure stable video playback across all regions.
+- **Unified Command Palette**: Press `/` to search across all media types instantly.
+- **Self-Hosted Privacy**: No telemetry, no trackers. You own your watch history and your data.
+
+## Tech Stack | 技術スタック
+
+- **Frontend**: React 19, Vite, TypeScript, Framer Motion, Hls.js (Deployed live on Vercel)
+- **Anime/Beyond API (Hono)**: A lightweight, high-performance Node.js service for scraping, WatchHentai stream resolution, AlphaAPIs extraction, Miruro provider integration with Hanime fallback, and HLS proxying (Deployed live on Vercel Serverless Functions).
+- **Cinema API**: A robust frontend/backend integration utilizing TMDB via dedicated proxies to bypass regional ISP blocks.
+- **Music API (FastAPI)**: A powerful Python backend utilizing `ytmusicapi`, `yt-dlp`, and the custom `SpotiFLAC` lossless downloading engine.
+- **Design**: Vanilla CSS Modules with a focus on typography and motion.
+
+## Project Structure | プロジェクト構造
 
 ```text
 REIATSU/
@@ -50,35 +58,38 @@ REIATSU/
 └── config/             # Global configuration tokens
 ```
 
-## Local Development
+## Deployment | デプロイ
 
-1. **Clone the repository:**
+### Local Development
+
+1. **Clone the Source:**
    ```bash
    git clone https://github.com/otzua/REIATSU.git
    cd REIATSU
    ```
 
-2. **Run the application:**
-   Each directory contains its own dependencies and local server configuration. You can run the entire stack using the root `package.json` scripts:
+2. **Run All-in-One (Recommended):**
+   *Each directory contains its own dependencies and local server configuration. You can easily run the entire stack using the root `package.json` scripts:*
+
    ```bash
    npm run dev
    ```
 
-   - **Frontend**: Runs on port 5173
-   - **Anime API**: Runs on port 4001
-   - **Music API**: Runs on port 8000
+   - **Frontend**: Runs on 5173
+   - **Anime API**: Runs on 4001
+   - **Music API**: Runs on 8000
 
-## Contributing
+## Contributing | 貢献する
 
-While Reiatsu is developed primarily as a closed-circle project for personal use, it remains open-source. Suggestions, bug reports, and improvements are welcome.
+While Reiatsu is developed primarily as a closed-circle project for personal use, it remains open-source. Suggestions, bug reports, and UX improvements are welcome!
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/NewFeature`)
-3. Commit your changes (`git commit -m 'Add NewFeature'`)
-4. Push to the branch (`git push origin feature/NewFeature`)
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## Roadmap
+## Roadmap | ロードマップ
 
 - [x] High-performance Halftone Engine
 - [x] Neo-Vintage Design System
@@ -93,11 +104,11 @@ While Reiatsu is developed primarily as a closed-circle project for personal use
 - [ ] Self-Hosting Docker Suite
 - [ ] PWA Support for Mobile Streaming
 
-## License
+## License | ライセンス
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-Created by [otzua](https://github.com/otzua).
+*Built with passion and the spirit of open source by [otzua](https://github.com/otzua).*
 
