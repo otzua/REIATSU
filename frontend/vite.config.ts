@@ -5,9 +5,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    target: 'esnext',
+    // Do NOT use 'esnext' here — Vite's Lightning CSS with esnext target strips
+    // the unprefixed `backdrop-filter`, keeping only `-webkit-backdrop-filter`.
+    // Chrome 76+ requires the UNPREFIXED version; webkit-only does nothing.
+    // Targeting chrome100 preserves both prefixed and unprefixed in the build output.
+    target: ['chrome100', 'safari16', 'firefox100'],
     sourcemap: true,
     chunkSizeWarningLimit: 600,
+    cssMinify: 'esbuild',
   },
   server: {
     proxy: {

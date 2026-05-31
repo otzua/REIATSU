@@ -24,9 +24,16 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
   /* Prevent unwanted touch callouts on images/links */
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Contain horizontal overflow at the root level without breaking
+   position:fixed backdrop-filter elements (overflow on body/html
+   creates a new containing block that clips backdrop-filter in
+   production GPU compositing) */
+#root {
+  overflow-x: clip;
 }
 
 h1, h2, h3, h4, h5, h6 {

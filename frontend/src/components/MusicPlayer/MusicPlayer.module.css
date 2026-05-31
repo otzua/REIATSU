@@ -16,6 +16,11 @@
   color: #fff;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(0);
+}
+
+.playerBar[data-expanded="true"] {
+  transform: translateY(100%);
 }
 
 .trackInfo {

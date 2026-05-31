@@ -245,11 +245,9 @@ const MusicPlayer: React.FC = () => {
     <>
       <QueueDrawer />
       <ExpandedPlayer />
-      <motion.div
-        initial={{ y: 100 }}
-        animate={{ y: isExpanded ? 100 : 0 }}
-        exit={{ y: 100 }}
+      <div
         className={`${styles.playerBar} glass`}
+        data-expanded={isExpanded ? 'true' : 'false'}
       >
         <div
           className={styles.trackInfo}
@@ -371,7 +369,7 @@ const MusicPlayer: React.FC = () => {
             <ListMusic size={20} />
           </button>
         </div>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {streamError && (
