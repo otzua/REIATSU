@@ -61,10 +61,17 @@ venv/
 .wrangler/
 .dev.vars
 
-# MCP / Tool Configs (Contain Secrets)
+# MCP / Tool Configs & IDEs
 .mcp.json
-.cursor/mcp.json
-.gemini/settings.json
+.cursor/
+.gemini/
+.codex/
+.zed/
+
+# Scratch & Patch files
+scratch/
+patch_*.js
+scratch_*.json
 
 # Claude Code / Workspace exclusions
 AnimeKAI-API-main/
