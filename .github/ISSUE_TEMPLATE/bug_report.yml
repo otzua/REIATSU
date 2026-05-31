@@ -1,0 +1,54 @@
+name: Bug Report
+description: Create a report to help us improve REIATSU.
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please provide as much detail as possible.
+  - type: input
+    id: version
+    attributes:
+      label: REIATSU Version
+      description: Are you running the latest main branch?
+      placeholder: e.g., main branch or deployed version
+    validations:
+      required: true
+  - type: dropdown
+    id: section
+    attributes:
+      label: Which section is this bug related to?
+      options:
+        - 霊 ANIME
+        - 映 CINEMA
+        - 音 MUSIC
+        - 🔞 BEYOND
+        - General UI/Core
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
