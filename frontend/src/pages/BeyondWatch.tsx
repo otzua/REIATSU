@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Info, Calendar, Tag, Flame } from 'lucide-react';
+import { ChevronLeft, Info, Calendar, Tag, Flame, Play } from 'lucide-react';
 import Hls from 'hls.js';
 import { beyondApi, MUSIC_API_BASE } from '../services/beyondApi';
 import type { BeyondVideo, BeyondDetails } from '../services/beyondApi';
@@ -220,6 +220,13 @@ const BeyondWatch = () => {
     }
   };
 
+  const decodeEntities = (text: string) => {
+    if (!text) return '';
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
+
   /* ─── Loading ─── */
   if (loading) {
     return (
@@ -379,7 +386,7 @@ const BeyondWatch = () => {
             </div>
           </div>
 
-          {/* Sidebar — metadata panel */}
+          {/* Sidebar — metadata panel and episodes */}
           <div className={styles.sidebar}>
             <div className={styles.sidebarHeader}>
               <h3 className={styles.sidebarTitle}>
@@ -408,6 +415,35 @@ const BeyondWatch = () => {
                 <span className={styles.metaValue}>{activeStream ? 'High Fidelity Stream' : 'Proxy Limited'}</span>
               </div>
             </div>
+
+            {details?.episodes && details.episodes.length > 0 && (
+              <>
+                <div className={styles.sidebarHeader} style={{ marginTop: '2rem' }}>
+                  <h3 className={styles.sidebarTitle}>EPISODES</h3>
+                </div>
+                <div className={styles.episodeGrid}>
+                  {details.episodes.map((ep, idx) => {
+                    const isActive = ep.isCurrent || id === ep.id;
+                    return (
+                      <button
+                        key={ep.id}
+                        data-active={isActive ? 'true' : undefined}
+                        className={`${styles.episodeItem} ${isActive ? styles.active : ''}`}
+                        onClick={() => navigate(`/beyond/watch/${ep.id}`)}
+                      >
+                        <span className={styles.num}>{idx + 1}</span>
+                        <span className={styles.name}>{decodeEntities(ep.title) || `Episode ${idx + 1}`}</span>
+                        {isActive && (
+                          <div className={styles.playIcon}>
+                            <Play size={12} fill="currentColor" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

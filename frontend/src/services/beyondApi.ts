@@ -42,6 +42,7 @@ export interface BeyondDetailInfo {
 export interface BeyondDetails {
   info: BeyondDetailInfo[];
   genres: BeyondDetailGenre[];
+  episodes?: Array<{ id: string; title: string; image: string; isCurrent?: boolean }>;
 }
 
 export const beyondApi = {

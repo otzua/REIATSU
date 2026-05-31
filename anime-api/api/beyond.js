@@ -42,7 +42,7 @@ const hanimeClient = new HanimeClient();
 const ALPHA_BASE = 'https://www.alphaapis.org';
 const HANIME_SEARCH_API = 'https://search.htv-services.com';
 const HANIME_VIDEO_API = 'https://hanime.tv/api/v8/video';
-const WATCHHENTAI_API = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:4005/api' : 'https://reiatsu-watchhentai-api.otzuaa.workers.dev/api';
+const WATCHHENTAI_API = process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:4005/api' : 'https://reiatsu-watchhentai-api.otzuaa.workers.dev/api';
 
 /**
  * GET /api/beyond
@@ -127,17 +127,13 @@ beyond.get('/details', async (c) => {
   if (slug.startsWith('wh:')) {
     try {
       let targetSlug = slug.replace('wh:', '');
-
-      // If it's a series from search, get the series details and grab the first episode!
+      // If it's a series slug from search (wh:series:XXX), resolve to first episode
       if (targetSlug.startsWith('series:')) {
-        const seriesSlug = targetSlug.replace('series:', '');
-        const seriesRes = await fetchJson(`${WATCHHENTAI_API}/series/${seriesSlug}`, { timeout: 10000 });
+        const seriesSlugKey = targetSlug.replace('series:', '');
+        const seriesRes = await fetchJson(`${WATCHHENTAI_API}/series/${seriesSlugKey}`, { timeout: 10000 });
         const episodes = seriesRes.data?.data?.episodes || [];
-          console.log('[Details Path] Series Slug:', seriesSlug, 'Episodes length:', episodes.length, 'seriesRes data:', JSON.stringify(seriesRes.data));
-          console.log('Series Slug:', seriesSlug, 'Episodes length:', episodes.length, 'Series Data:', JSON.stringify(seriesRes.data));
         if (episodes.length > 0) {
-          const firstEpUrl = episodes[0].url;
-          targetSlug = firstEpUrl.split('/videos/')[1]?.replace(/\//g, '');
+          targetSlug = episodes[0].url.split('/videos/')[1]?.replace(/\//g, '');
         } else {
           throw new Error('No episodes found for this series');
         }
@@ -153,6 +149,17 @@ beyond.get('/details', async (c) => {
         resolution: s.label || '1080p',
         height: parseInt(s.label) || 1080
       })) || [{ url: bestStream, filename: '1080p', resolution: '1080p', height: 1080 }];
+
+      // The watch endpoint always returns the full episodes list with isCurrent flag
+      const mappedEpisodes = (data.episodes || []).map((ep, idx) => {
+        const epVideoSlug = ep.url?.split('/videos/')[1]?.replace(/\//g, '');
+        return {
+          id: epVideoSlug ? `wh:${epVideoSlug}` : `wh:ep-${idx + 1}`,
+          title: ep.title || `Episode ${idx + 1}`,
+          image: ep.thumbnail || '',
+          isCurrent: ep.isCurrent || false
+        };
+      });
 
       const result = {
         info: [{
@@ -171,7 +178,8 @@ beyond.get('/details', async (c) => {
           best_stream: bestStream,
           streams: allStreams
         }],
-        genres: data.genres?.map(g => ({ genre: g.name })) || []
+        genres: data.genres?.map(g => ({ genre: g.name })) || [],
+        episodes: mappedEpisodes
       };
 
       detailsCache.set(slug, { data: result, time: Date.now() });
@@ -182,6 +190,7 @@ beyond.get('/details', async (c) => {
       return c.json({ success: false, error: 'Failed to fetch WatchHentai details' }, 500);
     }
   }
+
 
   try {
     let hanimeData = {};
@@ -287,7 +296,12 @@ beyond.get('/details', async (c) => {
         best_stream: bestStream,
         streams: allStreams
       }],
-      genres: hTags?.map(tag => ({ genre: tag.text })) || whData?.genres?.map(g => ({ genre: g.name })) || []
+      genres: hTags?.map(tag => ({ genre: tag.text })) || whData?.genres?.map(g => ({ genre: g.name })) || [],
+      episodes: (hanimeData.hentaiFranchiseHentaiVideos || hanimeData.hentai_franchise_hentai_videos || []).map(ep => ({
+        id: ep.slug,
+        title: ep.name,
+        image: ep.posterUrl || ep.coverUrl || ep.poster_url || ep.cover_url || ''
+      }))
     };
 
     detailsCache.set(slug, { data: result, time: Date.now() });
@@ -307,13 +321,14 @@ beyond.get('/details', async (c) => {
  */
 beyond.get('/search', async (c) => {
   const q = c.req.query('q');
-  const server = c.req.query('server') || 'hanime';
   if (!q) return c.json({ success: true, data: [] });
 
-  if (server === 'watchhentai') {
+  let results = [];
+
+  const fetchWatchHentai = async () => {
     try {
-      const res = await fetchJson(`${WATCHHENTAI_API}/search`, { params: { q }, timeout: 10000 });
-      const results = res.data?.data?.results?.map(item => {
+      const res = await fetchJson(`${WATCHHENTAI_API}/search`, { params: { q }, timeout: 8000 });
+      return res.data?.data?.results?.map(item => {
         const seriesSlug = item.url ? item.url.split('/series/')[1]?.replace(/\//g, '') : 'unknown';
         return {
           id: `wh:series:${seriesSlug}`,
@@ -321,49 +336,72 @@ beyond.get('/search', async (c) => {
           embedUrl: item.url,
           thumbnail: item.poster,
           description: item.description || `Released: ${item.year || 'N/A'}`,
-          pubDate: new Date().toISOString()
+          pubDate: new Date().toISOString(),
+          source: 'watchhentai'
         };
       }) || [];
-      return c.json({ success: true, data: results });
     } catch (err) {
       console.error('[WatchHentai Search Error]', err.message);
-      return c.json({ success: false, error: 'Failed to perform WatchHentai search' }, 500);
+      return [];
+    }
+  };
+
+  const fetchHanime = async () => {
+    try {
+      const response = await fetchJson(HANIME_SEARCH_API, { method: 'POST', body: {
+        search_text: q,
+        tags: [],
+        tags_mode: "AND",
+        brands: [],
+        blacklist: [],
+        order_by: "views",
+        ordering: "desc",
+        page_number: 1
+      }, ...{ timeout: 8000 } });
+
+      const hits = typeof response.data.hits === 'string'
+        ? JSON.parse(response.data.hits)
+        : response.data.hits;
+
+      return hits.map(hit => ({
+        id: hit.slug,
+        title: hit.name,
+        embedUrl: `https://hanime.tv/videos/hentai/${hit.slug}`,
+        thumbnail: hit.poster_url || hit.cover_url ? `/api/beyond/proxy-image?url=${encodeURIComponent(hit.poster_url || hit.cover_url)}` : '',
+        description: hit.description ? hit.description.replace(/<[^>]*>?/gm, '').trim() : '',
+        pubDate: hit.created_at ? new Date(hit.created_at * 1000).toISOString() : '',
+        source: 'hanime'
+      }));
+    } catch (error) {
+      console.error('[Beyond Search Error]', error.message);
+      return [];
+    }
+  };
+
+  const [whData, hnData] = await Promise.all([fetchWatchHentai(), fetchHanime()]);
+  
+  // Merge and remove duplicates by matching title
+  const titleSet = new Set();
+  const merged = [];
+  
+  // Prefer hanime if same title, but append watchhentai if not found.
+  // Actually, we'll just push hanime first, then watchhentai.
+  for (const item of hnData) {
+    const t = item.title.toLowerCase();
+    if (!titleSet.has(t)) {
+      titleSet.add(t);
+      merged.push(item);
+    }
+  }
+  for (const item of whData) {
+    const t = item.title.toLowerCase();
+    if (!titleSet.has(t)) {
+      titleSet.add(t);
+      merged.push(item);
     }
   }
 
-  try {
-    const response = await fetchJson(HANIME_SEARCH_API, { method: 'POST', body: {
-      search_text: q,
-      tags: [],
-      tags_mode: "AND",
-      brands: [],
-      blacklist: [],
-      order_by: "views",
-      ordering: "desc",
-      page_number: 1
-    }, ...{ timeout: 8000 } });
-
-    const hits = typeof response.data.hits === 'string'
-      ? JSON.parse(response.data.hits)
-      : response.data.hits;
-
-    const items = hits.map(hit => ({
-      id: hit.slug,
-      title: hit.name,
-      embedUrl: `https://hanime.tv/videos/hentai/${hit.slug}`,
-      thumbnail: hit.poster_url || hit.cover_url ? `/api/beyond/proxy-image?url=${encodeURIComponent(hit.poster_url || hit.cover_url)}` : '',
-      description: hit.description ? hit.description.replace(/<[^>]*>?/gm, '').trim() : '',
-      pubDate: hit.created_at ? new Date(hit.created_at * 1000).toISOString() : ''
-    }));
-
-    return c.json({
-      success: true,
-      data: items
-    });
-  } catch (error) {
-    console.error('[Beyond Search Error]', error);
-    return c.json({ success: false, error: 'Failed to perform beyond search' }, 500);
-  }
+  return c.json({ success: true, data: merged });
 });
 
 /**
