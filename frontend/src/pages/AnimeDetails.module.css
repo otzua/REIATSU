@@ -400,16 +400,11 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 2rem 1.5rem;
-  /* isolate stacking context so hover transforms don't clip siblings */
-  isolation: isolate;
 }
 
 .animeCard {
   display: flex;
   flex-direction: column;
-  /* create a new stacking context per card */
-  isolation: isolate;
-  will-change: transform;
 }
 
 .cardLink {

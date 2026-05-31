@@ -65,9 +65,6 @@
   overflow: hidden;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(220, 201, 169, 0.1);
-  /* transition handled by Framer Motion whileHover */
-  will-change: transform;
-  isolation: isolate;
 }
 
 .card:hover {

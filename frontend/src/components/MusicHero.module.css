@@ -45,7 +45,6 @@
 .emblaContainer {
   display: flex;
   height: 100%;
-  will-change: transform;
 }
 
 .emblaSlide {

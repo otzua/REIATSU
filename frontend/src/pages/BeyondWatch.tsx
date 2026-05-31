@@ -428,7 +428,7 @@ const BeyondWatch = () => {
                       <button
                         key={ep.id}
                         data-active={isActive ? 'true' : undefined}
-                        className={`${styles.episodeItem} ${isActive ? styles.active : ''}`}
+                        className={styles.episodeItem}
                         onClick={() => navigate(`/beyond/watch/${ep.id}`)}
                       >
                         <span className={styles.num}>{idx + 1}</span>

@@ -613,7 +613,7 @@ const Watch = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className={`${styles.episodeItem} ${currentEp === ep.number ? styles.active : ''}`}
+                    className={styles.episodeItem}
                     onClick={() => { setCurrentEp(ep.number); syncRangeForEpisode(ep.number); }}
                   >
                     <span className={styles.num}>{ep.number}</span>

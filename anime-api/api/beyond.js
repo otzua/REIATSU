@@ -42,7 +42,7 @@ const hanimeClient = new HanimeClient();
 const ALPHA_BASE = 'https://www.alphaapis.org';
 const HANIME_SEARCH_API = 'https://search.htv-services.com';
 const HANIME_VIDEO_API = 'https://hanime.tv/api/v8/video';
-const WATCHHENTAI_API = process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:4005/api' : 'https://reiatsu-watchhentai-api.otzuaa.workers.dev/api';
+const WATCHHENTAI_API = 'https://reiatsu-watchhentai-api.otzuaa.workers.dev/api';
 
 /**
  * GET /api/beyond
@@ -297,11 +297,29 @@ beyond.get('/details', async (c) => {
         streams: allStreams
       }],
       genres: hTags?.map(tag => ({ genre: tag.text })) || whData?.genres?.map(g => ({ genre: g.name })) || [],
-      episodes: (hanimeData.hentaiFranchiseHentaiVideos || hanimeData.hentai_franchise_hentai_videos || []).map(ep => ({
-        id: ep.slug,
-        title: ep.name,
-        image: ep.posterUrl || ep.coverUrl || ep.poster_url || ep.cover_url || ''
-      }))
+      episodes: (() => {
+        const hanimeEps = (hanimeData.hentaiFranchiseHentaiVideos || hanimeData.hentai_franchise_hentai_videos || []);
+        if (hanimeEps.length > 0) {
+          return hanimeEps.map(ep => ({
+            id: ep.slug,
+            title: ep.name,
+            image: ep.posterUrl || ep.coverUrl || ep.poster_url || ep.cover_url || '',
+            isCurrent: ep.slug === slug
+          }));
+        }
+        if (whData?.episodes && whData.episodes.length > 0) {
+          return whData.episodes.map((ep, idx) => {
+            const epVideoSlug = ep.url?.split('/videos/')[1]?.replace(/\//g, '');
+            return {
+              id: epVideoSlug ? `wh:${epVideoSlug}` : `wh:ep-${idx + 1}`,
+              title: ep.title || `Episode ${ep.number || idx + 1}`,
+              image: ep.thumbnail || '',
+              isCurrent: ep.isCurrent || false
+            };
+          });
+        }
+        return [];
+      })()
     };
 
     detailsCache.set(slug, { data: result, time: Date.now() });

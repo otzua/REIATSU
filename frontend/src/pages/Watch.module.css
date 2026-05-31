@@ -548,9 +548,9 @@
   padding-left: 1.5rem;
 }
 
-.episodeItem.active {
-  background: rgba(184, 58, 45, 0.08);
-  border-color: rgba(184, 58, 45, 0.2);
+.episodeItem[data-active="true"] {
+  background: rgba(184, 58, 45, 0.15);
+  border-color: rgba(184, 58, 45, 0.4);
   color: #fff;
 }
 
@@ -562,9 +562,9 @@
   opacity: 0.4;
 }
 
-.episodeItem.active .num {
+.episodeItem[data-active="true"] .num {
   opacity: 1;
-  color: #fff;
+  color: var(--accent);
 }
 
 .playIcon {

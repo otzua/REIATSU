@@ -425,9 +425,9 @@ const Navbar = () => {
           <motion.div
             key="switch-overlay"
             className={`${styles.switchOverlay} glass`}
-            initial={{ opacity: 0, y: '-40%', x: '-50%' }}
-            animate={{ opacity: 1, y: '-50%', x: '-50%' }}
-            exit={{ opacity: 0, y: '-40%', x: '-50%' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             <div className={styles.switchHeader}>
@@ -496,10 +496,10 @@ const Navbar = () => {
           <motion.div
             key="search-overlay"
             className={styles.searchOverlay}
-            initial={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
-            animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.95, y: -20, x: '-50%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
           >
             <div className={styles.searchBar}>
               <Search size={24} className={styles.searchIcon} />
@@ -715,10 +715,10 @@ const Navbar = () => {
         {showToast && (
           <motion.div
             className={styles.secretToast}
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 200 }}
           >
             <span className={styles.secretToastIcon}>
               {toastMsg.includes('Closed') || toastMsg.includes('Hidden') ? <Lock size={16} /> : <Sparkles size={16} />}
