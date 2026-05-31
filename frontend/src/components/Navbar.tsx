@@ -335,7 +335,7 @@ const Navbar = () => {
         <div 
           className={`${styles.logoCapsule} ${getInterfaceClass()} ${styles.cleanLogo} glass`} 
           onClick={() => { closeSearch(); setSwitchOpen(false); handleLogoClick(); }} 
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', userSelect: 'none' }}
         >
           <span className={styles.logoKanji}>{getLogoKanji()}</span>
         </div>
