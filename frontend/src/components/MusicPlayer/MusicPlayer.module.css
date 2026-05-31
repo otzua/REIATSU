@@ -13,8 +13,6 @@
   justify-content: space-between;
   padding: 0 20px;
   z-index: 1000;
-  transform: translateZ(0);
-  will-change: backdrop-filter;
   color: #fff;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);

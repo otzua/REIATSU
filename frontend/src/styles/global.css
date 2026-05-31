@@ -47,14 +47,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Glassmorphism Utility */
+/* NOTE: Do NOT add transform, will-change, filter, or opacity to this class.
+   Those properties create new GPU stacking contexts that clip backdrop-filter
+   in production compositing, making the blur invisible (works locally, breaks on Vercel). */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(220, 201, 169, 0.1);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transform: translateZ(0);
-  will-change: backdrop-filter;
 }
 
 /* Scrollbar Styling — only on pointer-fine (desktop) devices */

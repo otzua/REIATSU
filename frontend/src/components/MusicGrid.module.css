@@ -120,7 +120,6 @@
   transition: opacity 0.3s ease;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  transform: translateZ(0);
 }
 
 .card:hover .overlay,
@@ -163,7 +162,6 @@
   transition: all 0.2s ease;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  transform: translateZ(0);
 }
 
 .actionBtn:hover {
