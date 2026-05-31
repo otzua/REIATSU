@@ -104,6 +104,16 @@ While Reiatsu is developed primarily as a closed-circle project for personal use
 - [ ] Self-Hosting Docker Suite
 - [ ] PWA Support for Mobile Streaming
 
+## Legal & DMCA Disclaimer | 免責事項
+
+REIATSU is an open-source multimedia indexing and proxying software. 
+- **No Hosting:** This project **does not host, upload, or store any copyrighted media files** (video, audio, or otherwise) on its servers. 
+- **Indexing Only:** All content presented within the application is accessed and scraped from independent, third-party services over which the developers of REIATSU have no control.
+- **Personal Use:** This software is provided "as is" for educational and personal use only. Users are solely responsible for ensuring that their use of this software complies with the local laws and regulations of their jurisdiction.
+- **DMCA:** Any copyright infringement claims should be directed to the respective third-party hosting providers. Since we do not host the files, we cannot take them down.
+
+By using this software, you acknowledge and agree to these terms.
+
 ## License | ライセンス
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

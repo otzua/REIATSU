@@ -55,6 +55,11 @@ venv/
 
 # Local Netlify folder
 .netlify
+.vercel/
+
+# Cloudflare
+.wrangler/
+.dev.vars
 
 # MCP / Tool Configs (Contain Secrets)
 .mcp.json
