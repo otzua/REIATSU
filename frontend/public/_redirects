@@ -1,9 +1,2 @@
-# Proxy rules for API services
-/tmdb-api/*  https://twilight-cake-defb.hunternisha55.workers.dev/3/:splat  200
-/api/music/*  https://music-api-sigma-neon.vercel.app/:splat  200
-/api/beyond/* https://anime-api-alpha-kohl.vercel.app/api/beyond/:splat 200
-/api/anime/*   https://anime-api-alpha-kohl.vercel.app/:splat  200
-/api/cinema/*  https://cinema-api-sglaxy936-6784s-projects.vercel.app/:splat 200
-
 # SPA Routing - Must be last
 /* /index.html 200
