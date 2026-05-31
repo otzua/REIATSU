@@ -5,7 +5,7 @@
   
   ![Status](https://img.shields.io/badge/Status-Production_Ready-orange?style=for-the-badge&logo=cloudflare)
   ![Tech](https://img.shields.io/badge/Stack-React%20%7C%20Vite%20%7C%20TS-blue?style=for-the-badge&logo=react)
-  ![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red?style=for-the-badge&logo=github)
+  ![Open Source](https://img.shields.io/badge/Open%20Source-Free-red?style=for-the-badge&logo=github)
   ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 </div>
 
@@ -13,7 +13,7 @@
 
 <br/>
 
-## 🌌 The Vision | ビジョン
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Milky%20Way.png" alt="Milky Way" width="25" height="25" /> The Vision | ビジョン
 
 **Reiatsu (霊圧)** is a personal, premium open-source multimedia engine designed for speed, privacy, and absolute aesthetic dominance. Originally built as a passion project, it provides a unified, highly polished platform for streaming **Anime**, **Movies**, and **Music** without the bloat of corporate trackers, ads, or restrictive interfaces.
 
@@ -26,7 +26,7 @@ Built with a high-contrast **"Neo-Vintage Digital"** aesthetic, Reiatsu transfor
 
 <br/>
 
-## ✨ Core Features | 特徴
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png" alt="Sparkles" width="25" height="25" /> Core Features | 特徴
 
 REIATSU is divided into three primary ecosystems, plus a hidden fourth sector. 
 
@@ -45,7 +45,7 @@ REIATSU is divided into three primary ecosystems, plus a hidden fourth sector.
 - **YouTube Music Resolution:** Seamlessly resolves and plays tracks with no ads or interruptions.
 - **Live Synchronized Lyrics:** Apple Music-style flowing lyrics that sync perfectly to the beat in a dedicated view.
 
-### 4. 🔞 BEYOND (The Secret Sector)
+### 4. <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/No%20One%20Under%20Eighteen.png" alt="18+" width="25" height="25" /> BEYOND (The Secret Sector)
 REIATSU features a completely hidden portal for mature content, protected by discrete trigger mechanics.
 - **Access Method 1:** Tap the REIATSU logo in the top left corner **5 times rapidly**.
 - **Access Method 2:** Simply press the `H` key anywhere on the site.
@@ -53,7 +53,7 @@ REIATSU features a completely hidden portal for mature content, protected by dis
 
 <br/>
 
-## ⌨️ Keyboard Shortcuts | ショートカット
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Keyboard.png" alt="Keyboard" width="25" height="25" /> Keyboard Shortcuts | ショートカット
 
 Navigate the platform like a power user without touching your mouse:
 
@@ -66,7 +66,7 @@ Navigate the platform like a power user without touching your mouse:
 
 <br/>
 
-## 🎨 Design Philosophy | デザイン
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Artist%20Palette.png" alt="Palette" width="25" height="25" /> Design Philosophy | デザイン
 
 Reiatsu is built on a custom design system combining **90s Brutalism** with modern **Glassmorphism**.
 
@@ -76,7 +76,7 @@ Reiatsu is built on a custom design system combining **90s Brutalism** with mode
 
 <br/>
 
-## 🏗️ Architecture & Deployment
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Building%20Construction.png" alt="Construction" width="25" height="25" /> Architecture & Deployment
 
 REIATSU is built to run effortlessly on modern serverless infrastructure.
 
@@ -95,7 +95,7 @@ npm run dev
 
 <br/>
 
-## ⚖️ Legal & DMCA Disclaimer | 免責事項
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Balance%20Scale.png" alt="Scale" width="25" height="25" /> Legal & DMCA Disclaimer | 免責事項
 
 REIATSU is strictly an open-source multimedia indexing and proxying software interface. 
 
@@ -108,7 +108,7 @@ By using this software, you acknowledge and agree to these terms.
 
 <br/>
 
-## 📜 License
+## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" alt="Scroll" width="25" height="25" /> License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
