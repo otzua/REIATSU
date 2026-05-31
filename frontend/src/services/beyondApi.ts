@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_HOST = import.meta.env.VITE_API_URL || '';
-export const MUSIC_API_BASE = API_HOST ? `${API_HOST}/api` : '/api';
+export const BEYOND_API_BASE = '/api';
 
 export interface BeyondVideo {
   id: string; // The slug
@@ -50,7 +49,7 @@ export const beyondApi = {
    * Fetch recent videos.
    */
   getFeed: async (server: 'hanime' | 'watchhentai' = 'hanime'): Promise<BeyondVideo[]> => {
-    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond`, {
+    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${BEYOND_API_BASE}/beyond`, {
       params: { server }
     });
     return res.data.data;
@@ -60,7 +59,7 @@ export const beyondApi = {
    * Fetch full details for a video slug.
    */
   getDetails: async (slug: string): Promise<BeyondDetails> => {
-    const res = await axios.get<{ success: boolean, data: BeyondDetails }>(`${MUSIC_API_BASE}/beyond/details`, {
+    const res = await axios.get<{ success: boolean, data: BeyondDetails }>(`${BEYOND_API_BASE}/beyond/details`, {
       params: { slug }
     });
     return res.data.data;
@@ -70,7 +69,7 @@ export const beyondApi = {
    * Search for videos.
    */
   search: async (query: string, server: 'hanime' | 'watchhentai' = 'hanime'): Promise<BeyondVideo[]> => {
-    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${MUSIC_API_BASE}/beyond/search`, {
+    const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${BEYOND_API_BASE}/beyond/search`, {
       params: { q: query, server }
     });
     return res.data.data;

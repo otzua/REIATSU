@@ -69,7 +69,7 @@ const Beyond = () => {
       })
       .catch((err) => {
         console.error('Failed to load feed:', err);
-        setError('Connection to the Beyond sector failed. Please ensure the portal is active.');
+        setError(`Connection to the Beyond sector failed: ${err.message || String(err)}. Please ensure the portal is active.`);
       })
       .finally(() => {
         setLoading(false);

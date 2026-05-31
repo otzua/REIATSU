@@ -22,7 +22,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/music/, ''),
       },
       '/api': {
-        target: 'http://localhost:4001',
+        target: 'https://reiatsu-anime-api.otzuaa.workers.dev',
         changeOrigin: true,
       },
       '/toon-api': {

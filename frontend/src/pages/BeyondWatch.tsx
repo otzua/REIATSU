@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Info, Calendar, Tag, Flame, Play } from 'lucide-react';
 import Hls from 'hls.js';
-import { beyondApi, MUSIC_API_BASE } from '../services/beyondApi';
+import { beyondApi, BEYOND_API_BASE } from '../services/beyondApi';
 import type { BeyondVideo, BeyondDetails } from '../services/beyondApi';
 import { useMusic } from '../context/MusicContext';
 import HalftoneWave from '../components/HalftoneWave';
@@ -83,7 +83,7 @@ const BeyondWatch = () => {
       // Proxy only raw Hanime manifest links that require a Referer header.
       // AlphaAPIs extracted stream links are pre-signed CDN links that stream directly.
       if (activeStream.includes('weeb.hanime.tv') || activeStream.includes('proxy-required') || activeStream.includes('streamable.cloud')) {
-        finalUrl = `${MUSIC_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
+        finalUrl = `${BEYOND_API_BASE}/beyond/proxy-m3u8?url=${encodeURIComponent(activeStream)}`;
       }
 
       if (Hls.isSupported()) {
@@ -139,7 +139,7 @@ const BeyondWatch = () => {
     } else {
       // Proxy MP4 links that require referer
       if (activeStream.includes('hstorage.xyz') || activeStream.includes('watchhentai')) {
-        finalUrl = `${MUSIC_API_BASE}/beyond/proxy-video?url=${encodeURIComponent(activeStream)}`;
+        finalUrl = `${BEYOND_API_BASE}/beyond/proxy-video?url=${encodeURIComponent(activeStream)}`;
       }
       // Standard MP4 or direct link — no crossOrigin to avoid blocking CDN streams
       // that don't send Access-Control-Allow-Origin headers.

@@ -1,0 +1,462 @@
+
+> scarperapi@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/otzua/CODE/REIATSU/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/otzua/CODE/REIATSU/cinema-api/package-lock.json
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 14 errors:
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1
+Export DEFAULT_MIGRATION_LOCK_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/bun-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mBunSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_LOCK_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-route] (ecmascript).
+Did you mean to import ON_MODIFY_FOREIGN_ACTIONS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1
+Export DEFAULT_MIGRATION_LOCK_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/bun-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mBunSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_LOCK_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-rsc] (ecmascript).
+Did you mean to import ON_MODIFY_FOREIGN_ACTIONS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1
+Export DEFAULT_MIGRATION_LOCK_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mSqliteAdapter[39m[33m,[39m [33mSqliteQueryCompiler[39m } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/d1-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mD1SqliteAdapter[39m [33m=[39m [36mclass[39m [36mextends[39m [33mSqliteAdapter[39m {}[33m;[39m
+ [90m 4 |[39m [36mvar[39m [33mD1SqliteDriver[39m [33m=[39m [36mclass[39m {[0m
+
+The export DEFAULT_MIGRATION_LOCK_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-route] (ecmascript).
+Did you mean to import ON_MODIFY_FOREIGN_ACTIONS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1
+Export DEFAULT_MIGRATION_LOCK_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mSqliteAdapter[39m[33m,[39m [33mSqliteQueryCompiler[39m } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/d1-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mD1SqliteAdapter[39m [33m=[39m [36mclass[39m [36mextends[39m [33mSqliteAdapter[39m {}[33m;[39m
+ [90m 4 |[39m [36mvar[39m [33mD1SqliteDriver[39m [33m=[39m [36mclass[39m {[0m
+
+The export DEFAULT_MIGRATION_LOCK_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-rsc] (ecmascript).
+Did you mean to import ON_MODIFY_FOREIGN_ACTIONS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1
+Export DEFAULT_MIGRATION_LOCK_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/node-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mNodeSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_LOCK_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-route] (ecmascript).
+Did you mean to import ON_MODIFY_FOREIGN_ACTIONS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1
+Export DEFAULT_MIGRATION_LOCK_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/node-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mNodeSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_LOCK_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-rsc] (ecmascript).
+Did you mean to import ON_MODIFY_FOREIGN_ACTIONS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1
+Export DEFAULT_MIGRATION_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/bun-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mBunSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-route] (ecmascript).
+Did you mean to import TRANSACTION_ISOLATION_LEVELS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1
+Export DEFAULT_MIGRATION_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/bun-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mBunSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-rsc] (ecmascript).
+Did you mean to import TRANSACTION_ISOLATION_LEVELS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1
+Export DEFAULT_MIGRATION_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mSqliteAdapter[39m[33m,[39m [33mSqliteQueryCompiler[39m } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/d1-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mD1SqliteAdapter[39m [33m=[39m [36mclass[39m [36mextends[39m [33mSqliteAdapter[39m {}[33m;[39m
+ [90m 4 |[39m [36mvar[39m [33mD1SqliteDriver[39m [33m=[39m [36mclass[39m {[0m
+
+The export DEFAULT_MIGRATION_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-route] (ecmascript).
+Did you mean to import TRANSACTION_ISOLATION_LEVELS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1
+Export DEFAULT_MIGRATION_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mSqliteAdapter[39m[33m,[39m [33mSqliteQueryCompiler[39m } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/d1-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mD1SqliteAdapter[39m [33m=[39m [36mclass[39m [36mextends[39m [33mSqliteAdapter[39m {}[33m;[39m
+ [90m 4 |[39m [36mvar[39m [33mD1SqliteDriver[39m [33m=[39m [36mclass[39m {[0m
+
+The export DEFAULT_MIGRATION_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-rsc] (ecmascript).
+Did you mean to import TRANSACTION_ISOLATION_LEVELS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1
+Export DEFAULT_MIGRATION_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/node-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mNodeSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-route] (ecmascript).
+Did you mean to import TRANSACTION_ISOLATION_LEVELS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1
+Export DEFAULT_MIGRATION_TABLE doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mCompiledQuery[39m[33m,[39m [33mDEFAULT_MIGRATION_LOCK_TABLE[39m[33m,[39m [33mDEFAULT_MIGRATION_TABLE[39m[33m,[39m [33mDefaultQueryCompiler[39m[33m,[39m sql } [36mfrom[39m [32m"kysely"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [90m//#region src/node-sqlite-dialect.ts[39m
+ [90m 3 |[39m [36mvar[39m [33mNodeSqliteAdapter[39m [33m=[39m [36mclass[39m {
+ [90m 4 |[39m 	[36mget[39m supportsCreateIfNotExists() {[0m
+
+The export DEFAULT_MIGRATION_TABLE was not found in module [project]/cinema-api/node_modules/kysely/dist/index.js [app-rsc] (ecmascript).
+Did you mean to import TRANSACTION_ISOLATION_LEVELS?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/[...all]/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs
+    ./cinema-api/node_modules/@better-auth/kysely-adapter/dist/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/context/init.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/better-auth/dist/crypto/index.mjs:8:1
+Export managedNonce doesn't exist in target module
+[0m [90m  6 |[39m [36mimport[39m { createHash } [36mfrom[39m [32m"@better-auth/utils/hash"[39m[33m;[39m
+ [90m  7 |[39m [36mimport[39m { xchacha20poly1305 } [36mfrom[39m [32m"@noble/ciphers/chacha.js"[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m { bytesToHex[33m,[39m hexToBytes[33m,[39m managedNonce[33m,[39m utf8ToBytes } [36mfrom[39m [32m"@noble/ciphers/utils.js"[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  9 |[39m [90m//#region src/crypto/index.ts[39m
+ [90m 10 |[39m [36mconst[39m algorithm [33m=[39m {
+ [90m 11 |[39m 	name[33m:[39m [32m"HMAC"[39m[33m,[39m[0m
+
+The export managedNonce was not found in module [project]/cinema-api/node_modules/@noble/ciphers/esm/utils.js [app-route] (ecmascript).
+Did you mean to import anumber?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/better-auth/dist/crypto/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/oauth2/utils.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/routes/callback.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/base.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/notify-login/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/better-auth/dist/crypto/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/oauth2/utils.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/routes/callback.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/base.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+./cinema-api/node_modules/better-auth/dist/crypto/index.mjs:8:1
+Export managedNonce doesn't exist in target module
+[0m [90m  6 |[39m [36mimport[39m { createHash } [36mfrom[39m [32m"@better-auth/utils/hash"[39m[33m;[39m
+ [90m  7 |[39m [36mimport[39m { xchacha20poly1305 } [36mfrom[39m [32m"@noble/ciphers/chacha.js"[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m { bytesToHex[33m,[39m hexToBytes[33m,[39m managedNonce[33m,[39m utf8ToBytes } [36mfrom[39m [32m"@noble/ciphers/utils.js"[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  9 |[39m [90m//#region src/crypto/index.ts[39m
+ [90m 10 |[39m [36mconst[39m algorithm [33m=[39m {
+ [90m 11 |[39m 	name[33m:[39m [32m"HMAC"[39m[33m,[39m[0m
+
+The export managedNonce was not found in module [project]/cinema-api/node_modules/@noble/ciphers/esm/utils.js [app-rsc] (ecmascript).
+Did you mean to import anumber?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./cinema-api/node_modules/better-auth/dist/crypto/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/oauth2/utils.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/routes/callback.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/base.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/api/auth/notify-login/route.ts
+
+  Server Component:
+    ./cinema-api/node_modules/better-auth/dist/crypto/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/oauth2/utils.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/routes/callback.mjs
+    ./cinema-api/node_modules/better-auth/dist/api/index.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/base.mjs
+    ./cinema-api/node_modules/better-auth/dist/auth/full.mjs
+    ./cinema-api/lib/auth.ts
+    ./cinema-api/app/login/page.tsx
+
+
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/bun-sqlite-dialect-DzNwOpKv.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/d1-sqlite-dialect-C2B7YsIT.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1)
+    at ./cinema-api/node_modules/ (better-auth/kysely-adapter/dist/node-sqlite-dialect.mjs:1:1)
