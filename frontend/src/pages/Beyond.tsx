@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { History, Flame, RefreshCw } from 'lucide-react';
 import { beyondApi } from '../services/beyondApi';
 import type { BeyondVideo } from '../services/beyondApi';
@@ -169,9 +169,14 @@ const Beyond = () => {
             {/* Continue Watching */}
             {continueWatching.length > 0 && (
               <section className={styles.miniSection}>
-                <div className={styles.miniHeader}>
-                  <History size={20} className={styles.historyIcon} />
-                  CONTINUE WATCHING
+                <div className={styles.miniHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <History size={20} className={styles.historyIcon} />
+                    <span>CONTINUE WATCHING</span>
+                  </div>
+                  <Link to="/beyond/history" className={styles.historyLink}>
+                    VIEW FULL HISTORY
+                  </Link>
                 </div>
                 <div className={styles.miniGrid}>
                   {continueWatching.map((video) => (
