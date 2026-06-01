@@ -14,6 +14,9 @@ export async function onRequest(context) {
   } else if (pathParts[0] === 'cinema') {
     const subpath = pathParts.slice(1).join('/');
     targetUrl = `https://cinema-api-sglaxy936-6784s-projects.vercel.app/${subpath}${searchParams}`;
+  } else if (pathParts[0] === 'anime') {
+    const subpath = pathParts.slice(1).join('/');
+    targetUrl = `https://reiatsu-anime-api.otzuaa.workers.dev/${subpath}${searchParams}`;
   } else {
     targetUrl = `https://reiatsu-anime-api.otzuaa.workers.dev/api/${remainingPath}${searchParams}`;
   }
