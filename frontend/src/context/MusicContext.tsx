@@ -114,9 +114,26 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (direct_url) {
           audioRef.current.src = direct_url;
           audioRef.current.load();
-          await audioRef.current.play();
-          console.log('REIATSU: Playback started successfully via direct URL');
-          setIsPlaying(true);
+          try {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) await playPromise;
+            console.log('REIATSU: Playback started successfully via direct URL');
+            setIsPlaying(true);
+          } catch (directErr) {
+            console.warn('REIATSU: Direct URL playback failed, trying Invidious fallback:', directErr);
+            const isYoutubeId = track.id && /^[a-zA-Z0-9_-]{11}$/.test(track.id);
+            if (isYoutubeId) {
+              const invidiousUrl = `https://invidious.f5.si/latest_version?id=${track.id}&itag=140`;
+              audioRef.current.src = `/api/music/audio-proxy?url=${encodeURIComponent(invidiousUrl)}`;
+              audioRef.current.load();
+              const finalPlayPromise = audioRef.current.play();
+              if (finalPlayPromise !== undefined) await finalPlayPromise;
+              console.log('REIATSU: Playback started successfully via Invidious fallback');
+              setIsPlaying(true);
+            } else {
+              throw directErr;
+            }
+          }
         } else {
           throw proxyErr;
         }
