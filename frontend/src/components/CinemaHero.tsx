@@ -8,14 +8,6 @@ import type { CinemaMovie } from '../services/cinemaApi';
 import SmartImage from './SmartImage';
 import styles from './Hero.module.css';
 
-const TOP_TIER_MOVIE_IDS = [
-  { id: '550', type: 'movie' },    // Fight Club
-  { id: '157336', type: 'movie' }, // Interstellar
-  { id: '155', type: 'movie' },    // The Dark Knight
-  { id: '27205', type: 'movie' },  // Inception
-  { id: '238', type: 'movie' },    // The Godfather
-  { id: '680', type: 'movie' },    // Pulp Fiction
-] as const;
 
 const CinemaHero = () => {
   const [slides, setSlides] = useState<CinemaMovie[]>([]);
@@ -45,36 +37,30 @@ const CinemaHero = () => {
   }, [emblaApi, onSelect]);
 
   useEffect(() => {
-    const fetchTopMovies = async () => {
+    const fetchHeroMovies = async () => {
       setLoading(true);
       try {
-        const moviePromises = TOP_TIER_MOVIE_IDS.map(m => 
-          cinemaApi.getMovieDetails(m.id, m.type as 'movie' | 'tv')
-        );
-        const movieDetails = await Promise.all(moviePromises);
-        
-        const heroSlides: CinemaMovie[] = movieDetails.map(m => ({
-          id: m.id,
-          title: m.title,
-          imageUrl: m.imageUrl,
-          backdropUrl: m.backdropUrl,
-          mediaType: m.mediaType,
-          releaseDate: m.releaseDate,
-          rating: m.rating,
-          overview: m.description
-        }));
-        
-        setSlides(heroSlides);
+        // Always pull live trending data — no hardcoded list, always up to date
+        const [trendingMovies, trendingTV] = await Promise.all([
+          cinemaApi.getTrendingMovies(),
+          cinemaApi.getTrendingTV(),
+        ]);
+
+        // Mix top movies and shows, sort by rating, pick the best 8
+        const combined = [...trendingMovies.slice(0, 6), ...trendingTV.slice(0, 4)]
+          .filter(m => m.backdropUrl || m.imageUrl)
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+          .slice(0, 8);
+
+        setSlides(combined);
       } catch (err) {
         console.error('Error fetching hero movies:', err);
-        const trending = await cinemaApi.getTrendingMovies();
-        setSlides(trending.slice(0, 10));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTopMovies();
+    fetchHeroMovies();
   }, []);
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);

@@ -107,35 +107,20 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) await playPromise;
-        console.log('REIATSU: Playback started successfully via proxy');
+        console.log('REIATSU: Playback started successfully (direct)');
         setIsPlaying(true);
-      } catch (proxyErr) {
-        console.warn('REIATSU: Proxy playback failed, trying direct URL:', proxyErr);
+      } catch (directErr) {
+        // Direct URL failed — try via Cloudflare audio-proxy
+        console.warn('REIATSU: Direct playback failed, trying proxied URL:', directErr);
         if (direct_url) {
           audioRef.current.src = direct_url;
           audioRef.current.load();
-          try {
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) await playPromise;
-            console.log('REIATSU: Playback started successfully via direct URL');
-            setIsPlaying(true);
-          } catch (directErr) {
-            console.warn('REIATSU: Direct URL playback failed, trying Invidious fallback:', directErr);
-            const isYoutubeId = track.id && /^[a-zA-Z0-9_-]{11}$/.test(track.id);
-            if (isYoutubeId) {
-              const invidiousUrl = `https://invidious.f5.si/latest_version?id=${track.id}&itag=140`;
-              audioRef.current.src = `/api/music/audio-proxy?url=${encodeURIComponent(invidiousUrl)}`;
-              audioRef.current.load();
-              const finalPlayPromise = audioRef.current.play();
-              if (finalPlayPromise !== undefined) await finalPlayPromise;
-              console.log('REIATSU: Playback started successfully via Invidious fallback');
-              setIsPlaying(true);
-            } else {
-              throw directErr;
-            }
-          }
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) await playPromise;
+          console.log('REIATSU: Playback started via Cloudflare proxy');
+          setIsPlaying(true);
         } else {
-          throw proxyErr;
+          throw directErr;
         }
       }
     } catch (err) {
@@ -144,13 +129,11 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const errorMsg = axiosErr.response?.data?.detail || axiosErr.message || 'Failed to load stream';
       setStreamError(`Failed to load stream: ${errorMsg}. YouTube might be blocking the request.`);
       setIsPlaying(false);
-      
-      // Auto-skip to next if current fails? 
-      // skipForward(); 
     } finally {
       setLoadingStream(false);
     }
   };
+
 
   const togglePlay = () => {
     if (isPlaying) {

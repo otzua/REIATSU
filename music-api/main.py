@@ -160,7 +160,7 @@ async def search(q: str = Query(...), limit: int = 20):
 
 @app.get("/stream")
 async def stream(q: str = Query(...)):
-    # Upgraded Streaming Engine: Priority pytubefix + Local yt-dlp + Dynamic Invidious Fallback
+    # Streaming Engine: yt-dlp first (stable URLs), Cobalt as fallback
     try:
         # Extract video ID for metadata and fallback purposes
         video_id = q
@@ -343,98 +343,38 @@ async def stream(q: str = Query(...)):
                     }
             return None
 
-        # 1. First priority: Cobalt Resolution (Dynamic & Multi-host)
+        # 1. First priority: yt-dlp with mobile/TV client bypass
+        # These URLs are stable (expire in ~6h) and don't need further proxying
         try:
-            logger.info(f"Attempting premium Cobalt extraction for ID: {video_id}")
-            result = await asyncio.to_thread(extract_with_cobalt, video_id)
+            logger.info(f"Attempting yt-dlp extraction for: {q}")
+            result = await asyncio.to_thread(extract_with_ytdlp, q)
             if result and result.get("stream_url"):
-                logger.info(f"Cobalt resolved successfully: {result.get('stream_url')[:120]}")
+                logger.info(f"yt-dlp stream resolved: {result.get('title')}")
                 return result
-        except Exception as cobalt_err:
-            logger.warning(f"Cobalt extraction failed: {cobalt_err}. Trying pytubefix...")
+        except Exception as ytdlp_err:
+            logger.warning(f"yt-dlp extraction failed: {ytdlp_err}. Trying pytubefix...")
 
-        # 2. Second priority: pytubefix (local backup)
+        # 2. Second priority: pytubefix
         try:
             logger.info(f"Attempting pytubefix extraction for ID: {video_id}")
             result = await asyncio.to_thread(extract_with_pytubefix, video_id)
             if result and result.get("stream_url"):
-                logger.info(f"pytubefix stream resolved successfully: {result.get('title')}")
+                logger.info(f"pytubefix stream resolved: {result.get('title')}")
                 return result
         except Exception as pytube_err:
-            logger.warning(f"pytubefix extraction failed: {pytube_err}. Trying yt-dlp...")
+            logger.warning(f"pytubefix extraction failed: {pytube_err}. Trying Cobalt...")
 
-        # 3. Third priority: yt-dlp with mobile signatures and search bypass
+        # 3. Third priority: Cobalt (tunnel URLs expire quickly but work immediately)
         try:
-            logger.info(f"Attempting premium local yt-dlp search extraction for: {q}")
-            result = await asyncio.to_thread(extract_with_ytdlp, q)
+            logger.info(f"Attempting Cobalt extraction for ID: {video_id}")
+            result = await asyncio.to_thread(extract_with_cobalt, video_id)
             if result and result.get("stream_url"):
-                logger.info(f"Premium yt-dlp stream resolved successfully for: {result.get('title')}")
+                logger.info(f"Cobalt resolved: {result.get('stream_url')[:80]}")
                 return result
-        except Exception as ytdlp_err:
-            logger.warning(f"Premium yt-dlp extraction failed: {ytdlp_err}. Trying Invidious dynamic fallback...")
+        except Exception as cobalt_err:
+            logger.warning(f"Cobalt extraction failed: {cobalt_err}")
 
-        # 3. Third priority: Dynamic Invidious Redirect Resolver (Bulletproof backup)
-        try:
-            logger.info("Fetching healthy Invidious instances dynamically...")
-            res = requests.get("https://api.invidious.io/instances.json?sort_by=type,health", timeout=5)
-            data = res.json()
-            instances = []
-            for item in data:
-                if not isinstance(item, list) or len(item) < 2:
-                    continue
-                details = item[1]
-                if not isinstance(details, dict):
-                    continue
-                monitor = details.get("monitor")
-                is_up = False
-                if isinstance(monitor, dict):
-                    is_up = not monitor.get("down", True)
-                if details.get("type") == "https" and is_up:
-                    uri = details.get("uri")
-                    if uri:
-                        instances.append(uri)
-        except Exception as api_err:
-            logger.warning(f"Failed to fetch dynamic Invidious list: {api_err}. Using hardcoded fallback list.")
-            instances = [
-                "https://invidious.f5.si",
-                "https://inv.nadeko.net",
-                "https://yt.chocolatemoo53.com",
-                "https://inv.thepixora.com",
-                "https://invidious.nerdvpn.de"
-            ]
-
-        # Iterate healthy instances and follow redirects to find the direct googlevideo.com URL
-        headers = {"User-Agent": "Mozilla/5.0"}
-        for inst in instances[:10]: # Check top 10 healthy instances
-            current_url = f"{inst}/latest_version?id={video_id}&itag=140"
-            logger.info(f"Trying Invidious instance: {inst}")
-            try:
-                for step in range(4):
-                    res = requests.get(current_url, headers=headers, allow_redirects=False, timeout=8)
-                    if res.status_code in (301, 302, 303, 307, 308):
-                        loc = res.headers.get("location")
-                        if not loc:
-                            break
-                        if loc.startswith("/"):
-                            current_url = f"{inst}{loc}"
-                        else:
-                            current_url = loc
-                        
-                        if "googlevideo.com" in current_url:
-                            logger.info(f"Invidious successfully resolved to GoogleVideo URL via {inst}")
-                            return {
-                                "stream_url": current_url,
-                                "title": "Streamed via Invidious",
-                                "thumbnail": f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg",
-                                "user_agent": "Mozilla/5.0"
-                            }
-                    else:
-                        break
-            except Exception as inv_e:
-                logger.warning(f"Invidious instance {inst} failed during redirect chain: {inv_e}")
-                continue
-
-        raise Exception("All streaming engines and backup instances failed to provide a stream")
+        raise Exception("All streaming engines failed to provide a stream")
 
     except Exception as e:
         logger.error(f"Playback failed: {e}")
