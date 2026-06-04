@@ -239,9 +239,20 @@ async def stream(q: str = Query(...)):
                     if res.status_code == 200:
                         res_data = res.json()
                         if 'url' in res_data:
+                            test_url = res_data['url']
+                            try:
+                                # Test if it actually returns data and isn't a dead tunnel
+                                head_res = requests.head(test_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4)
+                                if head_res.headers.get('content-length') == '0' or head_res.status_code >= 400:
+                                    logger.warning(f"Cobalt v10 {inst} returned a dead tunnel (0 bytes or err). Skipping.")
+                                    raise Exception("Dead tunnel")
+                            except Exception as head_err:
+                                logger.warning(f"Failed to verify Cobalt v10 tunnel from {inst}: {head_err}")
+                                raise Exception("Dead tunnel")
+
                             logger.info(f"Cobalt v10 successfully resolved via {inst}")
                             return {
-                                "stream_url": res_data['url'],
+                                "stream_url": test_url,
                                 "title": "Streamed via Cobalt",
                                 "thumbnail": f"https://img.youtube.com/vi/{vid}/maxresdefault.jpg",
                                 "user_agent": "Mozilla/5.0"
@@ -255,9 +266,19 @@ async def stream(q: str = Query(...)):
                     if res.status_code == 200:
                         res_data = res.json()
                         if 'url' in res_data:
+                            test_url = res_data['url']
+                            try:
+                                head_res = requests.head(test_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=4)
+                                if head_res.headers.get('content-length') == '0' or head_res.status_code >= 400:
+                                    logger.warning(f"Cobalt v7 {inst} returned a dead tunnel (0 bytes or err). Skipping.")
+                                    raise Exception("Dead tunnel")
+                            except Exception as head_err:
+                                logger.warning(f"Failed to verify Cobalt v7 tunnel from {inst}: {head_err}")
+                                raise Exception("Dead tunnel")
+
                             logger.info(f"Cobalt v7 successfully resolved via {inst}")
                             return {
-                                "stream_url": res_data['url'],
+                                "stream_url": test_url,
                                 "title": "Streamed via Cobalt",
                                 "thumbnail": f"https://img.youtube.com/vi/{vid}/maxresdefault.jpg",
                                 "user_agent": "Mozilla/5.0"
