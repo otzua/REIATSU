@@ -5,8 +5,14 @@ export async function onRequest(context) {
   const remainingPath = pathParts.join('/');
   const searchParams = url.search;
   
-  const targetUrl = `https://api.tmdb.org/3/${remainingPath}${searchParams}`;
-  return handleProxy(request, targetUrl);
+  // Inject API key server-side — the key is stored as a Cloudflare Pages env var
+  // so it never appears in the frontend bundle
+  const targetUrlObj = new URL(`https://api.tmdb.org/3/${remainingPath}${searchParams}`);
+  const TMDB_KEY = context.env?.VITE_TMDB_API_KEY || 'd131017ccc6e5462a81c9304d21476de';
+  if (!targetUrlObj.searchParams.has('api_key')) {
+    targetUrlObj.searchParams.set('api_key', TMDB_KEY);
+  }
+  return handleProxy(request, targetUrlObj.toString());
 }
 
 async function handleProxy(request, targetUrl) {

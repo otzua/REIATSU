@@ -36,9 +36,15 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/tmdb-api/, '/3'),
         configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
             proxyReq.setHeader('User-Agent', 'Mozilla/5.0');
             proxyReq.setHeader('Accept', 'application/json');
+            // Inject TMDB API key so local dev works without exposing it in the client bundle
+            const url = new URL(`https://api.tmdb.org${req.url}`);
+            if (!url.searchParams.has('api_key')) {
+              url.searchParams.set('api_key', process.env.VITE_TMDB_API_KEY || 'd131017ccc6e5462a81c9304d21476de');
+              proxyReq.path = `/3${url.pathname}?${url.searchParams.toString()}`;
+            }
           });
         },
       },

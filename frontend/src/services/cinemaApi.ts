@@ -1,8 +1,6 @@
-// Clean and optimized TMDB-based Cinema API service for the Reiatsu platform
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY || '';
-if (!API_KEY) {
-  console.warn("REIATSU: VITE_TMDB_API_KEY is missing. Cinema features will be disabled.");
-}
+// TMDB API is proxied through /tmdb-api/* (Cloudflare Pages Function)
+// The API key is injected server-side in functions/tmdb-api/[[path]].js
+
 
 export interface CinemaMovie {
   id: string;
@@ -71,14 +69,11 @@ export interface TMDBDetailResponse {
 }
 
 async function tmdbFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
-  if (!API_KEY) {
-    return { results: [] } as unknown as T;
-  }
-  const queryParams = new URLSearchParams({ api_key: API_KEY, ...params });
-  // Using the /tmdb-api proxy defined in vite.config.ts and vercel.json.
-  // This securely proxies requests to the Cloudflare Worker server-to-server,
-  // completely bypassing ISP blocks on api.themoviedb.org and local browser CORS restrictions!
-  const res = await fetch(`/tmdb-api${path}?${queryParams.toString()}`);
+  // API key is injected server-side by the Cloudflare Pages function at /tmdb-api/*
+  // No need to send it from the client — keeps key out of the browser bundle
+  const queryParams = new URLSearchParams(params);
+  const queryStr = queryParams.toString();
+  const res = await fetch(`/tmdb-api${path}${queryStr ? `?${queryStr}` : ''}`);
   if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
   return res.json();
 }
