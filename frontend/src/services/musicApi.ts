@@ -80,15 +80,22 @@ export const musicApi = {
       params: { q },
     });
 
-    const userAgentParam = res.data.user_agent ? `&ua=${encodeURIComponent(res.data.user_agent)}` : '';
-    const proxiedUrl = `${MUSIC_API_BASE}/audio-proxy?url=${encodeURIComponent(res.data.stream_url)}${userAgentParam}`;
+    // Cobalt tunnel URLs expire within seconds — proxying them adds fatal latency.
+    // Cobalt already returns CORS headers (access-control-allow-origin: *) so the browser
+    // can play them directly. We send the raw URL as stream_url.
+    // The Invidious fallback is kept as direct_url via the Cloudflare audio-proxy.
+    const isYoutubeIdTrack = track.id && /^[a-zA-Z0-9_-]{11}$/.test(track.id);
+    const invidiousUrl = isYoutubeIdTrack
+      ? `/api/music/audio-proxy?url=${encodeURIComponent(`https://invidious.f5.si/latest_version?id=${track.id}&itag=140`)}`
+      : undefined;
 
     return {
       ...res.data,
-      stream_url: proxiedUrl,
-      direct_url: res.data.stream_url
+      stream_url: res.data.stream_url, // Play Cobalt URL directly — no proxy hop
+      direct_url: invidiousUrl,         // Invidious via Cloudflare as fallback
     };
   },
+
 
   /**
    * Download a track as lossless FLAC in the background.
