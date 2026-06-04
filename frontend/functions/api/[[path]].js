@@ -9,6 +9,13 @@ export async function onRequest(context) {
   let targetUrl = '';
   
   if (pathParts[0] === 'music') {
+    if (pathParts[1] === 'audio-proxy') {
+      targetUrl = url.searchParams.get('url');
+      if (!targetUrl) {
+        return new Response('Missing url parameter', { status: 400 });
+      }
+      return handleAudioProxy(request, targetUrl, url);
+    }
     const subpath = pathParts.slice(1).join('/');
     targetUrl = `https://music-api-sigma-neon.vercel.app/${subpath}${searchParams}`;
   } else if (pathParts[0] === 'cinema') {
@@ -22,6 +29,42 @@ export async function onRequest(context) {
   }
   
   return handleProxy(request, targetUrl);
+}
+
+async function handleAudioProxy(request, targetUrl, originalUrl) {
+  const headers = new Headers(request.headers);
+  headers.delete('host');
+  
+  const ua = originalUrl.searchParams.get('ua');
+  if (ua) {
+    headers.set('User-Agent', ua);
+  }
+  
+  try {
+    const res = await fetch(targetUrl, {
+      method: request.method,
+      headers: headers
+    });
+    
+    const responseHeaders = new Headers(res.headers);
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+    // Strip content-disposition so browsers don't treat it as an attachment download (which blocks playback)
+    responseHeaders.delete('content-disposition');
+    
+    return new Response(res.body, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: responseHeaders,
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: {
+        'content-type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
 }
 
 async function handleProxy(request, targetUrl) {
