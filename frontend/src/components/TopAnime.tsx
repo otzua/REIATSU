@@ -6,21 +6,6 @@ import type { AnimeCard } from '../services/animeApi';
 import SmartImage from './SmartImage';
 import styles from './TopAnime.module.css';
 
-const LEGENDARY_IDS = [
-  'one-piece-odmau',
-  'naruto-shippuden-c8gov',
-  'fullmetal-alchemist-brotherhood-9s0fl',
-  'hunter-x-hunter-tjlki',
-  'death-note-fc8mq',
-  'attack-on-titan-final-season-part-2-bures',
-  'code-geass-lelouch-of-the-rebellion-mtskz',
-  'cowboy-bebop-kb7hu',
-  'demon-slayer-kimetsu-no-yaiba-rzepv',
-  'neon-genesis-evangelion-d0uqe',
-  'dragon-ball-z-3gzan',
-  'chainsaw-man-efeig'
-];
-
 const TopAnime = ({ provider }: { provider?: string }) => {
   const [animes, setAnimes] = useState<AnimeCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,36 +14,14 @@ const TopAnime = ({ provider }: { provider?: string }) => {
     let mounted = true;
     const fetchAnimes = async () => {
       try {
-        if (provider) {
-          // For specific providers like miruro, we use their home data's top 10
-          const data = await animeApi.getHome(provider);
-          if (mounted) {
-            setAnimes((data.top10Animes?.month || data.latestEpisodeAnimes || []).slice(0, 12));
-          }
-        } else {
-          // Standard legends for default provider
-          const promises = LEGENDARY_IDS.map(id => animeApi.getAnime(id).catch(() => null));
-          const details = await Promise.all(promises);
-          
-          const valid = details
-            .filter(d => d && d.anime)
-            .map(d => ({
-              id: d!.anime.id,
-              name: d!.anime.name,
-              jname: null,
-              poster: d!.anime.poster,
-              type: d!.anime.type,
-              episodes: d!.anime.episodes
-            }));
-            
-          if (mounted) {
-            if (valid.length > 0) {
-              setAnimes(valid);
-            } else {
-              const data = await animeApi.getHome();
-              setAnimes((data.top10Animes?.month || data.topUpcomingAnimes || []).slice(0, 12));
-            }
-          }
+        // Always pull live top-10 data — never hardcoded
+        const data = await animeApi.getHome(provider);
+        if (mounted) {
+          const live =
+            data.top10Animes?.month?.length ? data.top10Animes.month :
+            data.top10Animes?.week?.length  ? data.top10Animes.week  :
+            data.latestEpisodeAnimes || [];
+          setAnimes(live.slice(0, 12));
         }
       } catch (error) {
         console.error('Failed to fetch top anime', error);
@@ -77,7 +40,7 @@ const TopAnime = ({ provider }: { provider?: string }) => {
     <section className={styles.section}>
       <div className={styles.header}>
         <div className={styles.accentBox}></div>
-        <h2 className={styles.title}>ALL-TIME LEGENDS</h2>
+        <h2 className={styles.title}>TOP THIS MONTH</h2>
       </div>
 
       <div className={styles.grid}>
