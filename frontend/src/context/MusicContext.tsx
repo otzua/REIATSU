@@ -100,27 +100,34 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const { stream_url, direct_url } = await musicApi.stream(track);
       console.log(`REIATSU: Resolved stream URL: ${stream_url}`);
-      
-      audioRef.current.src = stream_url;
+      console.log(`REIATSU: Proxy URL: ${direct_url ?? 'none'}`);
+
+      // ALWAYS prefer direct_url (same-origin audio-proxy) to avoid CORS.
+      // Cobalt tunnel URLs and yt-dlp URLs both lack Access-Control-Allow-Origin,
+      // causing MEDIA_ERR_SRC_NOT_SUPPORTED when played directly from the browser.
+      const primarySrc = direct_url || stream_url;
+      const fallbackSrc = direct_url ? stream_url : null;
+
+      audioRef.current.src = primarySrc;
       audioRef.current.load();
       
       try {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) await playPromise;
-        console.log('REIATSU: Playback started successfully (direct)');
+        console.log(`REIATSU: Playback started via ${direct_url ? 'audio-proxy' : 'direct URL'}`);
         setIsPlaying(true);
-      } catch (directErr) {
-        // Direct URL failed — try via Cloudflare audio-proxy
-        console.warn('REIATSU: Direct playback failed, trying proxied URL:', directErr);
-        if (direct_url) {
-          audioRef.current.src = direct_url;
+      } catch (proxyErr) {
+        // Proxy failed — try direct URL as last resort
+        console.warn('REIATSU: Proxy playback failed, trying direct URL:', proxyErr);
+        if (fallbackSrc) {
+          audioRef.current.src = fallbackSrc;
           audioRef.current.load();
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) await playPromise;
-          console.log('REIATSU: Playback started via Cloudflare proxy');
+          console.log('REIATSU: Playback started via direct URL fallback');
           setIsPlaying(true);
         } else {
-          throw directErr;
+          throw proxyErr;
         }
       }
     } catch (err) {
@@ -193,12 +200,18 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         skipForward();
       }
     };
+    const handleError = () => {
+      console.error('REIATSU: Audio element error during playback', audio.error);
+      setStreamError('Failed to play stream. The link might have expired or been blocked by YouTube.');
+      setIsPlaying(false);
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -206,6 +219,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
     };
   }, [volume, muted, repeat, queue, currentTrack, skipForward]);
 

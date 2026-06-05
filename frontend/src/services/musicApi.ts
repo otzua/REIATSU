@@ -70,76 +70,86 @@ export const musicApi = {
     // If track has a valid YouTube video ID (11 chars, alphanumeric with - or _), use it!
     const isYoutubeId = track.id && /^[a-zA-Z0-9_-]{11}$/.test(track.id);
     const q = isYoutubeId ? track.id : `${track.artist} - ${track.name}`;
-    
-    try {
-      const res = await axios.get<StreamResult>(`${MUSIC_API_BASE}/stream`, {
-        params: { q },
-      });
 
-      const rawUrl = res.data.stream_url;
-      
-      // If the backend returned a Cobalt tunnel URL, it's IP-locked to the Vercel server.
-      // If the browser tries to play it, Cobalt returns 403 Forbidden. We MUST fetch it client-side.
-      if (rawUrl.includes('cobalt') || rawUrl.includes('tunnel') || rawUrl.includes('kittycat')) {
-        console.log("REIATSU: Backend returned IP-locked Cobalt URL. Deferring to client-side Cobalt fallback...");
-        throw new Error("Cobalt IP lock bypass required");
-      }
+    /**
+     * Helper: wraps any external URL through the same-origin audio-proxy to avoid CORS.
+     * Cobalt tunnel URLs and yt-dlp URLs both lack Access-Control-Allow-Origin headers,
+     * which causes MEDIA_ERR_SRC_NOT_SUPPORTED when the browser tries to load them directly.
+     */
+    const proxyUrl = (rawUrl: string, ua?: string) => {
+      const uaParam = ua ? `&ua=${encodeURIComponent(ua)}` : '';
+      return `${MUSIC_API_BASE}/audio-proxy?url=${encodeURIComponent(rawUrl)}${uaParam}`;
+    };
 
-      const userAgentParam = res.data.user_agent ? `&ua=${encodeURIComponent(res.data.user_agent)}` : '';
-      const proxiedUrl = `${MUSIC_API_BASE}/audio-proxy?url=${encodeURIComponent(rawUrl)}${userAgentParam}`;
-
-      return {
-        ...res.data,
-        stream_url: rawUrl,
-        direct_url: proxiedUrl,
-      };
-    } catch (err) {
-      if (!isYoutubeId) throw err; // Can only do client-side Cobalt if we have a valid YouTube ID
-      
-      console.log("REIATSU: Backend stream failed or IP-locked. Attempting client-side Cobalt generation...");
+    // 1. Try client-side Cobalt first for immediate, reliable audio links
+    if (isYoutubeId) {
+      console.log("REIATSU: Attempting client-side Cobalt generation first...");
       const instances = [
-        "https://cobaltapi.kittycat.boo",
-        "https://apicobalt.mgytr.top",
         "https://dog.kittycat.boo",
+        "https://cobaltapi.squair.xyz",
         "https://nuko-c.meowing.de",
-        "https://subito-c.meowing.de"
+        "https://subito-c.meowing.de",
+        "https://cobaltapi.kittycat.boo",
+        "https://apicobalt.mgytr.top"
       ];
       const ytUrl = `https://www.youtube.com/watch?v=${track.id}`;
       
       for (const inst of instances) {
+        // Try v10 payload
         try {
           const res = await axios.post(inst, { url: ytUrl, downloadMode: "audio", audioFormat: "mp3" }, { 
             headers: { Accept: "application/json", "Content-Type": "application/json" },
-            timeout: 6000 
+            timeout: 5000 
           });
           if (res.data?.url) {
-            console.log(`REIATSU: Client-side Cobalt succeeded via ${inst}`);
+            const rawUrl = res.data.url;
+            console.log(`REIATSU: Client-side Cobalt (v10) succeeded via ${inst}`);
+            // MUST proxy through audio-proxy: Cobalt tunnel URLs have no CORS headers
             return {
-              stream_url: res.data.url,
+              stream_url: rawUrl,
+              direct_url: proxyUrl(rawUrl),
               title: track.name,
               thumbnail: track.poster
             };
           }
-        } catch (e) {
-          // Fallback to v7 Cobalt payload
-          try {
-            const res2 = await axios.post(inst, { url: ytUrl, isAudioOnly: true, aFormat: "mp3" }, { 
-              headers: { Accept: "application/json", "Content-Type": "application/json" },
-              timeout: 6000
-            });
-            if (res2.data?.url) {
-              console.log(`REIATSU: Client-side Cobalt (v7) succeeded via ${inst}`);
-              return {
-                stream_url: res2.data.url,
-                title: track.name,
-                thumbnail: track.poster
-              };
-            }
-          } catch (e2) {} // Ignore and try next instance
-        }
+        } catch (_e) { /* try v7 */ }
+
+        // Try v7 payload
+        try {
+          const res2 = await axios.post(inst, { url: ytUrl, isAudioOnly: true, aFormat: "mp3" }, { 
+            headers: { Accept: "application/json", "Content-Type": "application/json" },
+            timeout: 5000
+          });
+          if (res2.data?.url) {
+            const rawUrl = res2.data.url;
+            console.log(`REIATSU: Client-side Cobalt (v7) succeeded via ${inst}`);
+            return {
+              stream_url: rawUrl,
+              direct_url: proxyUrl(rawUrl),
+              title: track.name,
+              thumbnail: track.poster
+            };
+          }
+        } catch (_e2) {} // try next instance
       }
-      throw new Error("All streaming engines and client fallbacks failed.");
+      console.warn("REIATSU: All client-side Cobalt instances failed. Falling back to backend...");
     }
+
+    // 2. Fallback to Backend API (yt-dlp -> pytubefix -> server-side Cobalt)
+    const res = await axios.get<StreamResult>(`${MUSIC_API_BASE}/stream`, {
+      params: { q },
+    });
+
+    const rawUrl = res.data.stream_url;
+    // Always proxy backend URLs too — yt-dlp URLs are IP-locked to the server
+    // and the browser may receive a 403 playing them directly.
+    const proxiedUrl = proxyUrl(rawUrl, res.data.user_agent);
+
+    return {
+      ...res.data,
+      stream_url: rawUrl,
+      direct_url: proxiedUrl,
+    };
   },
 
 

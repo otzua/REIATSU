@@ -384,20 +384,41 @@ async def stream(q: str = Query(...)):
 @app.get("/audio-proxy")
 async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
     range_header = request.headers.get("Range")
-    headers = {"User-Agent": ua}
+    headers = {
+        "User-Agent": ua,
+        "Accept": "audio/*,*/*;q=0.8",
+        "Accept-Encoding": "identity",  # Prevent compressed responses that break streaming
+    }
     if range_header:
         headers["Range"] = range_header
 
     session = aiohttp.ClientSession()
     try:
-        resp = await session.get(url, headers=headers, allow_redirects=True)
+        timeout = aiohttp.ClientTimeout(total=30, connect=8)
+        resp = await session.get(url, headers=headers, allow_redirects=True, timeout=timeout)
         status_code = resp.status
-        
-        # Build headers to return to the browser
+
+        # Determine best content-type: Cobalt mp3 tunnels report audio/mpeg
+        content_type = resp.headers.get("Content-Type", "")
+        if not content_type or content_type == "application/octet-stream":
+            # Guess from URL
+            if ".mp3" in url or "aFormat=mp3" in url or "audioFormat=mp3" in url:
+                content_type = "audio/mpeg"
+            elif ".m4a" in url or "itag=140" in url:
+                content_type = "audio/mp4"
+            elif "video/mp4" in url or "mime=video%2Fmp4" in url:
+                content_type = "audio/mp4"  # mp4 containers with audio tracks work fine
+            else:
+                content_type = resp.headers.get("Content-Type", "audio/mpeg")
+
+        # Build response headers — CORS must be open so the browser can read the stream
         out_headers = {
             "Accept-Ranges": "bytes",
-            "Content-Type": resp.headers.get("Content-Type", "audio/mpeg"),
-            "Cache-Control": "no-cache"
+            "Content-Type": content_type,
+            "Cache-Control": "no-cache",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Range",
+            "Access-Control-Expose-Headers": "Content-Length, Content-Range, Accept-Ranges",
         }
         if "Content-Range" in resp.headers:
             out_headers["Content-Range"] = resp.headers["Content-Range"]
@@ -416,7 +437,7 @@ async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
             stream_generator(),
             status_code=status_code,
             headers=out_headers,
-            media_type=out_headers["Content-Type"]
+            media_type=content_type
         )
     except Exception as e:
         await session.close()
