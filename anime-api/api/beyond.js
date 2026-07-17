@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { HanimeClient } from '../hanime/dist/index.js';
+import * as hanime1Scraper from './hanime1Scraper.js';
 
 async function fetchJson(url, options = {}) {
   const { params, method = 'GET', body, timeout = 10000, ...rest } = options;
@@ -68,6 +69,16 @@ beyond.get('/', async (c) => {
     } catch (err) {
       console.error('[WatchHentai Feed Error]', err.message);
       return c.json({ success: false, error: 'Failed to fetch WatchHentai feed' }, 500);
+    }
+  }
+
+  if (server === 'hanime1') {
+    try {
+      const items = await hanime1Scraper.getHomeData();
+      return c.json({ success: true, data: items });
+    } catch (err) {
+      console.error('[Hanime1 Feed Error]', err.message);
+      return c.json({ success: false, error: 'Failed to fetch Hanime1 feed' }, 500);
     }
   }
 
@@ -169,6 +180,17 @@ beyond.get('/details', async (c) => {
     } catch (err) {
       console.error('[WatchHentai Details Error]', err.message);
       return c.json({ success: false, error: 'Failed to fetch WatchHentai details' }, 500);
+    }
+  }
+
+  if (slug.startsWith('hanime1:')) {
+    try {
+      const result = await hanime1Scraper.getVideoDetails(slug);
+      detailsCache.set(slug, { data: result, time: Date.now() });
+      return c.json({ success: true, data: result });
+    } catch (err) {
+      console.error('[Hanime1 Details Error]', err.message);
+      return c.json({ success: false, error: 'Failed to fetch Hanime1 details' }, 500);
     }
   }
 
@@ -350,15 +372,29 @@ beyond.get('/search', async (c) => {
   // This already returned [] via its catch — short-circuit so we stop issuing a request
   // that cannot succeed. Search falls back to WatchHentai results alone.
   const fetchHanime = async () => [];
+  
+  const fetchHanime1 = async () => {
+    try {
+      return await hanime1Scraper.searchVideos(q);
+    } catch (err) {
+      console.error('[Hanime1 Search Error]', err.message);
+      return [];
+    }
+  };
 
-  const [whData, hnData] = await Promise.all([fetchWatchHentai(), fetchHanime()]);
+  const [whData, hnData, hn1Data] = await Promise.all([fetchWatchHentai(), fetchHanime(), fetchHanime1()]);
   
   // Merge and remove duplicates by matching title
   const titleSet = new Set();
   const merged = [];
   
-  // Prefer hanime if same title, but append watchhentai if not found.
-  // Actually, we'll just push hanime first, then watchhentai.
+  for (const item of hn1Data) {
+    const t = item.title.toLowerCase();
+    if (!titleSet.has(t)) {
+      titleSet.add(t);
+      merged.push(item);
+    }
+  }
   for (const item of hnData) {
     const t = item.title.toLowerCase();
     if (!titleSet.has(t)) {

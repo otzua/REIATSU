@@ -48,7 +48,7 @@ export const beyondApi = {
   /**
    * Fetch recent videos.
    */
-  getFeed: async (server: 'hanime' | 'watchhentai' = 'hanime'): Promise<BeyondVideo[]> => {
+  getFeed: async (server: 'hanime1' | 'watchhentai' = 'hanime1'): Promise<BeyondVideo[]> => {
     const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${BEYOND_API_BASE}/beyond`, {
       params: { server }
     });
@@ -68,7 +68,7 @@ export const beyondApi = {
   /**
    * Search for videos.
    */
-  search: async (query: string, server: 'hanime' | 'watchhentai' = 'hanime'): Promise<BeyondVideo[]> => {
+  search: async (query: string, server: 'hanime1' | 'watchhentai' = 'hanime1'): Promise<BeyondVideo[]> => {
     const res = await axios.get<{ success: boolean, data: BeyondVideo[] }>(`${BEYOND_API_BASE}/beyond/search`, {
       params: { q: query, server }
     });

@@ -43,14 +43,12 @@ const Beyond = () => {
   const [videos, setVideos] = useState<BeyondVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Hanime has no reachable upstream left (old search host is NXDOMAIN, the v8 API is
-  // retired, and its replacement is WASM-signed), so /api/beyond?server=hanime returns 503.
-  // See api/beyond.js for the full breakdown. WatchHentai is the only live provider;
-  // migrate anyone whose saved preference still pins the dead one.
-  const [server, setServer] = useState<'hanime' | 'watchhentai'>(() => {
-    if (localStorage.getItem('beyond_provider') !== 'watchhentai') {
-      localStorage.setItem('beyond_provider', 'watchhentai');
+  const [server, setServer] = useState<'hanime1' | 'watchhentai'>(() => {
+    const saved = localStorage.getItem('beyond_provider');
+    if (saved === 'hanime1' || saved === 'watchhentai') {
+      return saved;
     }
+    localStorage.setItem('beyond_provider', 'watchhentai');
     return 'watchhentai';
   });
   const [continueWatching, setContinueWatching] = useState<BeyondVideo[]>(() => {
@@ -66,7 +64,7 @@ const Beyond = () => {
     return [];
   });
 
-  const fetchFeed = useCallback((targetServer: 'hanime' | 'watchhentai' = server) => {
+  const fetchFeed = useCallback((targetServer: 'hanime1' | 'watchhentai' = server) => {
     setLoading(true);
     setError(null);
     beyondApi.getFeed(targetServer)
@@ -117,12 +115,10 @@ const Beyond = () => {
             <span className={styles.providerLabel}>PROVIDER:</span>
             <div className={styles.serverToggle}>
               <button
-                className={styles.serverBtn}
-                disabled
-                title="Hanime's upstream API was shut down — provider unavailable"
-                style={{ opacity: 0.4, cursor: 'not-allowed' }}
+                className={`${styles.serverBtn} ${server === 'hanime1' ? styles.active : ''}`}
+                onClick={() => { setServer('hanime1'); localStorage.setItem('beyond_provider', 'hanime1'); fetchFeed('hanime1'); }}
               >
-                HANIME TV
+                HANIME1
               </button>
               <button
                 className={`${styles.serverBtn} ${server === 'watchhentai' ? styles.active : ''}`}
