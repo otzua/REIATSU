@@ -43,9 +43,15 @@ const Beyond = () => {
   const [videos, setVideos] = useState<BeyondVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Hanime has no reachable upstream left (old search host is NXDOMAIN, the v8 API is
+  // retired, and its replacement is WASM-signed), so /api/beyond?server=hanime returns 503.
+  // See api/beyond.js for the full breakdown. WatchHentai is the only live provider;
+  // migrate anyone whose saved preference still pins the dead one.
   const [server, setServer] = useState<'hanime' | 'watchhentai'>(() => {
-    const saved = localStorage.getItem('beyond_provider');
-    return (saved === 'hanime' || saved === 'watchhentai') ? saved : 'hanime';
+    if (localStorage.getItem('beyond_provider') !== 'watchhentai') {
+      localStorage.setItem('beyond_provider', 'watchhentai');
+    }
+    return 'watchhentai';
   });
   const [continueWatching, setContinueWatching] = useState<BeyondVideo[]>(() => {
     const saved = localStorage.getItem('beyond_history');
@@ -111,8 +117,10 @@ const Beyond = () => {
             <span className={styles.providerLabel}>PROVIDER:</span>
             <div className={styles.serverToggle}>
               <button
-                className={`${styles.serverBtn} ${server === 'hanime' ? styles.active : ''}`}
-                onClick={() => { setServer('hanime'); localStorage.setItem('beyond_provider', 'hanime'); fetchFeed('hanime'); }}
+                className={styles.serverBtn}
+                disabled
+                title="Hanime's upstream API was shut down — provider unavailable"
+                style={{ opacity: 0.4, cursor: 'not-allowed' }}
               >
                 HANIME TV
               </button>

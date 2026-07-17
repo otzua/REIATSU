@@ -71,44 +71,21 @@ beyond.get('/', async (c) => {
     }
   }
 
-  try {
-    // Sourced via HanimeClient (universal-cdn) rather than the old search.htv-services.com
-    // host, which now returns NXDOMAIN. The home page returns themed sections; flatten them
-    // into a single newest-first feed, since the UI renders one grid.
-    const home = await hanimeClient.getHomePage();
-
-    const seen = new Set();
-    const hits = [];
-    for (const section of home.sections || []) {
-      for (const hit of section.data || []) {
-        // section.data entries are resolved by id, so a video appearing in several
-        // sections (e.g. "Trending" and "New Releases") would otherwise duplicate.
-        if (!hit || !hit.slug || seen.has(hit.slug)) continue;
-        seen.add(hit.slug);
-        hits.push(hit);
-      }
-    }
-    hits.sort((a, b) => (b.createdAtUnix || 0) - (a.createdAtUnix || 0));
-
-    // NOTE: HanimeClient returns camelCase (posterUrl/createdAtUnix); the old search API
-    // returned snake_case (poster_url/created_at). Do not reintroduce the snake_case reads.
-    const items = hits.map(hit => ({
-      id: hit.slug,
-      title: hit.name,
-      embedUrl: `https://hanime.tv/videos/hentai/${hit.slug}`,
-      thumbnail: hit.posterUrl || hit.coverUrl ? `/api/beyond/proxy-image?url=${encodeURIComponent(hit.posterUrl || hit.coverUrl)}` : '',
-      description: [hit.brand, hit.views ? `Views: ${hit.views.toLocaleString()}` : null].filter(Boolean).join(' • '),
-      pubDate: hit.createdAtUnix ? new Date(hit.createdAtUnix * 1000).toISOString() : ''
-    }));
-
-    return c.json({
-      success: true,
-      data: items
-    });
-  } catch (error) {
-    console.error('[Beyond Feed Error]', error.message);
-    return c.json({ success: false, error: 'Failed to fetch beyond feed' }, 500);
-  }
+  // Hanime has no reachable data source left, so there is nothing to fetch here. Verified
+  // from Cloudflare's own egress (`wrangler dev --remote`), i.e. not an IP-reputation issue:
+  //   - search.htv-services.com (old feed/search host) => NXDOMAIN from its authoritative NS
+  //   - hanime.tv/api/v8/*      (HanimeClient `web` base) => 404; the v8 API is retired
+  //   - www.universal-cdn.com   (HanimeClient `app` base) => 403 Cloudflare challenge
+  // hanime.tv now signs requests to guest.freeanimehentai.net with an in-browser WASM
+  // signature plus Turnstile, which we deliberately do not attempt to reproduce.
+  //
+  // NOTE: /details appears to serve hanime content, but does not — getHentaiVideo() always
+  // throws and it silently falls back to WatchHentai. Do not read that as the provider
+  // working. Fail explicitly here rather than 500 with a misleading "failed to fetch".
+  return c.json({
+    success: false,
+    error: 'Hanime provider is unavailable: its upstream API was discontinued. Use server=watchhentai.'
+  }, 503);
 });
 
 const detailsCache = new Map();
