@@ -40,7 +40,6 @@ async function fetchJson(url, options = {}) {
 const beyond = new Hono();
 const hanimeClient = new HanimeClient();
 const ALPHA_BASE = 'https://www.alphaapis.org';
-const HANIME_SEARCH_API = 'https://search.htv-services.com';
 const HANIME_VIDEO_API = 'https://hanime.tv/api/v8/video';
 const WATCHHENTAI_API = 'https://reiatsu-watchhentai-api.otzuaa.workers.dev/api';
 
@@ -73,28 +72,33 @@ beyond.get('/', async (c) => {
   }
 
   try {
-    const response = await fetchJson(HANIME_SEARCH_API, { method: 'POST', body: {
-      search_text: "",
-      tags: [],
-      tags_mode: "AND",
-      brands: [],
-      blacklist: [],
-      order_by: "created_at_unix",
-      ordering: "desc",
-      page_number: 1
-    }, ...{ timeout: 8000 } });
+    // Sourced via HanimeClient (universal-cdn) rather than the old search.htv-services.com
+    // host, which now returns NXDOMAIN. The home page returns themed sections; flatten them
+    // into a single newest-first feed, since the UI renders one grid.
+    const home = await hanimeClient.getHomePage();
 
-    const hits = typeof response.data.hits === 'string'
-      ? JSON.parse(response.data.hits)
-      : response.data.hits;
+    const seen = new Set();
+    const hits = [];
+    for (const section of home.sections || []) {
+      for (const hit of section.data || []) {
+        // section.data entries are resolved by id, so a video appearing in several
+        // sections (e.g. "Trending" and "New Releases") would otherwise duplicate.
+        if (!hit || !hit.slug || seen.has(hit.slug)) continue;
+        seen.add(hit.slug);
+        hits.push(hit);
+      }
+    }
+    hits.sort((a, b) => (b.createdAtUnix || 0) - (a.createdAtUnix || 0));
 
+    // NOTE: HanimeClient returns camelCase (posterUrl/createdAtUnix); the old search API
+    // returned snake_case (poster_url/created_at). Do not reintroduce the snake_case reads.
     const items = hits.map(hit => ({
       id: hit.slug,
       title: hit.name,
       embedUrl: `https://hanime.tv/videos/hentai/${hit.slug}`,
-      thumbnail: hit.poster_url || hit.cover_url ? `/api/beyond/proxy-image?url=${encodeURIComponent(hit.poster_url || hit.cover_url)}` : '',
-      description: hit.description ? hit.description.replace(/<[^>]*>?/gm, '').trim() : '',
-      pubDate: hit.created_at ? new Date(hit.created_at * 1000).toISOString() : ''
+      thumbnail: hit.posterUrl || hit.coverUrl ? `/api/beyond/proxy-image?url=${encodeURIComponent(hit.posterUrl || hit.coverUrl)}` : '',
+      description: [hit.brand, hit.views ? `Views: ${hit.views.toLocaleString()}` : null].filter(Boolean).join(' • '),
+      pubDate: hit.createdAtUnix ? new Date(hit.createdAtUnix * 1000).toISOString() : ''
     }));
 
     return c.json({
@@ -364,37 +368,11 @@ beyond.get('/search', async (c) => {
     }
   };
 
-  const fetchHanime = async () => {
-    try {
-      const response = await fetchJson(HANIME_SEARCH_API, { method: 'POST', body: {
-        search_text: q,
-        tags: [],
-        tags_mode: "AND",
-        brands: [],
-        blacklist: [],
-        order_by: "views",
-        ordering: "desc",
-        page_number: 1
-      }, ...{ timeout: 8000 } });
-
-      const hits = typeof response.data.hits === 'string'
-        ? JSON.parse(response.data.hits)
-        : response.data.hits;
-
-      return hits.map(hit => ({
-        id: hit.slug,
-        title: hit.name,
-        embedUrl: `https://hanime.tv/videos/hentai/${hit.slug}`,
-        thumbnail: hit.poster_url || hit.cover_url ? `/api/beyond/proxy-image?url=${encodeURIComponent(hit.poster_url || hit.cover_url)}` : '',
-        description: hit.description ? hit.description.replace(/<[^>]*>?/gm, '').trim() : '',
-        pubDate: hit.created_at ? new Date(hit.created_at * 1000).toISOString() : '',
-        source: 'hanime'
-      }));
-    } catch (error) {
-      console.error('[Beyond Search Error]', error.message);
-      return [];
-    }
-  };
+  // Hanime search is unavailable: it ran against search.htv-services.com, which is now
+  // NXDOMAIN, and HanimeClient exposes no search endpoint to replace it (only home/video).
+  // This already returned [] via its catch — short-circuit so we stop issuing a request
+  // that cannot succeed. Search falls back to WatchHentai results alone.
+  const fetchHanime = async () => [];
 
   const [whData, hnData] = await Promise.all([fetchWatchHentai(), fetchHanime()]);
   
