@@ -55,7 +55,7 @@ const CinemaWatch = () => {
   }
   
   // Embed state
-  const [activeServer, setActiveServer] = useState<'videasy' | 'vidsrcicu' | 'vidlink' | 'vidfast'>('videasy');
+  const [activeServer, setActiveServer] = useState<'videasy' | 'vidsrcicu' | 'vidlink' | 'vidfast'>('vidlink');
   
   // TV Show State
   const [seasons, setSeasons] = useState<CinemaSeason[]>([]);

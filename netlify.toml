@@ -16,6 +16,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/eros/*"
+  to = "https://eros-api.vercel.app/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/tmdb-api/*"
   to = "https://api.tmdb.org/3/:splat"
   status = 200

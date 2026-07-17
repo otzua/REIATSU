@@ -21,6 +21,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/music/, ''),
       },
+      '/api/eros': {
+        target: 'https://eros-api.vercel.app',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api\/eros/, ''),
+      },
       '/api': {
         target: 'https://reiatsu-anime-api.otzuaa.workers.dev',
         changeOrigin: true,
@@ -36,14 +42,17 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/tmdb-api/, '/3'),
         configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq, req) => {
+          proxy.on('proxyReq', (proxyReq) => {
             proxyReq.setHeader('User-Agent', 'Mozilla/5.0');
             proxyReq.setHeader('Accept', 'application/json');
-            // Inject TMDB API key so local dev works without exposing it in the client bundle
-            const url = new URL(`https://api.tmdb.org${req.url}`);
-            if (!url.searchParams.has('api_key')) {
-              url.searchParams.set('api_key', process.env.VITE_TMDB_API_KEY || 'd131017ccc6e5462a81c9304d21476de');
-              proxyReq.path = `/3${url.pathname}?${url.searchParams.toString()}`;
+            // Inject TMDB API key into the already-rewritten path (e.g. /3/trending/movie/week).
+            // Must read proxyReq.path (post-rewrite), not req.url (pre-rewrite), to avoid
+            // a double /3 prefix that causes 404s.
+            const [pathname, querystring] = proxyReq.path.split('?');
+            const params = new URLSearchParams(querystring || '');
+            if (!params.has('api_key')) {
+              params.set('api_key', process.env.VITE_TMDB_API_KEY || 'd131017ccc6e5462a81c9304d21476de');
+              proxyReq.path = `${pathname}?${params.toString()}`;
             }
           });
         },

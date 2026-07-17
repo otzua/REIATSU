@@ -1,0 +1,28 @@
+{
+  "name": "eros-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@bochilteam/scraper": "^5.0.1",
+    "@consumet/extensions": "^1.8.8",
+    "@justalk/pornhub-api": "^3.5.0",
+    "@rodrigogs/xvideos": "^3.1.0",
+    "cheerio": "^1.0.0",
+    "cloudscraper": "^4.6.0",
+    "epornerapi": "^1.0.0",
+    "express": "^4.18.2",
+    "ph-api": "^1.0.3",
+    "phsearch": "^1.0.4",
+    "pornhub.js": "^1.15.0",
+    "pornsearch": "^2.4.3",
+    "xnxx-scraper": "^1.0.4",
+    "xvideos": "^0.0.4",
+    "xvideos-scraper": "^1.0.4",
+    "youtube-dl-exec": "^3.1.8"
+  }
+}

@@ -15,6 +15,9 @@ const ArtistDetails = lazy(() => import('./pages/ArtistDetails'));
 const MusicSearch = lazy(() => import('./pages/MusicSearch'));
 const Beyond = lazy(() => import('./pages/Beyond'));
 const BeyondWatch = lazy(() => import('./pages/BeyondWatch'));
+const Eros = lazy(() => import('./pages/Eros'));
+const ErosWatch = lazy(() => import('./pages/ErosWatch'));
+const ErosHistory = lazy(() => import('./pages/ErosHistory'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const AnimeKaiHome = lazy(() => import('./pages/AnimeKaiHome'));
 const MyList = lazy(() => import('./pages/MyList'));
@@ -55,6 +58,9 @@ function App() {
           <Route path="/beyond" element={<Beyond />} />
           <Route path="/beyond/history" element={<BeyondHistory />} />
           <Route path="/beyond/watch/:id" element={<BeyondWatch />} />
+          <Route path="/eros" element={<Eros />} />
+          <Route path="/eros/history" element={<ErosHistory />} />
+          <Route path="/eros/watch/:id" element={<ErosWatch />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/mylist" element={<MyList />} />
         </Routes>

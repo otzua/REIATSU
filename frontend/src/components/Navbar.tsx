@@ -18,16 +18,18 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  const isCinema = location.pathname.startsWith('/cinema') || 
+  const isCinema = location.pathname.startsWith('/cinema') ||
                    (location.pathname === '/schedule' && searchParams.get('type') === 'cinema') ||
                    (location.pathname === '/mylist' && searchParams.get('type') === 'cinema');
   const isMusic = location.pathname.startsWith('/music');
   const isBeyond = location.pathname.startsWith('/beyond');
+  const isEros = location.pathname.startsWith('/eros');
 
   const getInterfaceClass = () => {
     if (isCinema) return styles.cinemaTheme;
     if (isMusic) return styles.musicTheme;
     if (isBeyond) return styles.beyondTheme;
+    if (isEros) return styles.beyondTheme;
     return styles.animeTheme;
   };
 
@@ -62,8 +64,8 @@ const Navbar = () => {
     if (isCinema) return '/cinema';
     if (isMusic) return '/music';
     if (isBeyond) return '/beyond';
+    if (isEros) return '/eros';
     if (routeProvider) return `/${routeProvider}`;
-
     if (isAnimeKaiGlobally) return '/animekai';
     return '/anime';
   };
@@ -72,6 +74,7 @@ const Navbar = () => {
     if (isCinema) return '映';
     if (isMusic) return '音';
     if (isBeyond) return '過';
+    if (isEros) return '欲';
     return '霊';
   };
 
@@ -83,7 +86,7 @@ const Navbar = () => {
       icon: isMusic ? Download : Calendar 
     },
     { id: 'search', path: '#search', icon: Search },
-    ...(!isMusic && !isBeyond ? [{ id: 'mylist', path: isCinema ? '/mylist?type=cinema' : '/mylist', icon: Bookmark }] : []),
+    ...(!isMusic && !isBeyond && !isEros ? [{ id: 'mylist', path: isCinema ? '/mylist?type=cinema' : '/mylist', icon: Bookmark }] : []),
     { id: 'switch', path: '#switch', icon: ArrowRightLeft },
   ];
 
@@ -131,8 +134,8 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Direct shortcut 'h' / 'H' to instantly activate and open/close Portal
       if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        // 'h' / 'H' → Beyond portal
         if (e.key === 'h' || e.key === 'H') {
           e.preventDefault();
           if (location.pathname.startsWith('/beyond')) {
@@ -145,6 +148,20 @@ const Navbar = () => {
             setToastMsg('Entering Portal...');
             setShowToast(true);
             navigate('/beyond');
+          }
+          return;
+        }
+        // 'p' / 'P' → Eros section
+        if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          if (location.pathname.startsWith('/eros')) {
+            navigate('/cinema');
+            setToastMsg('Exiting Eros...');
+            setShowToast(true);
+          } else {
+            setToastMsg('Entering Eros...');
+            setShowToast(true);
+            navigate('/eros');
           }
           return;
         }
@@ -472,8 +489,8 @@ const Navbar = () => {
               </button>
 
               {beyondUnlocked && (
-                <button 
-                  className={`${styles.switchBtn} ${isBeyond ? styles.activeInterface : ''}`} 
+                <button
+                  className={`${styles.switchBtn} ${isBeyond ? styles.activeInterface : ''}`}
                   onClick={() => { navigate('/beyond'); setSwitchOpen(false); }}
                   style={{
                     border: isBeyond ? '1px solid rgba(0, 245, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
@@ -486,6 +503,19 @@ const Navbar = () => {
                   </div>
                 </button>
               )}
+              <button
+                className={`${styles.switchBtn} ${isEros ? styles.activeInterface : ''}`}
+                onClick={() => { navigate('/eros'); setSwitchOpen(false); }}
+                style={{
+                  border: isEros ? '1px solid rgba(184, 58, 45, 0.5)' : '1px solid rgba(255, 255, 255, 0.05)',
+                }}
+              >
+                <div className={styles.interfaceIcon} style={{ background: 'linear-gradient(135deg, #3d0000, #1a0000)', color: '#ff6b6b' }}>欲</div>
+                <div className={styles.interfaceInfo}>
+                  <h4>EROS</h4>
+                  <p>{isEros ? 'Current Interface' : 'Press P to enter'}</p>
+                </div>
+              </button>
             </div>
           </motion.div>
         )}
