@@ -39,18 +39,32 @@ async function handleAudioProxy(request, targetUrl, originalUrl) {
   if (ua) {
     headers.set('User-Agent', ua);
   }
-  
+
   try {
     const res = await fetch(targetUrl, {
       method: request.method,
       headers: headers
     });
-    
+
     const responseHeaders = new Headers(res.headers);
     responseHeaders.set('Access-Control-Allow-Origin', '*');
     // Strip content-disposition so browsers don't treat it as an attachment download (which blocks playback)
     responseHeaders.delete('content-disposition');
-    
+
+    // Normalise Content-Type: HTMLMediaElement rejects video/* with MEDIA_ERR_SRC_NOT_SUPPORTED,
+    // and YouTube serves video/mp4 for muxed itags (e.g. 18) that yt-dlp may fall back to.
+    // Mirrors the logic in music-api/main.py:/audio-proxy, which this function bypasses.
+    const mimeHint = originalUrl.searchParams.get('mime');
+    const upstreamType = (res.headers.get('Content-Type') || '').split(';')[0].trim();
+
+    if (mimeHint && mimeHint.startsWith('audio/')) {
+      responseHeaders.set('Content-Type', mimeHint);
+    } else if (upstreamType.startsWith('video/')) {
+      responseHeaders.set('Content-Type', upstreamType === 'video/webm' ? 'audio/webm' : 'audio/mp4');
+    } else if (!upstreamType || upstreamType === 'application/octet-stream') {
+      responseHeaders.set('Content-Type', /\.webm|itag=25[01]|itag=249/.test(targetUrl) ? 'audio/webm' : 'audio/mp4');
+    }
+
     return new Response(res.body, {
       status: res.status,
       statusText: res.statusText,

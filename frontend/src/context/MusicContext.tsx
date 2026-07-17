@@ -86,13 +86,11 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return updated;
     });
 
-    // Reset audio source to completely prevent overlapping stream playback and race conditions
+    // Pause any currently playing audio
     try {
       audioRef.current.pause();
-      audioRef.current.removeAttribute('src');
-      audioRef.current.load();
     } catch (e) {
-      console.warn('REIATSU: Error resetting audio before playback:', e);
+      console.warn('REIATSU: Error pausing audio before playback:', e);
     }
 
     console.log(`REIATSU: Attempting to play track: ${track.artist} - ${track.name}`);
@@ -109,8 +107,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const fallbackSrc = direct_url ? stream_url : null;
 
       audioRef.current.src = primarySrc;
-      audioRef.current.load();
-      
+      audioRef.current.crossOrigin = 'anonymous';
       try {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) await playPromise;
@@ -120,8 +117,8 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Proxy failed — try direct URL as last resort
         console.warn('REIATSU: Proxy playback failed, trying direct URL:', proxyErr);
         if (fallbackSrc) {
+          audioRef.current.crossOrigin = null;
           audioRef.current.src = fallbackSrc;
-          audioRef.current.load();
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) await playPromise;
           console.log('REIATSU: Playback started via direct URL fallback');

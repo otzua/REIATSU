@@ -306,7 +306,6 @@ async def stream(q: str = Query(...)):
 
         # Helper to extract using yt-dlp
         def extract_with_ytdlp(query_or_id: str):
-            # Check if it looks like a video ID or a URL containing video ID
             vid = query_or_id
             if "watch?v=" in query_or_id:
                 vid = query_or_id.split("watch?v=")[1].split("&")[0]
@@ -315,31 +314,45 @@ async def stream(q: str = Query(...)):
             elif "music.youtube.com" in query_or_id:
                 vid = query_or_id.split("watch?v=")[1].split("&")[0]
 
-            # Use ytsearch1 on the ID to bypass YouTube's strict watch page bot blocks!
-            url_to_extract = f"ytsearch1:{vid}"
-            
+            # If it's not already a bare 11-char video ID, search to resolve one.
+            # Two-step approach: ytsearch1 uses web client internally and does NOT propagate
+            # extractor_args player_client to nested format extraction — so we use flat search
+            # just to get the ID, then do a direct extraction with the right client.
+            is_video_id = bool(re.match(r'^[a-zA-Z0-9_-]{11}$', vid)) and not query_or_id.startswith("http")
+            if not is_video_id:
+                search_opts = {'quiet': True, 'no_warnings': True, 'extract_flat': True}
+                with yt_dlp.YoutubeDL(search_opts) as ydl_search:
+                    res = ydl_search.extract_info(f"ytsearch1:{vid}", download=False)
+                    if res and res.get('entries'):
+                        vid = res['entries'][0].get('id', vid)
+
+            # CRITICAL: 'bestaudio/best' can select itag=18 (360p video+audio MP4, mime=video/mp4).
+            # The browser's <audio> element rejects video/* MIME types with MEDIA_ERR_SRC_NOT_SUPPORTED.
+            # tv_embedded / android_music expose audio-only itag 140 (m4a) and 251 (webm).
             ydl_opts = {
-                'format': 'bestaudio/best',
+                'format': (
+                    'bestaudio[acodec!=none][vcodec=none][ext=m4a]'
+                    '/bestaudio[acodec!=none][vcodec=none][ext=webm]'
+                    '/bestaudio[acodec!=none][vcodec=none]'
+                    '/bestaudio[acodec!=none]'
+                    '/bestaudio'
+                ),
                 'quiet': True,
                 'no_warnings': True,
-                'extractor_args': {'youtube': {'player_client': ['android', 'ios']}}
+                'extractor_args': {'youtube': {'player_client': ['tv_embedded', 'android_music', 'ios_music']}}
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url_to_extract, download=False)
-                if 'entries' in info and len(info['entries']) > 0:
-                    entry = info['entries'][0]
-                    return {
-                        "stream_url": entry.get('url'),
-                        "title": entry.get('title', 'YouTube Audio'),
-                        "thumbnail": entry.get('thumbnail') or f"https://img.youtube.com/vi/{entry.get('id')}/maxresdefault.jpg",
-                        "user_agent": "Mozilla/5.0"
-                    }
-                elif 'url' in info:
+                info = ydl.extract_info(f"https://www.youtube.com/watch?v={vid}", download=False)
+                ext = info.get('ext', 'm4a')
+                mime = 'audio/mp4' if ext in ('m4a', 'mp4') else 'audio/webm'
+                logger.info(f"yt-dlp selected: ext={ext}, acodec={info.get('acodec')}, vcodec={info.get('vcodec')}, itag={info.get('format_id')}")
+                if info.get('url'):
                     return {
                         "stream_url": info.get('url'),
                         "title": info.get('title', 'YouTube Audio'),
-                        "thumbnail": info.get('thumbnail') or f"https://img.youtube.com/vi/{info.get('id')}/maxresdefault.jpg",
-                        "user_agent": "Mozilla/5.0"
+                        "thumbnail": info.get('thumbnail') or f"https://img.youtube.com/vi/{vid}/maxresdefault.jpg",
+                        "user_agent": "Mozilla/5.0",
+                        "mime_type": mime,
                     }
             return None
 
@@ -382,7 +395,7 @@ async def stream(q: str = Query(...)):
 
 
 @app.get("/audio-proxy")
-async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
+async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0", mime: str = ""):
     range_header = request.headers.get("Range")
     headers = {
         "User-Agent": ua,
@@ -398,18 +411,37 @@ async def audio_proxy(request: Request, url: str, ua: str = "Mozilla/5.0"):
         resp = await session.get(url, headers=headers, allow_redirects=True, timeout=timeout)
         status_code = resp.status
 
-        # Determine best content-type: Cobalt mp3 tunnels report audio/mpeg
-        content_type = resp.headers.get("Content-Type", "")
-        if not content_type or content_type == "application/octet-stream":
-            # Guess from URL
-            if ".mp3" in url or "aFormat=mp3" in url or "audioFormat=mp3" in url:
-                content_type = "audio/mpeg"
-            elif ".m4a" in url or "itag=140" in url:
-                content_type = "audio/mp4"
-            elif "video/mp4" in url or "mime=video%2Fmp4" in url:
-                content_type = "audio/mp4"  # mp4 containers with audio tracks work fine
+        # Normalise content-type so the browser <audio> element accepts the stream.
+        # yt-dlp sometimes returns video/* (e.g. video/mp4 for itag=18) even for audio-only
+        # requests. The browser's HTMLMediaElement rejects video/* with MEDIA_ERR_SRC_NOT_SUPPORTED.
+
+        if mime and mime.startswith("audio/"):
+            # Explicit hint from caller (e.g. from yt-dlp ext field) — trust it completely
+            content_type = mime
+            logger.info(f"audio-proxy: using explicit mime hint: {content_type}")
+        else:
+            upstream_ct = resp.headers.get("Content-Type", "").split(";")[0].strip()
+            if not upstream_ct or upstream_ct == "application/octet-stream":
+                # Infer from URL hints
+                if ".mp3" in url or "aFormat=mp3" in url or "audioFormat=mp3" in url:
+                    content_type = "audio/mpeg"
+                elif ".m4a" in url or "itag=140" in url:
+                    content_type = "audio/mp4"
+                elif ".webm" in url or "itag=251" in url or "itag=250" in url or "itag=249" in url:
+                    content_type = "audio/webm"
+                else:
+                    content_type = "audio/mp4"  # safe default — browser accepts this
+            elif upstream_ct.startswith("video/"):
+                # Safety net: remap any video/* the upstream accidentally returned
+                if upstream_ct == "video/mp4":
+                    content_type = "audio/mp4"
+                elif upstream_ct == "video/webm":
+                    content_type = "audio/webm"
+                else:
+                    content_type = "audio/mp4"
+                logger.warning(f"audio-proxy: remapped {upstream_ct} → {content_type}")
             else:
-                content_type = resp.headers.get("Content-Type", "audio/mpeg")
+                content_type = upstream_ct
 
         # Build response headers — CORS must be open so the browser can read the stream
         out_headers = {
