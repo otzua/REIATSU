@@ -74,7 +74,7 @@ beyond.get('/', async (c) => {
 
   if (server === 'hanime1') {
     try {
-      const items = await hanime1Scraper.getHomeData();
+      const items = await hanime1Scraper.getHomeData(c.env);
       return c.json({ success: true, data: items });
     } catch (err) {
       console.error('[Hanime1 Feed Error]', err.message);
@@ -185,7 +185,7 @@ beyond.get('/details', async (c) => {
 
   if (slug.startsWith('hanime1:')) {
     try {
-      const result = await hanime1Scraper.getVideoDetails(slug);
+      const result = await hanime1Scraper.getVideoDetails(slug, c.env);
       detailsCache.set(slug, { data: result, time: Date.now() });
       return c.json({ success: true, data: result });
     } catch (err) {
@@ -375,7 +375,7 @@ beyond.get('/search', async (c) => {
   
   const fetchHanime1 = async () => {
     try {
-      return await hanime1Scraper.searchVideos(q);
+      return await hanime1Scraper.searchVideos(q, c.env);
     } catch (err) {
       console.error('[Hanime1 Search Error]', err.message);
       return [];

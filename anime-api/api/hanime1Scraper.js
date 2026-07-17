@@ -23,8 +23,8 @@ function parseViews(viewsText) {
 /**
  * Fetch HTML using the Cloudflare Bypass proxy logic.
  */
-async function fetchBypassedHanime1(path, options = {}) {
-  const bypassUrl = process.env.CLOUDFLARE_BYPASS_SERVICE_URL;
+async function fetchBypassedHanime1(path, options = {}, env = {}) {
+  const bypassUrl = env.CLOUDFLARE_BYPASS_SERVICE_URL || (typeof process !== 'undefined' ? process.env.CLOUDFLARE_BYPASS_SERVICE_URL : undefined);
   let targetUrl = `${BASE_URL}${path}`;
   let fetchUrl = targetUrl;
   
@@ -93,8 +93,8 @@ function parseVideoItem($, el) {
   };
 }
 
-export async function getHomeData() {
-  const $ = await fetchBypassedHanime1('/');
+export async function getHomeData(env = {}) {
+  const $ = await fetchBypassedHanime1('/', {}, env);
   
   const items = [];
   $('#home-rows-wrapper div[title], #home-rows-wrapper a[href*="/watch?v="]').each((i, el) => {
@@ -117,9 +117,9 @@ export async function getHomeData() {
   return uniqueItems;
 }
 
-export async function getVideoDetails(slug) {
+export async function getVideoDetails(slug, env = {}) {
   const videoId = slug.replace('hanime1:', '');
-  const $ = await fetchBypassedHanime1(`/watch?v=${videoId}`);
+  const $ = await fetchBypassedHanime1(`/watch?v=${videoId}`, {}, env);
   
   const title = $('#shareBtn-title').text().trim() || videoId;
   const coverUrl = $('video#player').attr('poster') || '';
@@ -243,8 +243,8 @@ export async function getVideoDetails(slug) {
   };
 }
 
-export async function searchVideos(query) {
-  const $ = await fetchBypassedHanime1(`/search?query=${encodeURIComponent(query)}`);
+export async function searchVideos(query, env = {}) {
+  const $ = await fetchBypassedHanime1(`/search?query=${encodeURIComponent(query)}`, {}, env);
   
   const items = [];
   $('#home-rows-wrapper div[title], #home-rows-wrapper a[href*="/watch?v="]').each((i, el) => {
