@@ -1,2 +1,8 @@
+# Let Cloudflare Pages Functions handle all API traffic
+# These must appear BEFORE the SPA catch-all
+/api/* /api/:splat 200
+/tmdb-api/* /tmdb-api/:splat 200
+/toon-api/* /toon-api/:splat 200
+
 # SPA Routing - Must be last
 /* /index.html 200
